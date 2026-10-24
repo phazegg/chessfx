@@ -148,7 +148,7 @@
   const route = async () => {
     if (!CX_WEB.enabled()) return show('fOff', 'Accounts are coming soon', 'ChessFX works fully without one: your settings, looks and games are saved on this device.');
     const h = location.hash.slice(1) || 'signup';
-    if ((h === 'signup' || h === 'signin') && await CX_WEB.user()) return settings('account'); // already signed in
+    if ((h === 'signup' || h === 'signin') && await CX_WEB.ready) return settings('account'); // already signed in (here or in the extension)
     if (sessionStorage.getItem('cfxCodeFor') === 'recovery' && h === 'code') codeFor = 'recovery';
     if (h === 'signup' || h === 'signin') authMode(h);
     else if (h === 'code') codeMode();

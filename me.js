@@ -4,7 +4,7 @@
   const $ = (id) => document.getElementById(id);
   const W = window.CX_WEB, D = window.SITE;
   if (!W.enabled()) { $('meStatus').textContent = 'Accounts are coming soon. ChessFX works fully without one.'; return; }
-  const u = await W.user();
+  const u = await W.ready;
   if (!u) { location.replace('account.html#signin'); return; }
   const ago = (iso) => { if (!iso) return 'Never'; const m = Math.round((Date.now() - Date.parse(iso)) / 60e3); return m < 1 ? 'Just now' : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : new Date(iso).toLocaleDateString(); };
   const lookOf = (cfx) => {
@@ -43,7 +43,8 @@
         await W.applyLook(l.id);
         row = await W.row();
         paint();
-        $('applyMsg').textContent = `${l.name} is now your look. ChessFX switches to it the next time it syncs: open its toolbar popup to sync now.`;
+        const live = await W.syncExtension();
+        $('applyMsg').textContent = `${l.name} is now your look.` + (live ? ' ChessFX in this browser has switched to it.' : ' ChessFX switches to it the next time it syncs: open its toolbar popup to sync now.');
       } catch (e) { $('applyMsg').textContent = e.message; }
     });
     $('apply').append(b);

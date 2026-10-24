@@ -58,13 +58,17 @@ window.CX_WEB = (() => {
     if (r && Array.isArray(r.identities) && r.identities.length === 0) throw fail('exists', 'An account with this email already exists. Sign in instead?');
     return { confirm: true };
   };
-  const signIn = async (email, pw) => { check(email); keep(await call('/auth/v1/token?grant_type=password', { body: { email: email.trim(), password: pw } })); return user(); };
-  const verify = async (email, token, type) => { check(email); keep(await call('/auth/v1/verify', { body: { email: email.trim(), token: String(token).trim(), type } })); return user(); };
+  // An explicit sign-in here: hand it to the ChessFX extension on the next page (see the nav below); sign-out stops the
+  // website from signing itself back in from the extension.
+  const NO_AUTO = 'cfxNoAuto';
+  const signedIn = () => { try { localStorage.removeItem(NO_AUTO); sessionStorage.setItem('cfxHandOff', '1'); } catch (e) { /* storage off: no hand-off */ } };
+  const signIn = async (email, pw) => { check(email); signedIn(); keep(await call('/auth/v1/token?grant_type=password', { body: { email: email.trim(), password: pw } })); return user(); };
+  const verify = async (email, token, type) => { check(email); signedIn(); keep(await call('/auth/v1/verify', { body: { email: email.trim(), token: String(token).trim(), type } })); return user(); };
   const resend = (email) => call('/auth/v1/resend', { body: { type: 'signup', email: String(email).trim() } });
   const recover = (email) => { check(email); return call('/auth/v1/recover' + linkTo(), { body: { email: email.trim() } }); };
   const setPassword = async (pw) => { check('a@b.co', pw); const s = await session(); if (!s) throw fail('auth', 'Sign in again.'); await call('/auth/v1/user', { method: 'PUT', token: s.access_token, body: { password: pw } }); };
-  const signOut = async () => { const s = await session(); if (s) await call('/auth/v1/logout', { token: s.access_token }).catch(() => {}); localStorage.removeItem(KEY); };
-  const deleteAccount = async () => { const s = await session(); if (!s) throw fail('auth', 'Sign in again.'); await call('/rest/v1/rpc/delete_me', { token: s.access_token, body: {} }); localStorage.removeItem(KEY); };
+  const signOut = async () => { const s = await session(); if (s) await call('/auth/v1/logout', { token: s.access_token }).catch(() => {}); localStorage.removeItem(KEY); localStorage.setItem(NO_AUTO, '1'); };
+  const deleteAccount = async () => { const s = await session(); if (!s) throw fail('auth', 'Sign in again.'); await call('/rest/v1/rpc/delete_me', { token: s.access_token, body: {} }); localStorage.removeItem(KEY); localStorage.setItem(NO_AUTO, '1'); };
   // The account's synced data (the same row the extension syncs).
   const row = async () => {
     const s = await session();
@@ -91,6 +95,7 @@ window.CX_WEB = (() => {
     if (h.get('error_description')) throw fail('link', h.get('error_description').replace(/\+/g, ' '));
     if (!h.get('access_token')) return null;
     keep({ access_token: h.get('access_token'), refresh_token: h.get('refresh_token'), expires_in: +h.get('expires_in') || 3600, user: {} });
+    signedIn();
     return h.get('type') || 'oauth'; // Google/Discord come back with no type
   };
   // ---------- Continue with Lichess / Google / Discord ----------
@@ -122,19 +127,61 @@ window.CX_WEB = (() => {
     try { r = await fetch(C.url.replace(/\/$/, '') + '/functions/v1/lichess-auth', { method: 'POST', headers: { apikey: C.anonKey, 'Content-Type': 'application/json' }, body: JSON.stringify({ code: q.get('code'), verifier: st.v, redirect_uri: st.back }) }); } catch (e) { throw fail('offline', "Can't reach ChessFX. Check your connection and try again."); }
     const j = await r.json().catch(() => null);
     if (!r.ok || !j || !j.access_token) throw fail('provider', (j && j.error) || 'Lichess sign-in failed. Try again.');
+    signedIn();
     keep(j);
     return true;
   };
   const me = async () => { const s = await session(); if (!s) return null; const u = await call('/auth/v1/user', { method: 'GET', token: s.access_token }); keep({ ...s, expires_in: s.expires_at - Math.floor(Date.now() / 1000), user: u }); return u; };
-  return { enabled, session, user, providers, withProvider, fromLichess, fromLink, me, signUp, signIn, verify, resend, recover, setPassword, signOut, deleteAccount, row, applyLook };
+  // ---------- the ChessFX extension in this browser ----------
+  // It accepts messages from this site only (its manifest's externally_connectable). Extension ids: CX_CLOUD_CONFIG.
+  let found = null;
+  const send = (id, msg) => new Promise((res) => { try { chrome.runtime.sendMessage(id, msg, (r) => { void chrome.runtime.lastError; res(r || null); }); } catch (e) { res(null); } });
+  const extension = async () => {
+    if (found !== null) return found;
+    const ids = (window.chrome && chrome.runtime && chrome.runtime.sendMessage && C.extensionIds) || [];
+    for (const id of ids) { const r = await send(id, { t: 'cfx:hello' }); if (r && r.version) return (found = { id, ...r }); }
+    return (found = false);
+  };
+  const toExtension = async (msg) => { const e = await extension(); return e ? send(e.id, msg) : null; };
+  // Signed out here, signed in there: take a session of our own from the extension (unless you signed out here).
+  const fromExtension = async () => {
+    if (!enabled() || (await session()) || localStorage.getItem(NO_AUTO)) return null;
+    const r = await toExtension({ t: 'cfx:session' });
+    if (!r || !r.session || !r.session.access_token) return null;
+    keep(r.session);
+    return user();
+  };
+  // Just signed in here: sign the extension in too, if it is signed out (it never switches accounts).
+  const handOff = async () => {
+    if (sessionStorage.getItem('cfxHandOff') !== '1') return null;
+    sessionStorage.removeItem('cfxHandOff');
+    const s = await session();
+    return s ? toExtension({ t: 'cfx:adopt', token: s.access_token }) : null;
+  };
+  // After a change to the account (e.g. Apply): the extension in this browser syncs now. true when it did.
+  const syncExtension = async () => !!((await toExtension({ t: 'cfx:sync' })) || {}).ok;
+  return { enabled, session, user, extension, toExtension, syncExtension, fromExtension, handOff, providers, withProvider, fromLichess, fromLink, me, signUp, signIn, verify, resend, recover, setPassword, signOut, deleteAccount, row, applyLook };
 })();
 
-// Header: "Sign in · Create account" or your initial + "My Account" + "Sign out", on every page.
+// One sign-in for the website and the extension, settled before any page asks who is signed in (CX_WEB.ready -> user).
+// Not on the page an email link or sign-in service returns to: that page signs you in itself.
+window.CX_WEB.ready = /[#?&](access_token|code|error)=/.test(location.href) ? Promise.resolve(null)
+  : (async () => { await window.CX_WEB.handOff(); return (await window.CX_WEB.user()) || (await window.CX_WEB.fromExtension()); })().catch(() => null);
+
+// Header: "Sign in · Create account" or your initial + "My Account" + "Sign out", on every page; "Settings" opens the
+// extension's settings when it is installed in this browser.
 (async () => {
   const box = document.getElementById('acct');
   if (!box) return;
   if (!window.CX_WEB.enabled()) { box.innerHTML = '<a class="btn btn-go nav-cta" data-store href="index.html#get">Add to Chrome, free</a>'; return; }
-  const u = await window.CX_WEB.user();
+  const u = await window.CX_WEB.ready;
+  if (await window.CX_WEB.extension()) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'nav-link linkbtn'; b.id = 'openSettings'; b.textContent = 'Settings';
+    b.title = 'Open ChessFX settings';
+    b.addEventListener('click', () => window.CX_WEB.toExtension({ t: 'cfx:options' }));
+    box.before(b);
+  }
   if (!u) { box.innerHTML = '<a class="nav-link" href="account.html#signin">Sign in</a><a class="btn btn-go nav-cta" href="account.html#signup">Create account</a>'; return; }
   box.innerHTML = '<a class="me" href="me.html"><i aria-hidden="true"></i><span>My Account</span></a><button type="button" class="nav-link linkbtn" id="signOut">Sign out</button>';
   box.querySelector('i').textContent = (u.name || u.email || '?')[0].toUpperCase();

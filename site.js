@@ -223,7 +223,7 @@
   $('pause').addEventListener('click', () => setPaused(!paused));
 
   // ---------- signed in: apply the look on the board to your ChessFX (through your account) ----------
-  if (window.CX_WEB && CX_WEB.enabled()) CX_WEB.user().then((u) => {
+  if (window.CX_WEB && CX_WEB.enabled()) CX_WEB.ready.then((u) => {
     if (!u) return;
     $('applyRow').hidden = false;
     $('applyBtn').addEventListener('click', async () => {
@@ -231,7 +231,8 @@
       $('applyMsg').textContent = 'Applying…';
       try {
         await CX_WEB.applyLook(base.id, look.board !== base.board ? look.board : null);
-        $('applyMsg').textContent = `${look.label || look.name} is now your look. Open the ChessFX toolbar popup to sync it now.`;
+        const live = await CX_WEB.syncExtension();
+        $('applyMsg').textContent = `${look.label || look.name} is now your look.` + (live ? ' ChessFX in this browser has switched to it.' : ' Open the ChessFX toolbar popup to sync it now.');
       } catch (e) { $('applyMsg').textContent = e.message; }
     });
   });
