@@ -50,6 +50,31 @@ body { background: var(--cfx-env, var(--cfx-ink-0)); color: var(--cfx-text); fon
 .a-row2 { display: flex; gap: 10px; }
 .a-row2 .cfx-btn { flex: 1; }
 .a-foot { margin: 0; color: var(--cfx-text-3); font-size: var(--cfx-fs-1); text-align: center; }
+/* Two columns on wide screens: a chess visual beside the card. */
+.a-split { flex-direction: row; flex-wrap: wrap; align-content: center; gap: 28px 64px; }
+.a-split > .a-foot { flex-basis: 100%; }
+.a-aside { width: 340px; display: flex; flex-direction: column; gap: 14px; }
+.a-aside h2 { margin: 10px 0 0; font-size: var(--cfx-fs-6); font-weight: 800; letter-spacing: -.01em; line-height: 1.15; }
+.a-points { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; color: var(--cfx-text-2); }
+.a-points li::before { content: '✓'; color: var(--cfx-accent); font-weight: 800; margin-right: 10px; }
+.a-board { position: relative; width: 100%; aspect-ratio: 1; border-radius: var(--cfx-r-3); box-shadow: var(--cfx-shadow-2); }
+.a-bimg { width: 100%; height: 100%; display: block; border-radius: inherit; object-fit: cover; box-shadow: inset 0 0 0 1px var(--cfx-glass-line, var(--cfx-line)); }
+.a-piece { position: absolute; left: 50%; top: 50%; width: 46%; translate: -50% -50%; filter: drop-shadow(0 18px 22px var(--cfx-ink-0)); animation: a-float 5s var(--cfx-ease) infinite alternate; }
+@keyframes a-float { to { transform: translateY(-8px) rotate(-2deg); } }
+@media (prefers-reduced-motion: reduce) { .a-piece { animation: none; } }
+@media (max-width: 820px) { .a-aside { display: none; } }
+/* Provider buttons: one per sign-in service, before the email form. */
+.a-prov { display: flex; flex-direction: column; gap: 10px; }
+.a-pbtn {
+  display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 44px; padding: 10px 14px;
+  border-radius: var(--cfx-r-2); border: 1px solid var(--cfx-line-strong); background: var(--cfx-ink-2); color: var(--cfx-text);
+  font: inherit; font-weight: 700; cursor: pointer; transition: background var(--cfx-t-1) var(--cfx-ease), border-color var(--cfx-t-1) var(--cfx-ease);
+}
+.a-pbtn:hover:not(:disabled) { background: var(--cfx-ink-3); border-color: var(--cfx-text-3); }
+.a-pbtn:focus-visible { outline: 2px solid var(--cfx-accent); outline-offset: 2px; }
+.a-pbtn:disabled { cursor: progress; opacity: .7; }
+.a-pbtn svg { width: 20px; height: 20px; flex: none; }
+.a-prov:not(:has(.a-pbtn:not([hidden]))) { display: none; }
 [hidden] { display: none !important; }
 @media (forced-colors: active) { .a-card, .a-field input, .a-alert { border: 1px solid CanvasText; } }
 /* Privacy policy and terms: the same card, wider, as a readable document. */

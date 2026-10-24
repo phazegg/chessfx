@@ -16,7 +16,7 @@
   const paint = () => {
     const d = (row && row.data) || {};
     const l = lookOf(d.cfx);
-    $('meEmail').textContent = u.email;
+    $('meEmail').textContent = u.name || u.email;
     $('curName').textContent = l.name;
     $('curMeta').textContent = l.meta;
     $('curImg').src = `assets/boards/${l.board || 'galaxy'}.jpg`;
@@ -54,16 +54,16 @@
 
   $('export').addEventListener('click', async () => {
     const r = await W.row();
-    const url = URL.createObjectURL(new Blob([JSON.stringify({ app: 'ChessFX', account: u.email, exported: new Date().toISOString(), data: (r && r.data) || {} }, null, 2)], { type: 'application/json' }));
+    const url = URL.createObjectURL(new Blob([JSON.stringify({ app: 'ChessFX', account: u.name || u.email, exported: new Date().toISOString(), data: (r && r.data) || {} }, null, 2)], { type: 'application/json' }));
     const a = document.createElement('a');
     a.href = url; a.download = `chessfx-account-${new Date().toISOString().slice(0, 10)}.json`; a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   });
   $('signOutMe').addEventListener('click', async () => { await W.signOut(); location.href = 'index.html'; });
   const dlg = $('delDlg');
-  $('del').addEventListener('click', () => { $('delEmail').value = ''; $('delGo').disabled = true; $('delErr').textContent = ''; dlg.showModal(); });
+  $('del').addEventListener('click', () => { $('delEmail').value = ''; $('delWho').textContent = u.name || u.email; $('delGo').disabled = true; $('delErr').textContent = ''; dlg.showModal(); });
   $('delCancel').addEventListener('click', () => dlg.close());
-  $('delEmail').addEventListener('input', () => { $('delGo').disabled = $('delEmail').value.trim().toLowerCase() !== u.email.toLowerCase(); });
+  $('delEmail').addEventListener('input', () => { $('delGo').disabled = $('delEmail').value.trim().toLowerCase() !== (u.name || u.email).toLowerCase(); });
   $('delGo').addEventListener('click', async () => {
     $('delGo').disabled = true; $('delGo').textContent = 'Deleting…';
     try { await W.deleteAccount(); location.href = 'index.html'; } catch (e) { $('delErr').textContent = e.message; $('delGo').disabled = false; $('delGo').textContent = 'Delete account'; }

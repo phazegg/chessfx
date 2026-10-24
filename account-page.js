@@ -39,7 +39,7 @@
     $('switchText').textContent = sw;
     $('switchMode').textContent = swBtn;
     $('password').autocomplete = m === 'signup' ? 'new-password' : 'current-password';
-    for (const id of ['pwRules', 'ageRow', 'legal']) $(id).hidden = m !== 'signup';
+    for (const id of ['pwRules', 'ageRow']) $(id).hidden = m !== 'signup';
     $('toForgot').hidden = m !== 'signin';
     rules();
   };
@@ -82,6 +82,17 @@
         await afterSignIn();
       });
     }
+  });
+
+  // ---------- Continue with Lichess / Google / Discord ----------
+  const pbtns = [...document.querySelectorAll('.a-pbtn')];
+  if (CX_WEB.enabled()) CX_WEB.providers().then((ps) => { for (const b of pbtns) b.hidden = !ps.includes(b.dataset.p); });
+  for (const b of pbtns) b.addEventListener('click', async () => {
+    const label = b.querySelector('span'), old = label.textContent, name = old.replace('Continue with ', '');
+    for (const x of pbtns) x.disabled = true;
+    label.textContent = `Opening ${name}…`; alert('');
+    try { await CX_WEB.withProvider(b.dataset.p); } catch (e) { alert(e.message || 'Something went wrong. Try again.'); }
+    finally { for (const x of pbtns) x.disabled = false; label.textContent = old; }
   });
 
   // ---------- email code ----------

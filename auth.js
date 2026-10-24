@@ -26,9 +26,11 @@ window.CX_WEB = (() => {
     if (r.status === 401) { localStorage.removeItem(KEY); throw fail('auth', 'Your session has ended. Sign in again.'); }
     throw fail('server', 'Something went wrong on our side. Try again in a moment.');
   };
+  // `name` is what the pages show: the Lichess username for Lichess accounts (their email is a placeholder), else the email.
+  const who = (u) => ({ id: u && u.id, email: u && u.email, name: (u && u.user_metadata && u.user_metadata.lichess_username) || (u && u.email) });
   const keep = (s) => {
     if (!s || !s.access_token) return null;
-    const v = { access_token: s.access_token, refresh_token: s.refresh_token, expires_at: Math.floor(Date.now() / 1000) + (s.expires_in || 3600), user: { id: s.user && s.user.id, email: s.user && s.user.email } };
+    const v = { access_token: s.access_token, refresh_token: s.refresh_token, expires_at: Math.floor(Date.now() / 1000) + (s.expires_in || 3600), user: who(s.user) };
     try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) { /* private mode: session lasts for this page only */ }
     return v;
   };
@@ -89,10 +91,42 @@ window.CX_WEB = (() => {
     if (h.get('error_description')) throw fail('link', h.get('error_description').replace(/\+/g, ' '));
     if (!h.get('access_token')) return null;
     keep({ access_token: h.get('access_token'), refresh_token: h.get('refresh_token'), expires_in: +h.get('expires_in') || 3600, user: {} });
-    return h.get('type') || 'signup';
+    return h.get('type') || 'oauth'; // Google/Discord come back with no type
   };
-  const me = async () => { const s = await session(); if (!s) return null; const u = await call('/auth/v1/user', { method: 'GET', token: s.access_token }); keep({ ...s, expires_in: s.expires_at - Math.floor(Date.now() / 1000), user: { id: u.id, email: u.email } }); return u; };
-  return { enabled, session, user, fromLink, me, signUp, signIn, verify, resend, recover, setPassword, signOut, deleteAccount, row, applyLook };
+  // ---------- Continue with Lichess / Google / Discord ----------
+  // Lichess is always offered (our "lichess-auth" server function); Google and Discord once switched on in Supabase.
+  const providers = async () => {
+    const s = await call('/auth/v1/settings', { method: 'GET' }).catch(() => null);
+    return ['lichess', ...['google', 'discord'].filter((p) => s && s.external && s.external[p])];
+  };
+  const back = () => new URL('confirm.html', location.href).href;
+  const b64u = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  // Leaves the page: the provider sends the visitor back to confirm.html, which finishes the sign-in.
+  const withProvider = async (p) => {
+    if (!enabled()) throw fail('off', 'Accounts are coming soon.');
+    if (p !== 'lichess') { location.href = `${C.url.replace(/\/$/, '')}/auth/v1/authorize?provider=${p}&redirect_to=${encodeURIComponent(back())}`; return; }
+    const v = b64u(crypto.getRandomValues(new Uint8Array(32))), state = b64u(crypto.getRandomValues(new Uint8Array(16)));
+    const c = b64u(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(v)));
+    sessionStorage.setItem('cfxLichess', JSON.stringify({ v, state, back: back() }));
+    location.href = 'https://lichess.org/oauth?' + new URLSearchParams({ response_type: 'code', client_id: 'chessfx', redirect_uri: back(), code_challenge_method: 'S256', code_challenge: c, state });
+  };
+  // confirm.html?code=…&state=… after Lichess: false when the URL isn't a Lichess return.
+  const fromLichess = async (search) => {
+    const q = new URLSearchParams(search);
+    if (!q.get('code') && !q.get('error')) return false;
+    let st = null;
+    try { st = JSON.parse(sessionStorage.getItem('cfxLichess') || 'null'); } catch (e) { st = null; }
+    sessionStorage.removeItem('cfxLichess');
+    if (q.get('error') || !st || st.state !== q.get('state')) throw fail('cancel', "Lichess sign-in was cancelled or didn't finish. Try again.");
+    let r;
+    try { r = await fetch(C.url.replace(/\/$/, '') + '/functions/v1/lichess-auth', { method: 'POST', headers: { apikey: C.anonKey, 'Content-Type': 'application/json' }, body: JSON.stringify({ code: q.get('code'), verifier: st.v, redirect_uri: st.back }) }); } catch (e) { throw fail('offline', "Can't reach ChessFX. Check your connection and try again."); }
+    const j = await r.json().catch(() => null);
+    if (!r.ok || !j || !j.access_token) throw fail('provider', (j && j.error) || 'Lichess sign-in failed. Try again.');
+    keep(j);
+    return true;
+  };
+  const me = async () => { const s = await session(); if (!s) return null; const u = await call('/auth/v1/user', { method: 'GET', token: s.access_token }); keep({ ...s, expires_in: s.expires_at - Math.floor(Date.now() / 1000), user: u }); return u; };
+  return { enabled, session, user, providers, withProvider, fromLichess, fromLink, me, signUp, signIn, verify, resend, recover, setPassword, signOut, deleteAccount, row, applyLook };
 })();
 
 // Header: "Sign in · Create account" or your initial + "My Account" + "Sign out", on every page.
@@ -103,7 +137,7 @@ window.CX_WEB = (() => {
   const u = await window.CX_WEB.user();
   if (!u) { box.innerHTML = '<a class="nav-link" href="account.html#signin">Sign in</a><a class="btn btn-go nav-cta" href="account.html#signup">Create account</a>'; return; }
   box.innerHTML = '<a class="me" href="me.html"><i aria-hidden="true"></i><span>My Account</span></a><button type="button" class="nav-link linkbtn" id="signOut">Sign out</button>';
-  box.querySelector('i').textContent = (u.email || '?')[0].toUpperCase();
-  box.querySelector('.me').title = u.email;
+  box.querySelector('i').textContent = (u.name || u.email || '?')[0].toUpperCase();
+  box.querySelector('.me').title = u.name || u.email;
   document.getElementById('signOut').addEventListener('click', async () => { await window.CX_WEB.signOut(); location.href = 'index.html'; });
 })();

@@ -62,7 +62,7 @@
 <dialog id="delDlg" class="dlg">
   <h2>Delete your account?</h2>
   <p class="sub">This deletes your account and everything synced to it, for good. Your browsers keep their local copy.</p>
-  <label class="field">Type your email to confirm<input id="delEmail" type="email" autocomplete="off"></label>
+  <label class="field">Type <b id="delWho"></b> to confirm<input id="delEmail" type="text" autocomplete="off"></label>
   <p id="delErr" class="err" role="alert"></p>
   <div class="dlg-bar"><button type="button" class="btn btn-ghost" id="delCancel">Cancel</button><button type="button" class="btn btn-danger" id="delGo" disabled>Delete account</button></div>
 </dialog>

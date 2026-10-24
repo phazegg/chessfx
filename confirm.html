@@ -41,15 +41,20 @@
 <script>
 (async () => {
   const $ = (id) => document.getElementById(id);
-  const W = window.CX_WEB, hash = location.hash;
+  const W = window.CX_WEB, hash = location.hash, search = location.search;
   history.replaceState(null, '', location.pathname); // the link's tokens never stay in the address bar or history
   const say = (title, lede) => { $('aTitle').textContent = title; $('aLede').textContent = lede; $('aTitle').focus(); };
+  // Back from Lichess (?code=…), or from Google/Discord (#access_token=… with no type): signed in, go to My Account.
+  try { if (await W.fromLichess(search)) return location.replace('me.html'); } catch (e) {
+    say('Sign-in did not finish', e.message); $('again').hidden = false; return;
+  }
   let type;
   try { type = W.fromLink(hash); } catch (e) {
     say('That link has expired', 'Links work once and expire after an hour. Sign in, or ask for a new one from the sign-in page.');
     $('again').hidden = false; return;
   }
   if (!type) { say('Nothing to confirm here', 'This page opens from the links in ChessFX emails.'); $('again').hidden = false; return; }
+  if (type === 'oauth') { await W.me().catch(() => {}); return location.replace('me.html'); }
   let u = null;
   try { u = await W.me(); } catch (e) { /* the session still works; the email is just for the message */ }
   if (type === 'recovery') {
