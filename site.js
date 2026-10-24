@@ -1,6 +1,8 @@
 // ChessFX website: the live hero board (the extension's real shaders and pieces, playing the Opera Game), the look
 // switcher, Original vs ChessFX, the board gallery, and the store links. No framework, no build step.
 (() => {
+  // An email link that landed on the home page (no redirect page set): hand it to the confirm page.
+  if (/access_token=|error_description=/.test(location.hash)) { location.replace('confirm.html' + location.hash); return; }
   // Store pages: fill in once the listings are live. Until then the buttons scroll to the closing section, which says so.
   const STORE = { chrome: '', edge: '' };
   const D = window.SITE;

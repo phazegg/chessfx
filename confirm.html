@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en" class="cfx-app dark-mode">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChessFX</title>
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="assets/icon.png">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/ui.css">
+<link rel="stylesheet" href="assets/account.css">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<header class="nav"><a class="brand" href="index.html"><img src="assets/icon.png" alt="" width="28" height="28"><b>ChessFX</b></a><div class="acct" id="acct"></div></header>
+<!-- Where the email links open: confirm a new account, or choose a new password. -->
+<main class="a-wrap">
+  <section class="a-card" aria-labelledby="aTitle">
+    <h1 id="aTitle" tabindex="-1">One moment…</h1>
+    <p id="aLede" class="a-lede"></p>
+    <p id="aAlert" class="a-alert" role="alert" hidden></p>
+    <form id="fReset" class="a-form" novalidate hidden>
+      <label class="a-field"><span>New password</span>
+        <input id="newPassword" type="password" autocomplete="new-password" required aria-describedby="pwErr">
+        <small id="pwErr" class="a-err"></small>
+      </label>
+      <button type="submit" id="save" class="cfx-btn cfx-btn-primary a-wide">Save new password</button>
+    </form>
+    <div id="next" class="a-form" hidden>
+      <a class="cfx-btn cfx-btn-primary a-wide" href="me.html">Go to My Account</a>
+      <a class="cfx-btn a-wide" href="https://www.chess.com/play" target="_blank" rel="noopener">Open chess.com</a>
+    </div>
+    <div id="again" class="a-form" hidden>
+      <a class="cfx-btn cfx-btn-primary a-wide" href="account.html#signin">Back to sign in</a>
+    </div>
+  </section>
+</main>
+<script src="assets/cloud-config.js"></script>
+<script src="auth.js"></script>
+<script>
+(async () => {
+  const $ = (id) => document.getElementById(id);
+  const W = window.CX_WEB, hash = location.hash;
+  history.replaceState(null, '', location.pathname); // the link's tokens never stay in the address bar or history
+  const say = (title, lede) => { $('aTitle').textContent = title; $('aLede').textContent = lede; $('aTitle').focus(); };
+  let type;
+  try { type = W.fromLink(hash); } catch (e) {
+    say('That link has expired', 'Links work once and expire after an hour. Sign in, or ask for a new one from the sign-in page.');
+    $('again').hidden = false; return;
+  }
+  if (!type) { say('Nothing to confirm here', 'This page opens from the links in ChessFX emails.'); $('again').hidden = false; return; }
+  let u = null;
+  try { u = await W.me(); } catch (e) { /* the session still works; the email is just for the message */ }
+  if (type === 'recovery') {
+    say('Choose a new password', u && u.email ? `For ${u.email}.` : 'At least 8 characters.');
+    $('fReset').hidden = false;
+    $('newPassword').focus();
+    $('fReset').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const pw = $('newPassword').value;
+      $('pwErr').textContent = pw.length >= 8 ? '' : 'Use at least 8 characters.';
+      if (pw.length < 8) return $('newPassword').focus();
+      $('save').disabled = true; $('save').textContent = 'Saving…';
+      try {
+        await W.setPassword(pw);
+        $('fReset').hidden = true;
+        say('Password updated', 'Use your new password to sign in to ChessFX, in the extension and here.');
+        $('next').hidden = false;
+      } catch (err) { $('aAlert').textContent = err.message; $('aAlert').hidden = false; $('save').disabled = false; $('save').textContent = 'Save new password'; }
+    });
+    return;
+  }
+  say('Your email is confirmed', `${u && u.email ? u.email + ' is ready. ' : ''}You're signed in here. In the ChessFX extension, sign in with the same email and password.`);
+  $('next').hidden = false;
+})();
+</script>
+</body>
+</html>

@@ -85,14 +85,18 @@
   });
 
   // ---------- email code ----------
+  // Email links (Supabase's standard emails): confirm a new account, or reset the password on the website.
   const codeMode = () => {
     const email = sessionStorage.getItem('cfxEmail') || '';
     if (!email) { location.hash = 'signin'; return; }
     const reset = codeFor === 'recovery';
-    show('fCode', reset ? 'Reset your password' : 'Check your email', `We sent a code to ${email}. It expires in 1 hour.`);
-    $('newPwRow').hidden = !reset;
-    $('codeSubmit').textContent = reset ? 'Set new password' : 'Confirm email';
-    $('code').value = '';
+    show('fCode', 'Check your email', reset
+      ? `We sent a link to ${email}. It opens the ChessFX website, where you choose a new password.`
+      : `We sent a link to ${email}. Click it to confirm your account, then sign in here.`);
+    for (const id of ['code', 'newPwRow']) (id === 'code' ? $('code').closest('label') : $(id)).hidden = true;
+    $('codeSubmit').textContent = reset ? 'Back to sign in' : "I've confirmed, sign in";
+    $('resend').textContent = 'Resend link';
+    $('otherEmail').textContent = 'Use a different email';
   };
   let cool = 0;
   $('resend').addEventListener('click', async () => {
@@ -106,19 +110,10 @@
     setTimeout(() => { $('resend').disabled = false; }, 30e3);
   });
   $('otherEmail').addEventListener('click', () => { sessionStorage.removeItem('cfxEmail'); location.hash = codeFor === 'recovery' ? 'forgot' : 'signup'; });
-  $('fCode').addEventListener('submit', async (e) => {
+  $('fCode').addEventListener('submit', (e) => {
     e.preventDefault();
-    const email = sessionStorage.getItem('cfxEmail') || '', reset = codeFor === 'recovery';
-    fieldErr($('code'), 'codeErr', /^\d{6,10}$/.test($('code').value.trim()) ? '' : 'Enter the code from the email.');
-    if (reset) fieldErr($('newPassword'), 'newPwErr', $('newPassword').value.length >= 8 ? '' : 'Use at least 8 characters.');
-    const bad = [$('code'), $('newPassword')].find((i) => i.getAttribute('aria-invalid') === 'true');
-    if (bad) return bad.focus();
-    await busy($('codeSubmit'), reset ? 'Saving…' : 'Confirming…', async () => {
-      await CX_WEB.verify(email, $('code').value, reset ? 'recovery' : 'signup');
-      if (reset) await CX_WEB.setPassword($('newPassword').value);
-      sessionStorage.removeItem('cfxEmail');
-      if (reset) await afterSignIn(); else await done(true);
-    });
+    $('email').value = sessionStorage.getItem('cfxEmail') || '';
+    location.hash = 'signin';
   });
 
   // ---------- forgot password ----------

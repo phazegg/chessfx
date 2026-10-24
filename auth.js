@@ -19,7 +19,7 @@ window.CX_WEB = (() => {
     const raw = String((j && (j.error_code || j.code || j.error)) || '') + ' ' + String((j && (j.msg || j.message || j.error_description)) || '');
     if (r.status === 429 || /rate limit|too many/i.test(raw)) throw fail('rate', 'Too many tries. Wait a minute and try again.');
     if (/invalid_credentials|invalid login|invalid_grant/i.test(raw)) throw fail('bad', 'Email or password is incorrect.');
-    if (/email_not_confirmed|not confirmed/i.test(raw)) throw fail('unconfirmed', 'Confirm your email first: enter the code we sent you.');
+    if (/email_not_confirmed|not confirmed/i.test(raw)) throw fail('unconfirmed', 'Confirm your email first: click the link we sent you, then sign in.');
     if (/user_already_exists|already registered|already exists/i.test(raw)) throw fail('exists', 'An account with this email already exists. Sign in instead?');
     if (/otp_expired|token has expired|invalid.*(otp|token)/i.test(raw)) throw fail('code', 'That code is wrong or has expired. Request a new one.');
     if (/weak_password|password should/i.test(raw)) throw fail('weak', 'Choose a stronger password: at least 8 characters.');
@@ -43,13 +43,15 @@ window.CX_WEB = (() => {
   };
   const user = async () => (await session())?.user || null;
   const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // Email links (confirm, reset) open this site's confirm page.
+  const linkTo = () => '?redirect_to=' + encodeURIComponent(C.linkPage || new URL('confirm.html', location.href).href);
   const check = (email, pw) => {
     if (!EMAIL.test(String(email || '').trim())) throw fail('email', "That email doesn't look right.");
     if (pw !== undefined && String(pw).length < 8) throw fail('weak', 'Use at least 8 characters.');
   };
   const signUp = async (email, pw) => {
     check(email, pw);
-    const r = await call('/auth/v1/signup', { body: { email: email.trim(), password: pw } });
+    const r = await call('/auth/v1/signup' + linkTo(), { body: { email: email.trim(), password: pw } });
     if (r && r.access_token) { keep(r); return { session: true }; }
     if (r && Array.isArray(r.identities) && r.identities.length === 0) throw fail('exists', 'An account with this email already exists. Sign in instead?');
     return { confirm: true };
@@ -57,7 +59,7 @@ window.CX_WEB = (() => {
   const signIn = async (email, pw) => { check(email); keep(await call('/auth/v1/token?grant_type=password', { body: { email: email.trim(), password: pw } })); return user(); };
   const verify = async (email, token, type) => { check(email); keep(await call('/auth/v1/verify', { body: { email: email.trim(), token: String(token).trim(), type } })); return user(); };
   const resend = (email) => call('/auth/v1/resend', { body: { type: 'signup', email: String(email).trim() } });
-  const recover = (email) => { check(email); return call('/auth/v1/recover', { body: { email: email.trim() } }); };
+  const recover = (email) => { check(email); return call('/auth/v1/recover' + linkTo(), { body: { email: email.trim() } }); };
   const setPassword = async (pw) => { check('a@b.co', pw); const s = await session(); if (!s) throw fail('auth', 'Sign in again.'); await call('/auth/v1/user', { method: 'PUT', token: s.access_token, body: { password: pw } }); };
   const signOut = async () => { const s = await session(); if (s) await call('/auth/v1/logout', { token: s.access_token }).catch(() => {}); localStorage.removeItem(KEY); };
   const deleteAccount = async () => { const s = await session(); if (!s) throw fail('auth', 'Sign in again.'); await call('/rest/v1/rpc/delete_me', { token: s.access_token, body: {} }); localStorage.removeItem(KEY); };
@@ -81,7 +83,16 @@ window.CX_WEB = (() => {
     await call('/rest/v1/user_state?on_conflict=user_id', { token: s.access_token, headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: { user_id: s.user.id, data: next, updated_at: new Date().toISOString() } });
     return settings;
   };
-  return { enabled, session, user, signUp, signIn, verify, resend, recover, setPassword, signOut, deleteAccount, row, applyLook };
+  // The confirm page: an email link arrives with the session in the URL fragment (#access_token=…&type=signup|recovery).
+  const fromLink = (hash) => {
+    const h = new URLSearchParams(String(hash || '').replace(/^#/, ''));
+    if (h.get('error_description')) throw fail('link', h.get('error_description').replace(/\+/g, ' '));
+    if (!h.get('access_token')) return null;
+    keep({ access_token: h.get('access_token'), refresh_token: h.get('refresh_token'), expires_in: +h.get('expires_in') || 3600, user: {} });
+    return h.get('type') || 'signup';
+  };
+  const me = async () => { const s = await session(); if (!s) return null; const u = await call('/auth/v1/user', { method: 'GET', token: s.access_token }); keep({ ...s, expires_in: s.expires_at - Math.floor(Date.now() / 1000), user: { id: u.id, email: u.email } }); return u; };
+  return { enabled, session, user, fromLink, me, signUp, signIn, verify, resend, recover, setPassword, signOut, deleteAccount, row, applyLook };
 })();
 
 // Header: "Sign in · Create account" or your initial + "My Account" + "Sign out", on every page.
