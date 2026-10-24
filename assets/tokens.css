@@ -1,0 +1,104 @@
+/* ChessFX design tokens: the one source of colour, type, radius, shadow and motion values.
+   Loaded by the popup, the options page and (as a content-script stylesheet) chess.com, so every name is --cfx-*.
+   Contrast (checked by tools/check.mjs): text tiers >= 4.5:1 on every surface, --cfx-line-strong >= 3:1. */
+:root {
+  /* surfaces: chess.com's dark theme (solid, so contrast is predictable) */
+  --cfx-ink-0: #312e2b;   /* page (chess.com's page grey) */
+  --cfx-well: #1f1e1c;    /* inset wells: inputs, tables, thumbnails */
+  --cfx-ink-1: #262522;   /* cards and panels */
+  --cfx-ink-2: #3c3a37;   /* raised controls */
+  --cfx-ink-3: #484643;   /* hover */
+  --cfx-line: #3c3a37;          /* decorative dividers */
+  --cfx-line-strong: #8b8987;   /* control boundaries (>= 3:1) */
+
+  /* text */
+  --cfx-text: #ffffff;
+  --cfx-text-2: #d0cfcd;  /* secondary */
+  --cfx-text-3: #b8b7b4;  /* hints, meta */
+
+  /* accent: chess.com green for indicators (selection, switches, focus). Buttons use --cfx-go: chess.com's green
+     darkened just enough for white text (4.5:1), with its raised bottom edge. */
+  --cfx-accent: #81b64c;
+  --cfx-on-accent: #ffffff; /* non-text marks on the accent (switch knob) */
+  --cfx-go: #47852a;
+  --cfx-on-go: #ffffff;
+  --cfx-edge: inset 0 -3px 0 rgba(0, 0, 0, .28);
+  --cfx-accent-soft: color-mix(in srgb, var(--cfx-accent) 16%, transparent);
+  --cfx-accent-glow: color-mix(in srgb, var(--cfx-accent) 40%, transparent);
+
+  /* status */
+  --cfx-win: #a3d160;  /* chess.com's light green, readable as text on every surface */
+  --cfx-loss: #ff9a8f;
+  --cfx-draw: var(--cfx-text-2);
+  --cfx-alert: #ff5a64;
+  --cfx-star: #ffc94d;  /* favourites */
+
+  /* type: 7 steps */
+  --cfx-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; /* chess.com's stack */
+  --cfx-mono: ui-monospace, Consolas, monospace;
+  --cfx-fs-1: 11px;
+  --cfx-fs-2: 12.5px;
+  --cfx-fs-3: 14px;
+  --cfx-fs-4: 16px;
+  --cfx-fs-5: 20px;
+  --cfx-fs-6: 26px;
+  --cfx-fs-7: 36px;
+
+  /* radii: 4 steps (+ 50% for circles) */
+  --cfx-r-1: 4px;
+  --cfx-r-2: 6px;
+  --cfx-r-3: 10px;
+  --cfx-r-pill: 999px;
+
+  /* depth */
+  --cfx-shadow-1: 0 4px 12px rgba(0, 0, 0, .35);
+  --cfx-shadow-2: 0 12px 36px rgba(0, 0, 0, .55);
+  --cfx-hairline: inset 0 1px 0 rgba(255, 255, 255, .04);
+  --cfx-hover-glow: rgba(255, 255, 255, .42); /* hover glow on chess.com canvas boards (matches the DOM hover lift) */
+
+  /* motion */
+  --cfx-ease: cubic-bezier(.2, .8, .2, 1);
+  --cfx-spring: cubic-bezier(.3, 1.6, .5, 1);
+  --cfx-t-1: .15s;
+  --cfx-t-2: .28s;
+}
+
+/* ChessFX's own pages (Settings, popup: <html class="cfx-app">): dark emerald glass. chess.com keeps the values above.
+   Same contrast rules (check.mjs reads these, the last value of each name). */
+html.cfx-app {
+  --cfx-ink-0: #0b0f0e;   /* environment (obsidian) */
+  --cfx-well: #0e1412;    /* inputs, wells */
+  --cfx-ink-1: #121a17;   /* panels */
+  --cfx-ink-2: #1a2420;   /* raised controls */
+  --cfx-ink-3: #24312b;   /* hover */
+  --cfx-line: #1f2a25;
+  --cfx-line-strong: #6e8078;
+  --cfx-text: #f4f7f4;
+  --cfx-text-2: #b8c4be;
+  --cfx-text-3: #97a59e;
+  --cfx-accent: #79d65a;  /* emerald: selection, switches, focus */
+  --cfx-on-accent: #0b0f0e;
+  --cfx-go: #2e7a3c;      /* buttons: deep emerald with white text */
+  --cfx-on-go: #ffffff;
+  --cfx-win: #8fdc6c;
+  --cfx-shadow-1: 0 6px 16px rgba(0, 0, 0, .45);
+  --cfx-shadow-2: 0 24px 60px -12px rgba(0, 0, 0, .7);
+
+  /* materials: environment → glass panels → floating glass → solid controls */
+  --cfx-glass: rgba(18, 27, 24, .66);        /* main panels */
+  --cfx-glass-2: rgba(28, 40, 35, .72);      /* elevated / floating */
+  --cfx-glass-line: rgba(225, 245, 232, .10);
+  --cfx-glass-hi: inset 0 1px 0 rgba(255, 255, 255, .06);
+  --cfx-blur: blur(18px) saturate(140%);
+  /* board frame, shared by the Settings stage and the popup: a bezel with light from the upper left, a bevel and a faint
+     sheen over the squares (pointer-events none), and depth below */
+  --cfx-frame-bg: linear-gradient(160deg, rgba(255, 255, 255, .11), rgba(255, 255, 255, .025) 42%, rgba(0, 0, 0, .28)), #1a2420;
+  --cfx-frame-edge: inset 0 1px 0 rgba(255, 255, 255, .16), inset 0 0 0 1px rgba(255, 255, 255, .06);
+  --cfx-frame-drop: 0 30px 70px -26px rgba(0, 0, 0, .9);
+  --cfx-board-bevel: inset 0 0 0 1px rgba(0, 0, 0, .5), inset 0 2px 10px rgba(0, 0, 0, .35);
+  --cfx-board-sheen: linear-gradient(165deg, rgba(255, 255, 255, .08), transparent 36%);
+  --cfx-env:
+    radial-gradient(900px 600px at 12% -8%, rgba(47, 122, 60, .26), transparent 60%),
+    radial-gradient(800px 700px at 100% 110%, rgba(40, 90, 110, .18), transparent 60%),
+    #0b0f0e;
+}

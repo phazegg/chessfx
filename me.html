@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en" class="cfx-app dark-mode">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Account · ChessFX</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/icon.png">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav">
+  <a class="brand" href="index.html"><img src="assets/icon.png" alt="" width="28" height="28"><b>ChessFX</b></a>
+  <nav aria-label="Sections"><a href="index.html#looks">Looks</a><a href="index.html#features">Features</a><a href="index.html#faq">FAQ</a></nav>
+  <div class="acct" id="acct"></div>
+</header>
+<main id="main" class="me-wrap">
+  <p id="meStatus" class="sub" role="status" aria-live="polite">Loading your account…</p>
+  <div id="meBody" hidden>
+    <section class="me-head">
+      <p class="eyebrow">My Account</p>
+      <h1 id="meEmail"></h1>
+      <p class="sub">The same account works in the ChessFX extension: sign in there once and your look follows you.</p>
+    </section>
+
+    <section class="me-grid">
+      <article class="card me-look">
+        <img id="curImg" alt="" width="400" height="400">
+        <div><p class="eyebrow">Your look</p><h2 id="curName"></h2><p class="sub" id="curMeta"></p></div>
+      </article>
+      <article class="card">
+        <p class="eyebrow">In your account</p>
+        <ul class="stats">
+          <li><b id="nLooks">0</b><span>saved looks</span></li>
+          <li><b id="nGames">0</b><span>synced games</span></li>
+          <li><b id="lastSync">Never</b><span>last synced</span></li>
+        </ul>
+        <p class="sub small">Game history syncs only if you turn it on in the extension (Settings → Account).</p>
+      </article>
+    </section>
+
+    <section class="sec-tight" aria-labelledby="applyH">
+      <h2 id="applyH">Change your look</h2>
+      <p class="sub">Pick a look and apply it: ChessFX switches to it the next time it syncs. Open the ChessFX toolbar popup to sync right away.</p>
+      <div class="apply" id="apply"></div>
+      <p class="sub" id="applyMsg" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="sec-tight" aria-labelledby="dataH">
+      <h2 id="dataH">Your data</h2>
+      <div class="me-actions">
+        <button type="button" class="btn btn-ghost" id="export">Export my data</button>
+        <button type="button" class="btn btn-ghost" id="signOutMe">Sign out</button>
+        <button type="button" class="btn btn-danger" id="del">Delete account…</button>
+      </div>
+      <p class="sub small"><a href="privacy.html">Privacy policy</a> · <a href="terms.html">Terms</a></p>
+    </section>
+  </div>
+</main>
+<dialog id="delDlg" class="dlg">
+  <h2>Delete your account?</h2>
+  <p class="sub">This deletes your account and everything synced to it, for good. Your browsers keep their local copy.</p>
+  <label class="field">Type your email to confirm<input id="delEmail" type="email" autocomplete="off"></label>
+  <p id="delErr" class="err" role="alert"></p>
+  <div class="dlg-bar"><button type="button" class="btn btn-ghost" id="delCancel">Cancel</button><button type="button" class="btn btn-danger" id="delGo" disabled>Delete account</button></div>
+</dialog>
+<footer class="foot"><p class="disclaimer">ChessFX is an independent project, not affiliated with or endorsed by Chess.com.</p></footer>
+<script src="assets/data.js"></script>
+<script src="assets/catalog.js"></script>
+<script src="assets/presets.js"></script>
+<script src="assets/settings.js"></script>
+<script src="assets/cloud-config.js"></script>
+<script src="auth.js"></script>
+<script src="me.js"></script>
+</body>
+</html>

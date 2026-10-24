@@ -1,0 +1,48 @@
+/* Shared UI primitives for the popup and the options page (not injected into chess.com). Uses src/tokens.css. */
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--cfx-accent); outline-offset: 2px; }
+
+/* Switch: <span class="cfx-switch"><input type="checkbox"><i></i></span>. Off/on differ by knob position and fill,
+   not only by colour; the off track has a >= 3:1 boundary. */
+.cfx-switch { position: relative; display: inline-block; flex: none; width: 42px; height: 24px; }
+.cfx-switch input { position: absolute; inset: 0; z-index: 1; margin: 0; opacity: 0; cursor: pointer; }
+.cfx-switch i {
+  position: absolute; inset: 0; border-radius: var(--cfx-r-pill); background: var(--cfx-well);
+  box-shadow: inset 0 0 0 1.5px var(--cfx-line-strong); transition: background var(--cfx-t-1), box-shadow var(--cfx-t-1);
+}
+.cfx-switch i::after {
+  content: ""; position: absolute; top: 4px; left: 4px; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--cfx-text-2); transition: transform var(--cfx-t-2) var(--cfx-spring), background var(--cfx-t-1);
+}
+.cfx-switch input:checked + i { background: var(--cfx-accent); box-shadow: inset 0 0 0 1.5px var(--cfx-accent); }
+.cfx-switch input:checked + i::after { transform: translateX(18px); background: var(--cfx-on-accent); }
+.cfx-switch input:focus-visible + i { outline: 2px solid var(--cfx-text); outline-offset: 2px; }
+.cfx-switch input:disabled + i { opacity: .55; }
+
+/* Buttons */
+.cfx-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 14px; border-radius: var(--cfx-r-2);
+  border: 1px solid var(--cfx-line-strong); background: var(--cfx-ink-2); color: var(--cfx-text); cursor: pointer;
+  font-weight: 600; font-size: var(--cfx-fs-3); transition: background var(--cfx-t-1), border-color var(--cfx-t-1);
+}
+.cfx-btn:hover:not(:disabled) { background: var(--cfx-ink-3); border-color: var(--cfx-text-3); }
+.cfx-btn:disabled { opacity: .5; cursor: default; }
+.cfx-btn-primary { background: var(--cfx-go); color: var(--cfx-on-go); border-color: transparent; box-shadow: var(--cfx-edge); }
+.cfx-btn-primary:hover:not(:disabled) { background: var(--cfx-go); filter: brightness(1.08); border-color: transparent; }
+
+/* Reduced motion: no transforms or long transitions in our own pages. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+}
+
+/* Windows high contrast: let system colours draw boundaries, selection and focus. */
+@media (forced-colors: active) {
+  .cfx-switch i { border: 1px solid CanvasText; }
+  .cfx-switch i::after { background: CanvasText; }
+  .cfx-switch input:checked + i { background: Highlight; }
+  .cfx-switch input:checked + i::after { background: HighlightText; }
+  .cfx-btn { border: 1px solid ButtonText; }
+  :focus-visible { outline: 2px solid Highlight; }
+}

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en" class="dark-mode cfx-app">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in · ChessFX</title>
+<link rel="icon" href="assets/icon.png">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/ui.css">
+<link rel="stylesheet" href="assets/account.css">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<header class="nav"><a class="brand" href="index.html"><img src="assets/icon.png" alt="" width="28" height="28"><b>ChessFX</b></a><div class="acct" id="acct"></div></header>
+<main class="a-wrap">
+  <section class="a-card" aria-labelledby="aTitle">
+        <h1 id="aTitle" tabindex="-1"></h1>
+    <p id="aLede" class="a-lede"></p>
+    <p id="aAlert" class="a-alert" role="alert" hidden></p>
+    <p id="aStatus" class="a-status" role="status" aria-live="polite"></p>
+
+    <!-- Sign up / sign in -->
+    <form id="fAuth" class="a-form" novalidate hidden>
+      <label class="a-field"><span>Email</span>
+        <input id="email" type="email" autocomplete="email" required aria-describedby="emailErr">
+        <small id="emailErr" class="a-err"></small>
+      </label>
+      <label class="a-field"><span class="a-labelrow">Password <button type="button" id="toForgot" class="a-link a-small">Forgot password?</button></span>
+        <span class="a-pw"><input id="password" type="password" required aria-describedby="pwErr pwRules"><button type="button" id="showPw" class="a-link" aria-pressed="false">Show</button></span>
+        <small id="pwErr" class="a-err"></small>
+      </label>
+      <ul id="pwRules" class="a-rules" aria-label="Password rules">
+        <li data-rule="len">At least 8 characters</li>
+        <li data-rule="mail">Not your email</li>
+      </ul>
+      <label class="a-check" id="ageRow"><input id="age" type="checkbox"> <span>I'm 13 or older</span></label>
+      <button type="submit" id="submit" class="cfx-btn cfx-btn-primary a-wide"></button>
+      <div class="a-or" aria-hidden="true"><span>or</span></div>
+      <button type="button" class="cfx-btn a-wide a-guest">Continue as guest</button>
+      <p class="a-hint">Everything stays on this device.</p>
+      <p class="a-switch"><span id="switchText"></span> <button type="button" id="switchMode" class="a-link"></button></p>
+      <p class="a-legal" id="legal">By creating an account you agree to the <a href="terms.html">Terms</a> and <a href="privacy.html">Privacy policy</a>.</p>
+    </form>
+
+    <!-- 6-digit code from the email (confirm a new account, or reset a password) -->
+    <form id="fCode" class="a-form" novalidate hidden>
+      <label class="a-field"><span>Code from the email</span>
+        <input id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" required aria-describedby="codeErr">
+        <small id="codeErr" class="a-err"></small>
+      </label>
+      <label class="a-field" id="newPwRow" hidden><span>New password</span>
+        <input id="newPassword" type="password" autocomplete="new-password" aria-describedby="newPwErr">
+        <small id="newPwErr" class="a-err"></small>
+      </label>
+      <button type="submit" id="codeSubmit" class="cfx-btn cfx-btn-primary a-wide"></button>
+      <p class="a-switch"><button type="button" id="resend" class="a-link">Resend code</button> · <button type="button" id="otherEmail" class="a-link">Use a different email</button></p>
+    </form>
+
+    <!-- Forgot password: ask for the email -->
+    <form id="fForgot" class="a-form" novalidate hidden>
+      <label class="a-field"><span>Email</span>
+        <input id="forgotEmail" type="email" autocomplete="email" required aria-describedby="forgotErr">
+        <small id="forgotErr" class="a-err"></small>
+      </label>
+      <button type="submit" class="cfx-btn cfx-btn-primary a-wide">Send code</button>
+      <p class="a-switch"><button type="button" id="backToSignin" class="a-link">Back to sign in</button></p>
+    </form>
+
+    <!-- Accounts not set up in this copy -->
+    <div id="fOff" class="a-form" hidden>
+      <button type="button" class="cfx-btn cfx-btn-primary a-wide a-guest">Continue as guest</button>
+    </div>
+  </section>
+  <p class="a-foot">ChessFX is an independent extension, not affiliated with Chess.com.</p>
+</main>
+<script src="assets/catalog.js"></script>
+<script src="assets/presets.js"></script>
+<script src="assets/settings.js"></script>
+<script src="assets/cloud-config.js"></script>
+<script src="auth.js"></script>
+<script src="account-page.js"></script>
+</body>
+</html>
