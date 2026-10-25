@@ -443,26 +443,33 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 
 @media (prefers-reduced-motion: reduce) { .wall.run, .caps img, .chip-dice.roll svg { animation: none; } .clock { transition: none; } }
 @media (forced-colors: active) { .clock.on { outline: 2px solid Highlight; } }
-/* The die is a compact round button (its name is in the label and tooltip), so the looks keep two rows on desktop. */
-.chip-dice { width: 40px; padding: 0; justify-content: center; border-radius: 50%; }
-.chip-dice span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-/* Board bar, two rows at every width: the look's name and move count, then the controls (die, compare, sound, pause). */
-.board-bar { flex-wrap: wrap; row-gap: 8px; }
-.look-name { flex: 1 1 100%; flex-direction: row; align-items: baseline; justify-content: space-between; gap: 12px; }
-.look-name small { flex: none; }
-.board-bar .chip-dice { margin-right: auto; }
-.board-bar .seg { margin-left: 0; }
-@media (max-width: 440px) { .board-bar .seg { flex: 1; } }
-/* The finale wall is bigger than the section on purpose: the section clips it (no sideways scroll). */
+/* The finale wall is bigger than the section on purpose: the section clips it (no sideways scroll) and its edges fade. */
 .final { position: relative; overflow: hidden; }
-/* Phones: the bar in three tidy rows: name and move count, the compare toggle full width, then die, sound and pause. */
+.wall { -webkit-mask: radial-gradient(ellipse 70% 75% at 50% 50%, transparent 15%, #000 42%, #000 58%, transparent 82%); mask: radial-gradient(ellipse 70% 75% at 50% 50%, transparent 15%, #000 42%, #000 58%, transparent 82%); }
+
+/* Board bar. Row 1: the look's name (move count under it) beside "Surprise me". Row 2: compare, sound, pause on the right.
+   Phones: name; then the compare toggle full width; then die, sound and pause. Long names wrap instead of being cut. */
+.board-bar { flex-wrap: wrap; row-gap: 8px; }
+.board-bar::after { content: ''; flex-basis: 100%; order: 1; }
+.look-name { flex: 1 1 0; min-width: 0; flex-direction: column; align-items: flex-start; gap: 1px; }
+#lookName, .look-name small { white-space: normal; }
+.board-bar .seg, #sound, #pause { order: 2; }
+.board-bar .seg { margin-left: auto; }
+.chip-dice { align-self: flex-start; height: 40px; min-height: 40px; padding: 0 14px 0 10px; gap: 8px; border-style: solid; border-radius: 10px; }
+.board-bar .chip-dice { margin: 0; }
 @media (max-width: 440px) {
-  .look-name { flex-direction: column; align-items: flex-start; gap: 2px; }
-  #lookName { max-width: 100%; }
-  .board-bar .seg { flex: 1 1 100%; order: 2; }
+  .board-bar::after { display: none; }
+  .look-name { flex: 1 1 100%; }
+  .board-bar .seg { flex: 1 1 100%; order: 2; margin-left: 0; }
   .board-bar .chip-dice, #sound, #pause { order: 3; }
   #sound { margin-left: auto; }
 }
-/* Narrower bars (small laptops, phones): the move count goes under the name; on phones a long name may wrap. */
-@media (min-width: 921px) and (max-width: 1100px) { .look-name { flex-direction: column; align-items: flex-start; gap: 2px; } }
-@media (max-width: 440px) { #lookName { white-space: normal; } }
+
+/* Short desktop screens: the board scales with the window height, so the board and its controls stay on screen. */
+@media (min-width: 921px) and (max-height: 900px) { .stage { width: min(100%, calc(100vh - 340px)); justify-self: center; } }
+
+/* Player names: the short form on phones. Captured pieces: legible. */
+.pshort { display: none; }
+@media (max-width: 440px) { .pfull { display: none; } .pshort { display: inline; } }
+.caps { gap: 0; padding-left: 2px; }
+.caps img { width: 20px; height: 20px; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .5)); }

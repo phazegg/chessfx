@@ -85,7 +85,8 @@
     if (soundOn && !actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { soundOn = false; } }
     if (actx && actx.state === 'suspended') actx.resume();
     $('sound').setAttribute('aria-pressed', String(soundOn));
-    $('sound').setAttribute('aria-label', soundOn ? 'Sound on' : 'Sound');
+    $('sound').title = soundOn ? 'Turn sound off' : 'Turn sound on';
+    if (!soundOn && actx) actx.suspend();
     if (soundOn) sfx('move');
   });
 
@@ -222,9 +223,9 @@
     timer = 0;
     if (paused) return;
     if (!visible || document.hidden) { timer = setTimeout(play, 700); return; }
-    if (step >= D.demo.length) { timer = setTimeout(() => { step = 0; cap.textContent = 'The Opera Game'; setup(!rm.matches); timer = setTimeout(play, rm.matches ? 0 : 1700); }, 3500); return; }
+    if (step >= D.demo.length) { timer = setTimeout(() => { step = 0; cap.textContent = 'The Opera Game, 1858'; setup(!rm.matches); timer = setTimeout(play, rm.matches ? 0 : 1700); }, 3500); return; }
     const m = D.demo[step++];
-    cap.textContent = `Move ${Math.ceil(step / 2)} of ${Math.ceil(D.demo.length / 2)}`;
+    cap.textContent = `Move ${Math.ceil(step / 2)} of ${Math.ceil(D.demo.length / 2)} · Opera Game, 1858`;
     clockLive = true;
     sfx(m.mate ? 'mate' : m.check ? 'check' : m.captured ? 'capture' : 'move');
     if (m.captured && at.has(m.to)) { const v = at.get(m.to); capture(m.color, v.dataset.p); v.classList.add('gone'); setTimeout(() => v.remove(), 300); burst(m.to, 26, 1.4); }
@@ -349,9 +350,8 @@
   const dice = document.createElement('button');
   dice.type = 'button';
   dice.className = 'chip chip-dice';
-  dice.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="9" cy="9" r="1.3"/><circle cx="15" cy="15" r="1.3"/><circle cx="15" cy="9" r="1.3"/><circle cx="9" cy="15" r="1.3"/><circle cx="12" cy="12" r="1.3"/></svg><span>Surprise me</span>';
+  dice.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="9" cy="9" r="1.3"/><circle cx="15" cy="15" r="1.3"/><circle cx="15" cy="9" r="1.3"/><circle cx="9" cy="15" r="1.3"/><circle cx="12" cy="12" r="1.3"/></svg><span class="dice-label">Surprise me</span>';
   dice.setAttribute('aria-label', 'Surprise me: a random board and piece set');
-  dice.title = 'Surprise me';
   const pick = (a) => a[Math.floor(Math.random() * a.length)];
   dice.addEventListener('click', () => {
     let bd, set;
