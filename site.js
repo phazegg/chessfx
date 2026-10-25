@@ -15,16 +15,27 @@
   for (const a of document.querySelectorAll('[data-store]')) {
     if (store) { a.href = store; a.target = '_blank'; a.rel = 'noopener'; if (isEdge) a.textContent = a.textContent.replace('Chrome', 'Edge'); }
   }
-  if (!store) $('getNote').textContent = 'ChessFX is launching soon on the Chrome Web Store. Free, cosmetic only, and ready in one click.';
+  if (!store) {
+    $('getNote').textContent = 'ChessFX is launching soon on the Chrome Web Store. Free, cosmetic only, and ready in one click.';
+    const fin = document.querySelector('#get [data-store]');
+    fin.textContent = 'Coming soon to Chrome'; fin.classList.replace('btn-go', 'btn-ghost'); fin.removeAttribute('href'); fin.setAttribute('aria-disabled', 'true');
+  }
+
+  // The header gains a solid edge once the page scrolls under it.
+  const nav = document.querySelector('.nav');
+  const onScroll = () => nav.classList.toggle('scrolled', scrollY > 8);
+  addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
 
   // ---------- board: pieces ----------
   const board = $('board'), layer = $('pieces');
   const START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
   let look = D.looks[0], at = new Map(), pieceSet = { w: look.white, b: look.black }, original = false;
   const src = (c, p) => `assets/pieces/${original ? 'cburnett' : pieceSet[c]}/${c}${p.toUpperCase()}.png`;
-  const place = (img, sq) => { const f = sq.charCodeAt(0) - 97, r = +sq[1] - 1; img.style.transform = `translate(${f * 100}%, ${(7 - r) * 100}%)`; img.dataset.sq = sq; };
-  const setup = () => {
+  const place = (img, sq) => { const f = sq.charCodeAt(0) - 97, r = +sq[1] - 1; img.style.transform = `translate(${f * 100}%, ${(7 - r) * 100}%)`; img.style.setProperty('--k', f + 7 - r); img.dataset.sq = sq; };
+  const setup = (intro) => {
     layer.textContent = '';
+    marks.hidden = true;
     at = new Map();
     START.split('/').forEach((row, ri) => {
       let f = 0;
@@ -37,6 +48,7 @@
         img.dataset.p = ch.toLowerCase();
         img.src = src(c, img.dataset.p);
         img.draggable = false;
+        if (intro) { img.classList.add('set'); img.style.setProperty('--d', `${0.55 + (c === 'w' ? 7 - ri : ri) * 0.09 + Math.abs(f - 3.5) * 0.03}s`); img.addEventListener('animationend', () => img.classList.remove('set'), { once: true }); }
         const sq = String.fromCharCode(97 + f) + (8 - ri);
         place(img, sq);
         layer.append(img);
@@ -45,6 +57,9 @@
       }
     });
   };
+  // Last move: its two squares light up under the pieces.
+  const marks = $('marks');
+  const mark = (from, to) => { marks.hidden = original; [from, to].forEach((sq, i) => { marks.children[i].style.cssText = `left:${(sq.charCodeAt(0) - 97) * 12.5}%;top:${(8 - +sq[1]) * 12.5}%`; }); };
   const repaintPieces = () => { for (const img of layer.children) img.src = src(img.className.includes('w') ? 'w' : 'b', img.dataset.p); };
 
   // ---------- board: the shader (the extension's own GLSL from assets/shaders.js) ----------
@@ -64,14 +79,14 @@
     return true;
   };
   const prog = (name) => {
-    if (progs[name]) return progs[name];
+    if (name in progs) return progs[name];
     const sh = (type, s) => { const x = gl.createShader(type); gl.shaderSource(x, s); gl.compileShader(x); return x; };
     const p = gl.createProgram();
     gl.attachShader(p, sh(gl.VERTEX_SHADER, VS));
     gl.attachShader(p, sh(gl.FRAGMENT_SHADER, CX.SHADERS.common + CX.SHADERS[name]));
     gl.bindAttribLocation(p, 0, 'p');
     gl.linkProgram(p);
-    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) return null;
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) return (progs[name] = null);
     const u = {};
     for (const k of ['t', 'res', 'flip', 'cL', 'cD']) u[k] = gl.getUniformLocation(p, k);
     return (progs[name] = { p, u });
@@ -143,12 +158,14 @@
   const play = () => {
     timer = 0;
     if (paused) return;
-    if (step >= D.demo.length) { step = 0; timer = setTimeout(() => { setup(); play(); }, 3500); return; }
+    if (!visible || document.hidden) { timer = setTimeout(play, 700); return; }
+    if (step >= D.demo.length) { timer = setTimeout(() => { step = 0; setup(!rm.matches); timer = setTimeout(play, rm.matches ? 0 : 1700); }, 3500); return; }
     const m = D.demo[step++];
     if (m.captured && at.has(m.to)) { const v = at.get(m.to); v.classList.add('gone'); setTimeout(() => v.remove(), 300); burst(m.to, 26, 1.4); }
     const img = at.get(m.from);
     at.delete(m.from);
     place(img, m.to);
+    mark(m.from, m.to);
     at.set(m.to, img);
     if (m.rook) { const r = at.get(m.rook[0]); at.delete(m.rook[0]); place(r, m.rook[1]); at.set(m.rook[1], r); }
     if (m.promo) { img.dataset.p = m.promo; img.src = src(m.color, m.promo); }
@@ -170,7 +187,9 @@
     $('applyMsg').textContent = '';
     board.setAttribute('aria-label', `Live preview of the ${label || l.name} look playing the Opera Game`);
     if (original) setOriginal(false); else { repaintPieces(); draw(); }
+    if (!rm.matches) { board.classList.remove('swap'); void board.offsetWidth; board.classList.add('swap'); }
   };
+  board.addEventListener('animationend', (e) => { if (e.target === board) board.classList.remove('swap'); });
   const chips = $('chips');
   for (const l of D.looks) {
     const b = document.createElement('button');
@@ -206,6 +225,7 @@
     $('mOriginal').setAttribute('aria-pressed', String(on));
     $('mFx').setAttribute('aria-pressed', String(!on));
     parts = []; rings = []; g.clearRect(0, 0, fx.width, fx.height);
+    if (on) marks.hidden = true;
     repaintPieces();
     sync();
   };
@@ -241,8 +261,9 @@
   for (const c of D.credits) { const li = document.createElement('li'); li.textContent = `${c.set}: ${c.licence}`; $('creditList').append(li); }
 
   // ---------- start: poster first, shader when the page is idle ----------
-  setup();
+  setup(!rm.matches);
   applyLook(look);
-  const start = () => { if (initGL()) draw(); setPaused(paused); };
+  board.classList.remove('swap');
+  const start = () => { if (initGL()) draw(); if (paused) setPaused(true); else { sync(); timer = setTimeout(play, 1600); } };
   if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 1200 }); else setTimeout(start, 300);
 })();
