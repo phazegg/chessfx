@@ -262,6 +262,9 @@
   };
   board.addEventListener('animationend', (e) => { if (e.target === board && e.animationName === 'sweep') board.classList.remove('swap'); });
   $('heroPiece').addEventListener('animationend', (e) => { if (e.animationName === 'pop') e.target.classList.remove('swap'); });
+  // After picking a board or piece set further down: bring the board itself into view (on phones the hero's top is
+  // the headline, far above the board).
+  const showBoard = () => $('board').scrollIntoView({ behavior: rm.matches ? 'auto' : 'smooth', block: 'center' });
   const share = () => {
     const base = D.looks.find((x) => x.id === look.id) || D.looks[0];
     const u = new URL(location.href);
@@ -294,7 +297,7 @@
       for (const c of chips.children) c.setAttribute('aria-pressed', 'false');
       applyLook({ ...look, board: bd.id, L: bd.L, D: bd.D }, bd.name);
       share();
-      $('top').scrollIntoView({ behavior: rm.matches ? 'auto' : 'smooth' });
+      showBoard();
     });
     t.addEventListener('pointerenter', (e) => { if (e.pointerType !== 'touch') tileLive(t, bd); });
     t.addEventListener('pointerleave', () => tileLive(null));
@@ -317,7 +320,7 @@
       pieceOverride = id;
       applyLook(look, look.label);
       share();
-      $('top').scrollIntoView({ behavior: rm.matches ? 'auto' : 'smooth' });
+      showBoard();
     });
     setsBox.append(b);
   }
