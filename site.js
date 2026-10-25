@@ -17,6 +17,8 @@
   }
   if (!store) {
     $('getNote').textContent = 'ChessFX is launching soon on the Chrome Web Store. Free, cosmetic only, and ready in one click.';
+    const heroGet = document.querySelector('.ctas [data-store]');
+    heroGet.textContent = 'Coming soon to Chrome';
     const soon = document.createElement('p');
     soon.className = 'soon';
     soon.textContent = 'Coming soon to Chrome';
@@ -61,7 +63,7 @@
   };
   // Last move: its two squares light up under the pieces.
   const marks = $('marks');
-  const mark = (from, to) => { marks.hidden = original; [from, to].forEach((sq, i) => { marks.children[i].style.cssText = `left:${(sq.charCodeAt(0) - 97) * 12.5}%;top:${(8 - +sq[1]) * 12.5}%`; }); };
+  const mark = (from, to) => { marks.hidden = original; [from, to].forEach((sq, i) => { marks.children[i].style.transform = `translate(${(sq.charCodeAt(0) - 97) * 100}%, ${(8 - +sq[1]) * 100}%)`; }); };
   const repaintPieces = () => { for (const img of layer.children) img.src = src(img.className.includes('w') ? 'w' : 'b', img.dataset.p); };
 
   // ---------- board: the shader (the extension's own GLSL from assets/shaders.js) ----------
@@ -156,14 +158,16 @@
   };
 
   // ---------- the demo game (Morphy's Opera Game), looped ----------
+  const cap = $('moveCap');
   let step = 0, timer = 0;
   const kingOf = (color) => [...at].find(([, img]) => img.dataset.p === 'k' && img.classList.contains(color))?.[0];
   const play = () => {
     timer = 0;
     if (paused) return;
     if (!visible || document.hidden) { timer = setTimeout(play, 700); return; }
-    if (step >= D.demo.length) { timer = setTimeout(() => { step = 0; setup(!rm.matches); timer = setTimeout(play, rm.matches ? 0 : 1700); }, 3500); return; }
+    if (step >= D.demo.length) { timer = setTimeout(() => { step = 0; cap.textContent = 'Opera Game, Paris 1858'; setup(!rm.matches); timer = setTimeout(play, rm.matches ? 0 : 1700); }, 3500); return; }
     const m = D.demo[step++];
+    cap.textContent = `Opera Game, move ${Math.ceil(step / 2)} of ${Math.ceil(D.demo.length / 2)}`;
     if (m.captured && at.has(m.to)) { const v = at.get(m.to); v.classList.add('gone'); setTimeout(() => v.remove(), 300); burst(m.to, 26, 1.4); }
     const img = at.get(m.from);
     at.delete(m.from);
@@ -197,6 +201,12 @@
   };
   board.addEventListener('animationend', (e) => { if (e.target === board && e.animationName === 'sweep') board.classList.remove('swap'); });
   $('heroPiece').addEventListener('animationend', (e) => { if (e.animationName === 'pop') e.target.classList.remove('swap'); });
+  const share = (lookId, boardId) => {
+    const u = new URL(location.href);
+    u.searchParams.set('look', lookId);
+    if (boardId) u.searchParams.set('board', boardId); else u.searchParams.delete('board');
+    history.replaceState(history.state, '', u);
+  };
   const chips = $('chips');
   for (const l of D.looks) {
     const b = document.createElement('button');
@@ -205,7 +215,7 @@
     b.innerHTML = `<img src="assets/boards/${l.board}.jpg" alt="" loading="lazy" width="30" height="30"><span></span>`;
     b.querySelector('span').textContent = l.name;
     b.setAttribute('aria-pressed', String(l === look));
-    b.addEventListener('click', () => { for (const c of chips.children) c.setAttribute('aria-pressed', String(c === b)); applyLook(l); });
+    b.addEventListener('click', () => { for (const c of chips.children) c.setAttribute('aria-pressed', String(c === b)); applyLook(l); share(l.id); });
     chips.append(b);
   }
   const gal = $('gallery');
@@ -219,6 +229,7 @@
     t.addEventListener('click', () => {
       for (const c of chips.children) c.setAttribute('aria-pressed', 'false');
       applyLook({ ...look, board: bd.id, L: bd.L, D: bd.D }, bd.name);
+      share(look.id, bd.id);
       $('top').scrollIntoView({ behavior: rm.matches ? 'auto' : 'smooth' });
     });
     gal.append(t);
@@ -269,7 +280,12 @@
 
   // ---------- start: poster first, shader when the page is idle ----------
   setup(!rm.matches);
-  applyLook(look);
+  // A shared link (?look=inferno, optionally &board=lava) opens on that look.
+  const q = new URLSearchParams(location.search);
+  const qLook = D.looks.find((l) => l.id === q.get('look')), qBoard = D.boards.find((bd) => bd.id === q.get('board'));
+  if (qLook) { look = qLook; pieceSet = { w: look.white, b: look.black }; for (const [i, c] of [...chips.children].entries()) c.setAttribute('aria-pressed', String(D.looks[i] === look && !qBoard)); }
+  if (qBoard) for (const c of chips.children) c.setAttribute('aria-pressed', 'false');
+  if (qBoard) applyLook({ ...look, board: qBoard.id, L: qBoard.L, D: qBoard.D }, qBoard.name); else applyLook(look);
   board.classList.remove('swap'); $('heroPiece').classList.remove('swap');
   const start = () => { if (initGL()) draw(); clearTimeout(timer); if (paused) setPaused(true); else { sync(); timer = setTimeout(play, 1600); } };
   if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 1200 }); else setTimeout(start, 300);

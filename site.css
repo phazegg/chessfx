@@ -228,7 +228,7 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 
 /* Last move: the two squares glow under the pieces and glide to each new move. */
 .marks { pointer-events: none; }
-.marks i { position: absolute; width: 12.5%; height: 12.5%; background: color-mix(in srgb, var(--glow-w, #fff) 30%, rgb(255 214 64 / .18)); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--glow-w, #fff) 70%, transparent), inset 0 0 0 3px rgb(0 0 0 / .28); transition: left .32s cubic-bezier(.2, .8, .2, 1), top .32s cubic-bezier(.2, .8, .2, 1); }
+.marks i { position: absolute; width: 12.5%; height: 12.5%; background: color-mix(in srgb, var(--glow-w, #fff) 30%, rgb(255 214 64 / .18)); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--glow-w, #fff) 70%, transparent), inset 0 0 0 3px rgb(0 0 0 / .28); left: 0; top: 0; transition: transform .32s cubic-bezier(.2, .8, .2, 1); }
 
 /* ===== The one orchestrated moment: the page loads ===== */
 /* Headline lines rise in turn while the board card settles in, the pieces set up rank by rank, the knight lands. */
@@ -315,3 +315,19 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 @media (max-width: 380px) { .stats-row { gap: 16px; } .stats-row span { font-size: 12px; } }
 /* Phones: no knight, so the caption bar needs no room for it. */
 @media (max-width: 620px) { .stage .board-bar { padding-left: 4px; } }
+
+/* ===== UX research pass (council-approved) ===== */
+/* No announcement bar any more: the hero fills the screen under the 65px header. */
+.hero { min-height: calc(100vh - 65px); }
+/* The header keeps its height while the account buttons load (they used to push the page down 11px). */
+.acct { min-height: 40px; }
+/* What it is, right where people decide. */
+.ctas-note { margin: 14px 0 0; color: var(--cfx-text-2); font-size: 14px; }
+.js .hero-copy > :nth-child(6) { animation-delay: .44s; }
+/* The look name, with what the board is playing underneath (fixed height: no shift as the move count changes). */
+.look-name { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
+.look-name small { min-height: 1.2em; color: var(--cfx-text-3); font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 380px) { .look-name small { font-size: 11px; } }
+/* Grid columns may shrink below their content's longest unbreakable line (the caption), so nothing is pushed off-screen. */
+.hero { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); }
+@media (max-width: 920px) { .hero { grid-template-columns: minmax(0, 1fr); } }

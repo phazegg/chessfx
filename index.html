@@ -16,8 +16,8 @@
 <link rel="icon" href="assets/icon.png">
 <script>document.documentElement.classList.add('js')</script>
 <link rel="preload" as="image" href="assets/boards/galaxy.jpg" fetchpriority="high">
-<link rel="stylesheet" href="assets/tokens.css?v=3">
-<link rel="stylesheet" href="site.css?v=3">
+<link rel="stylesheet" href="assets/tokens.css?v=4">
+<link rel="stylesheet" href="site.css?v=4">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"SoftwareApplication","name":"ChessFX","applicationCategory":"BrowserApplication","operatingSystem":"Chrome, Edge, Brave","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Animated boards, piece sets, effects and sounds for Chess.com. Cosmetic only."}
 </script>
@@ -31,7 +31,6 @@
   </nav>
   <div class="acct" id="acct"></div>
 </header>
-<p class="announce">Every board, piece set and sound pack is free. No paywall, nothing to configure. <a href="#how">How it works</a></p>
 
 <main id="main">
   <!-- Hero: the product itself, live. -->
@@ -44,6 +43,7 @@
         <a class="btn btn-go btn-lg" href="#looks">Find your look <span aria-hidden="true">↗</span></a>
         <a class="btn btn-ghost btn-lg" data-store href="#get">Get the extension</a>
       </div>
+      <p class="ctas-note">A browser extension for Chrome, Edge and Brave. Cosmetic only: it never touches your moves.</p>
       <ul class="stats-row" aria-label="At a glance">
         <li><b>21</b><span>animated boards</span></li>
         <li><b>40+</b><span>piece sets</span></li>
@@ -52,8 +52,8 @@
     </div>
 
     <div class="stage" aria-label="Live preview">
-      <div class="glow" aria-hidden="true"></div>
       <div class="board-wrap">
+      <div class="glow" aria-hidden="true"></div>
       <figure class="board-card">
         <div class="board" id="board" role="img" aria-label="Live preview of the Cosmic look playing the Opera Game">
           <img class="poster" id="poster" src="assets/boards/galaxy.jpg" alt="" width="800" height="800" fetchpriority="high">
@@ -64,7 +64,7 @@
           <canvas id="fx" aria-hidden="true"></canvas>
         </div>
         <figcaption class="board-bar">
-          <span id="lookName" class="look-name">Cosmic</span>
+          <span class="look-name"><span id="lookName">Cosmic</span><small id="moveCap" aria-hidden="true">Opera Game, Paris 1858</small></span>
           <span class="seg" role="group" aria-label="Compare">
             <button type="button" id="mOriginal" aria-pressed="false">Original</button>
             <button type="button" id="mFx" aria-pressed="true">ChessFX</button>
@@ -165,13 +165,13 @@
   <details id="credits" class="credits"><summary>Credits and licences</summary><p>Piece sets shown on this page come from the Lichess project and their authors:</p><ul id="creditList"></ul></details>
 </footer>
 
-<script src="assets/data.js?v=3"></script>
-<script src="assets/shaders.js?v=3"></script>
-<script src="assets/catalog.js?v=3"></script>
-<script src="assets/presets.js?v=3"></script>
-<script src="assets/settings.js?v=3"></script>
-<script src="assets/cloud-config.js?v=3"></script>
-<script src="auth.js?v=3"></script>
-<script src="site.js?v=3" defer></script>
+<script src="assets/data.js?v=4"></script>
+<script src="assets/shaders.js?v=4"></script>
+<script src="assets/catalog.js?v=4"></script>
+<script src="assets/presets.js?v=4"></script>
+<script src="assets/settings.js?v=4"></script>
+<script src="assets/cloud-config.js?v=4"></script>
+<script src="auth.js?v=4"></script>
+<script src="site.js?v=4" defer></script>
 </body>
 </html>

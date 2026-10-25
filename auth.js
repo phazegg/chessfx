@@ -173,7 +173,7 @@ window.CX_WEB.ready = /[#?&](access_token|code|error)=/.test(location.href) ? Pr
 (async () => {
   const box = document.getElementById('acct');
   if (!box) return;
-  if (!window.CX_WEB.enabled()) { box.innerHTML = '<a class="btn btn-go nav-cta" data-store href="index.html#get">Add to Chrome, free</a>'; return; }
+  if (!window.CX_WEB.enabled()) { box.innerHTML = '<a class="btn btn-go nav-cta" href="index.html#get">Get ChessFX</a>'; return; }
   const u = await window.CX_WEB.ready;
   if (await window.CX_WEB.extension()) {
     const b = document.createElement('button');
