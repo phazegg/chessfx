@@ -34,7 +34,11 @@
   // ---------- board: pieces ----------
   const board = $('board'), layer = $('pieces');
   const START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
-  let look = D.looks[0], at = new Map(), pieceSet = { w: look.white, b: look.black }, original = false;
+  let look = D.looks[0], at = new Map(), pieceSet = { w: look.white, b: look.black }, original = false, pieceOverride = null;
+  const SETS = [...new Set(D.looks.map((l) => l.white))];
+  const setName = (id) => (id === 'cburnett' ? 'Classic' : id.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()));
+  // What the board shows, in words: the look (or gallery board), plus the piece set when it was picked separately.
+  const title = () => (look.label || look.name) + (pieceOverride ? ` · ${setName(pieceOverride)} pieces` : '');
   const src = (c, p) => `assets/pieces/${original ? 'cburnett' : pieceSet[c]}/${c}${p.toUpperCase()}.png`;
   const place = (img, sq) => { const f = sq.charCodeAt(0) - 97, r = +sq[1] - 1; img.style.transform = `translate(${f * 100}%, ${(7 - r) * 100}%)`; img.style.setProperty('--k', f + 7 - r); img.dataset.sq = sq; };
   const setup = (intro) => {
@@ -182,17 +186,75 @@
     timer = setTimeout(play, m.mate ? 1800 : 1050);
   };
 
+  // ---------- gallery: the pointed-at tile plays its board live ----------
+  let lastPointer = '';
+  const tcv = document.createElement('canvas');
+  tcv.className = 'tile-live';
+  tcv.setAttribute('aria-hidden', 'true');
+  let tgl = null, tprogs = {}, tRaf = 0, tBoard = null, tT = 0, tLast = 0;
+  const tileGL = () => {
+    if (tgl) return tgl;
+    try { tgl = tcv.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'low-power' }); } catch (e) { tgl = null; }
+    if (!tgl) return null;
+    const b = tgl.createBuffer();
+    tgl.bindBuffer(tgl.ARRAY_BUFFER, b);
+    tgl.bufferData(tgl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), tgl.STATIC_DRAW);
+    tgl.enableVertexAttribArray(0);
+    tgl.vertexAttribPointer(0, 2, tgl.FLOAT, false, 0, 0);
+    tcv.addEventListener('webglcontextlost', (e) => { e.preventDefault(); tgl = null; tprogs = {}; });
+    return tgl;
+  };
+  const tprog = (name) => {
+    if (name in tprogs) return tprogs[name];
+    const sh = (type, src0) => { const x = tgl.createShader(type); tgl.shaderSource(x, src0); tgl.compileShader(x); return x; };
+    const p = tgl.createProgram();
+    tgl.attachShader(p, sh(tgl.VERTEX_SHADER, VS));
+    tgl.attachShader(p, sh(tgl.FRAGMENT_SHADER, CX.SHADERS.common + CX.SHADERS[name]));
+    tgl.bindAttribLocation(p, 0, 'p');
+    tgl.linkProgram(p);
+    if (!tgl.getProgramParameter(p, tgl.LINK_STATUS)) return (tprogs[name] = null);
+    const u = {};
+    for (const k of ['t', 'res', 'flip', 'cL', 'cD']) u[k] = tgl.getUniformLocation(p, k);
+    return (tprogs[name] = { p, u });
+  };
+  const tileFrame = (now) => {
+    tRaf = 0;
+    if (!tBoard || !tgl) return;
+    const pr = tprog(tBoard.id);
+    if (!pr) return;
+    tT += Math.min(now - (tLast || now), 100) / 1000; tLast = now;
+    tgl.viewport(0, 0, tcv.width, tcv.height);
+    tgl.useProgram(pr.p);
+    tgl.uniform1f(pr.u.t, tT); tgl.uniform2f(pr.u.res, tcv.width, tcv.height); tgl.uniform1f(pr.u.flip, 0);
+    tgl.uniform3fv(pr.u.cL, rgb(tBoard.L)); tgl.uniform3fv(pr.u.cD, rgb(tBoard.D));
+    tgl.drawArrays(tgl.TRIANGLES, 0, 3);
+    tcv.classList.add('on');
+    tRaf = requestAnimationFrame(tileFrame);
+  };
+  const tileLive = (tile, bd) => {
+    cancelAnimationFrame(tRaf); tRaf = 0; tBoard = null; tcv.classList.remove('on');
+    if (!tile || rm.matches || !tileGL()) { tcv.remove(); return; }
+    const img = tile.querySelector('img'), px = Math.round(img.clientWidth * Math.min(devicePixelRatio || 1, 1.5));
+    if (tcv.width !== px) tcv.width = tcv.height = px;
+    tile.prepend(tcv);
+    tBoard = bd; tT = 37; tLast = 0;
+    tRaf = requestAnimationFrame(tileFrame);
+  };
+
   // ---------- looks: chips under the board, and the full gallery ----------
   const applyLook = (l, label) => {
     look = { ...l, label: label || l.name };
-    pieceSet = { w: l.white, b: l.black };
+    if (pieceOverride === l.white) pieceOverride = null;
+    pieceSet = pieceOverride ? { w: pieceOverride, b: pieceOverride } : { w: l.white, b: l.black };
     board.style.setProperty('--glow-w', l.glowW);
     board.style.setProperty('--glow-b', l.glowB);
     $('poster').src = `assets/boards/${l.board}.jpg`;
-    $('lookName').textContent = label || l.name;
-    $('heroPiece').src = `assets/pieces/${l.white}/wN.png`;
+    $('lookName').textContent = title();
+    $('heroPiece').src = `assets/pieces/${pieceSet.w}/wN.png`;
     $('applyMsg').textContent = '';
-    board.setAttribute('aria-label', `Live preview of the ${label || l.name} look playing the Opera Game`);
+    board.setAttribute('aria-label', `Live preview of the ${title()} look playing the Opera Game`);
+    cmpPaint();
+    for (const c of $('sets').children) c.setAttribute('aria-pressed', String(c.dataset.set === pieceSet.w));
     if (original) setOriginal(false); else { repaintPieces(); draw(); }
     if (!rm.matches) {
       for (const i of layer.children) i.classList.remove('set');
@@ -201,10 +263,15 @@
   };
   board.addEventListener('animationend', (e) => { if (e.target === board && e.animationName === 'sweep') board.classList.remove('swap'); });
   $('heroPiece').addEventListener('animationend', (e) => { if (e.animationName === 'pop') e.target.classList.remove('swap'); });
-  const share = (lookId, boardId) => {
+  // After picking a board or piece set further down: bring the board itself into view (on phones the hero's top is
+  // the headline, far above the board).
+  const showBoard = () => $('board').scrollIntoView({ behavior: rm.matches ? 'auto' : 'smooth', block: 'center' });
+  const share = () => {
+    const base = D.looks.find((x) => x.id === look.id) || D.looks[0];
     const u = new URL(location.href);
-    u.searchParams.set('look', lookId);
-    if (boardId) u.searchParams.set('board', boardId); else u.searchParams.delete('board');
+    u.searchParams.set('look', base.id);
+    if (look.board !== base.board) u.searchParams.set('board', look.board); else u.searchParams.delete('board');
+    if (pieceOverride) u.searchParams.set('pieces', pieceOverride); else u.searchParams.delete('pieces');
     u.hash = '';
     history.replaceState(history.state, '', u);
   };
@@ -216,7 +283,7 @@
     b.innerHTML = `<img src="assets/boards/${l.board}.jpg" alt="" loading="lazy" width="30" height="30"><span></span>`;
     b.querySelector('span').textContent = l.name;
     b.setAttribute('aria-pressed', String(l === look));
-    b.addEventListener('click', () => { for (const c of chips.children) c.setAttribute('aria-pressed', String(c === b)); applyLook(l); share(l.id); });
+    b.addEventListener('click', () => { for (const c of chips.children) c.setAttribute('aria-pressed', String(c === b)); pieceOverride = null; applyLook(l); share(); });
     chips.append(b);
   }
   const gal = $('gallery');
@@ -230,16 +297,82 @@
     t.addEventListener('click', () => {
       for (const c of chips.children) c.setAttribute('aria-pressed', 'false');
       applyLook({ ...look, board: bd.id, L: bd.L, D: bd.D }, bd.name);
-      share(look.id, bd.id);
-      $('top').scrollIntoView({ behavior: rm.matches ? 'auto' : 'smooth' });
+      share();
+      tileLive(null);
+      showBoard();
     });
+    t.addEventListener('pointerdown', (e) => { lastPointer = e.pointerType; });
+    t.addEventListener('pointerenter', (e) => { if (e.pointerType !== 'touch') tileLive(t, bd); });
+    t.addEventListener('pointerleave', () => tileLive(null));
+    t.addEventListener('focus', () => { if (lastPointer !== 'touch') tileLive(t, bd); });
+    t.addEventListener('blur', () => tileLive(null));
     gal.append(t);
   }
+
+  // ---------- piece sets: try any of them on the hero board ----------
+  const setsBox = $('sets');
+  for (const id of SETS) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'set';
+    b.dataset.set = id;
+    b.innerHTML = '<span class="set-row" aria-hidden="true">' + ['wK', 'wQ', 'wN', 'bN', 'bQ', 'bK'].map((p) => `<img src="assets/pieces/${id}/${p}.png" alt="" loading="lazy" width="64" height="64">`).join('') + '</span><b></b>';
+    b.querySelector('b').textContent = setName(id);
+    b.setAttribute('aria-label', `Try the ${setName(id)} pieces on the preview`);
+    b.addEventListener('click', () => {
+      pieceOverride = id;
+      applyLook(look, look.label);
+      share();
+      showBoard();
+    });
+    setsBox.append(b);
+  }
+
+  // ---------- before and after: the Opera Game after 13 moves, on Chess.com's board and on the chosen look ----------
+  const cmp = $('cmp'), cmpRange = $('cmpRange');
+  const cmpPos = (() => {
+    const m = new Map();
+    START.split('/').forEach((row, ri) => { let f = 0; for (const ch of row) { if (/\d/.test(ch)) { f += +ch; continue; } m.set(String.fromCharCode(97 + f) + (8 - ri), ch); f++; } });
+    for (const mv of D.demo.slice(0, 26)) {
+      m.set(mv.to, mv.promo ? (mv.color === 'w' ? mv.promo.toUpperCase() : mv.promo) : m.get(mv.from)); m.delete(mv.from);
+      if (mv.rook) { m.set(mv.rook[1], m.get(mv.rook[0])); m.delete(mv.rook[0]); }
+    }
+    return m;
+  })();
+  const cmpFill = (box, set) => {
+    box.textContent = '';
+    for (const [sq, ch] of cmpPos) {
+      const c = ch === ch.toUpperCase() ? 'w' : 'b', img = document.createElement('img');
+      img.alt = ''; img.className = c; img.draggable = false; img.loading = 'lazy';
+      img.src = `assets/pieces/${set[c]}/${c}${ch.toUpperCase()}.png`;
+      img.style.transform = `translate(${(sq.charCodeAt(0) - 97) * 100}%, ${(8 - +sq[1]) * 100}%)`;
+      box.append(img);
+    }
+  };
+  cmpFill($('cmpOrig'), { w: 'cburnett', b: 'cburnett' });
+  function cmpPaint() {
+    $('cmpPoster').src = `assets/boards/${look.board}.jpg`;
+    $('cmpTag').textContent = look.label || look.name;
+    cmp.style.setProperty('--glow-w', look.glowW); cmp.style.setProperty('--glow-b', look.glowB);
+    cmpFill($('cmpFx'), pieceSet);
+  }
+  let cmpTouched = false;
+  const cmpSet = (v) => { cmp.style.setProperty('--pos', v + '%'); cmpRange.value = v; };
+  cmpRange.addEventListener('input', () => { cmpTouched = true; cmpSet(+cmpRange.value); });
+  // One reveal when it first scrolls into view: the divider sweeps across and settles in the middle.
+  new IntersectionObserver(([e], o) => {
+    if (!e.isIntersecting) return;
+    o.disconnect();
+    if (rm.matches || cmpTouched) return;
+    const t0 = performance.now();
+    const step = (now) => { if (cmpTouched) return; const k = Math.min(1, (now - t0) / 1400), ease = 1 - Math.pow(1 - k, 3); cmpSet(Math.round(88 - 38 * ease)); if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  }, { threshold: 0.6 }).observe(cmp);
 
   // ---------- Original vs ChessFX, and pause ----------
   const setOriginal = (on) => {
     original = on;
-    $('lookName').textContent = on ? 'Without ChessFX' : look.label || look.name;
+    $('lookName').textContent = on ? 'Without ChessFX' : title();
     board.classList.toggle('original', on);
     $('mOriginal').setAttribute('aria-pressed', String(on));
     $('mFx').setAttribute('aria-pressed', String(!on));
@@ -269,9 +402,9 @@
       const base = D.looks.find((x) => x.id === look.id) || D.looks[0];
       $('applyMsg').textContent = 'Applying…';
       try {
-        await CX_WEB.applyLook(base.id, look.board !== base.board ? look.board : null);
+        await CX_WEB.applyLook(base.id, look.board !== base.board ? look.board : null, pieceOverride);
         const live = await CX_WEB.syncExtension();
-        $('applyMsg').textContent = `${look.label || look.name} is now your look.` + (live ? ' ChessFX in this browser has switched to it.' : ' Open the ChessFX toolbar popup to sync it now.');
+        $('applyMsg').textContent = `${title()} is now your look.` + (live ? ' ChessFX in this browser has switched to it.' : ' Open the ChessFX toolbar popup to sync it now.');
       } catch (e) { $('applyMsg').textContent = e.message; }
     });
   });
@@ -283,7 +416,9 @@
   // A shared link (?look=inferno, optionally &board=lava) opens on that look.
   const q = new URLSearchParams(location.search);
   const qLook = D.looks.find((l) => l.id === q.get('look')), qBoard = D.boards.find((bd) => bd.id === q.get('board'));
-  if (qLook) { look = qLook; pieceSet = { w: look.white, b: look.black }; for (const [i, c] of [...chips.children].entries()) c.setAttribute('aria-pressed', String(D.looks[i] === look && !qBoard)); }
+  if (SETS.includes(q.get('pieces'))) pieceOverride = q.get('pieces');
+  if (qLook) { look = qLook; pieceSet = pieceOverride ? { w: pieceOverride, b: pieceOverride } : { w: look.white, b: look.black }; for (const [i, c] of [...chips.children].entries()) c.setAttribute('aria-pressed', String(D.looks[i] === look && !qBoard)); }
+  if (pieceOverride && !qLook) pieceSet = { w: pieceOverride, b: pieceOverride };
   setup(!rm.matches);
   if (qBoard) for (const c of chips.children) c.setAttribute('aria-pressed', 'false');
   if (qBoard) applyLook({ ...look, board: qBoard.id, L: qBoard.L, D: qBoard.D }, qBoard.name); else applyLook(look);
