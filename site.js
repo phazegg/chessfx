@@ -17,8 +17,10 @@
   }
   if (!store) {
     $('getNote').textContent = 'ChessFX is launching soon on the Chrome Web Store. Free, cosmetic only, and ready in one click.';
-    const fin = document.querySelector('#get [data-store]');
-    fin.textContent = 'Coming soon to Chrome'; fin.classList.replace('btn-go', 'btn-ghost'); fin.removeAttribute('href'); fin.setAttribute('aria-disabled', 'true');
+    const soon = document.createElement('p');
+    soon.className = 'soon';
+    soon.textContent = 'Coming soon to Chrome';
+    document.querySelector('#get [data-store]').replaceWith(soon);
   }
 
   // The header gains a solid edge once the page scrolls under it.
@@ -187,9 +189,13 @@
     $('applyMsg').textContent = '';
     board.setAttribute('aria-label', `Live preview of the ${label || l.name} look playing the Opera Game`);
     if (original) setOriginal(false); else { repaintPieces(); draw(); }
-    if (!rm.matches) { board.classList.remove('swap'); void board.offsetWidth; board.classList.add('swap'); }
+    if (!rm.matches) {
+      for (const i of layer.children) i.classList.remove('set');
+      for (const el of [board, $('heroPiece')]) { el.classList.remove('swap'); void el.offsetWidth; el.classList.add('swap'); }
+    }
   };
-  board.addEventListener('animationend', (e) => { if (e.target === board) board.classList.remove('swap'); });
+  board.addEventListener('animationend', (e) => { if (e.target === board && e.animationName === 'sweep') board.classList.remove('swap'); });
+  $('heroPiece').addEventListener('animationend', (e) => { if (e.animationName === 'pop') e.target.classList.remove('swap'); });
   const chips = $('chips');
   for (const l of D.looks) {
     const b = document.createElement('button');
@@ -263,7 +269,7 @@
   // ---------- start: poster first, shader when the page is idle ----------
   setup(!rm.matches);
   applyLook(look);
-  board.classList.remove('swap');
-  const start = () => { if (initGL()) draw(); if (paused) setPaused(true); else { sync(); timer = setTimeout(play, 1600); } };
+  board.classList.remove('swap'); $('heroPiece').classList.remove('swap');
+  const start = () => { if (initGL()) draw(); clearTimeout(timer); if (paused) setPaused(true); else { sync(); timer = setTimeout(play, 1600); } };
   if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 1200 }); else setTimeout(start, 300);
 })();
