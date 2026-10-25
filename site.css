@@ -37,8 +37,6 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 .facts li::before { content: '✓'; margin-right: 8px; color: var(--cfx-accent); font-weight: 800; }
 
 .stage { display: flex; flex-direction: column; gap: 14px; }
-.board-card { margin: 0; padding: 12px; border-radius: 22px; background: var(--cfx-ink-1); border: 1px solid var(--cfx-glass-line, var(--cfx-line)); box-shadow: 0 40px 90px -40px rgba(0, 0, 0, .9), var(--cfx-glass-hi, none); }
-.board { position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: #1e1946; }
 .board > * { position: absolute; inset: 0; width: 100%; height: 100%; }
 .poster { object-fit: cover; }
 #shader { opacity: 0; transition: opacity .5s; }
@@ -46,11 +44,6 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 .flat { display: none; background: repeating-conic-gradient(#769656 0 25%, #eeeed2 0 50%) 0 0 / 25% 25%; }
 .board.original .flat { display: block; }
 .board.original #shader, .board.original .poster { visibility: hidden; }
-.pieces img { position: absolute; left: 0; top: 0; width: 12.5%; height: 12.5%; transition: transform .32s cubic-bezier(.2, .8, .2, 1), opacity .25s; will-change: transform; }
-.pieces img.w { filter: drop-shadow(0 0 4px var(--glow-w, transparent)); }
-.pieces img.b { filter: drop-shadow(0 0 4px var(--glow-b, transparent)); }
-.board.original .pieces img { filter: none; }
-.pieces img.gone { opacity: 0; }
 #fx { pointer-events: none; }
 .board-bar { display: flex; align-items: center; gap: 12px; padding: 12px 4px 2px; }
 .look-name { font-weight: 800; font-size: 17px; margin-right: auto; }
@@ -112,7 +105,6 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 }
 @media (max-width: 620px) {
   .nav nav { display: none; }
-  .nav-cta { margin-left: auto; }
   .steps ol, .grid { grid-template-columns: 1fr; }
   .gallery { grid-template-columns: repeat(2, 1fr); }
   .lede { font-size: 17px; }
@@ -120,7 +112,7 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .pieces img, .tile, #shader { transition: none; }
+  .tile, #shader { transition: none; }
   .tile:hover { transform: none; }
 }
 @media (forced-colors: active) { .btn, .chip, .card, .tile, .checks, .faq details { border: 1px solid CanvasText; } }
@@ -140,8 +132,6 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 .linkbtn:hover, .nav-link:hover { color: var(--cfx-text); }
 .me { display: inline-flex; align-items: center; gap: 8px; color: var(--cfx-text); font-weight: 700; font-size: 15px; text-decoration: none; }
 .me i { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--cfx-go); color: var(--cfx-on-go); font-style: normal; font-weight: 800; }
-.announce { margin: 0; padding: 9px 20px; text-align: center; font-size: 14px; color: var(--cfx-text-2); background: color-mix(in srgb, var(--cfx-go) 18%, var(--cfx-ink-0)); border-bottom: 1px solid color-mix(in srgb, var(--cfx-accent) 35%, transparent); }
-.announce a { margin-left: 10px; color: var(--cfx-text); font-weight: 700; }
 
 .hero { min-height: calc(100vh - 110px); padding-top: 48px; padding-bottom: 48px; }
 .eyebrow.line { display: flex; align-items: center; gap: 12px; }
@@ -151,14 +141,6 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 .stats-row li { display: flex; align-items: baseline; gap: 8px; color: var(--cfx-text-2); font-size: 14px; }
 .stats-row b { color: var(--cfx-accent); font-size: 28px; font-weight: 900; letter-spacing: -.02em; }
 
-.stage { position: relative; perspective: 1400px; }
-.glow { position: absolute; inset: -12% -18% -6% -10%; z-index: -1; pointer-events: none; background: radial-gradient(closest-side, color-mix(in srgb, var(--cfx-accent) 26%, transparent), transparent 75%); filter: blur(10px); }
-.board-card { transform: rotateY(-9deg) rotateX(4deg); transform-origin: 60% 50%; transition: transform .6s var(--cfx-ease, ease); }
-.stage:hover .board-card { transform: rotateY(-4deg) rotateX(2deg); }
-.hero-piece { position: absolute; left: -11%; bottom: 9%; width: 30%; height: auto; pointer-events: none; filter: drop-shadow(0 26px 30px rgba(0, 0, 0, .65)) drop-shadow(0 0 22px color-mix(in srgb, var(--cfx-accent) 45%, transparent)); animation: float 5s ease-in-out infinite; }
-@keyframes float { 50% { transform: translateY(-14px) rotate(-3deg); } }
-/* The floating piece sits on the board card's lower-left corner: the caption starts after it. */
-.stage .board-bar { padding-left: 21%; }
 .apply-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 0; color: var(--cfx-text-2); font-size: 14px; }
 
 /* My Account */
@@ -198,16 +180,201 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 
 @media (max-width: 920px) {
   .hero { min-height: 0; }
-  .board-card, .stage:hover .board-card { transform: none; }
-  .hero-piece { width: 22%; left: -3%; bottom: 12%; }
-  .stage .board-bar { padding-left: 18%; }
   .me-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 620px) {
   .acct .nav-link { display: none; }
-  .announce { font-size: 13px; }
-  .hero-piece { display: none; }
-  .stage .board-bar { padding-left: 4px; }
 }
-@media (prefers-reduced-motion: reduce) { .hero-piece { animation: none; } .board-card { transition: none; } }
 @media (max-width: 620px) { .nav-cta { white-space: nowrap; padding: 8px 12px; font-size: 13px; } .tag { display: none; } }
+
+/* ===== Cinematic 3D hero (site.js: the rig turns toward the pointer; pieces stand and face the viewer) ===== */
+:root { --a1: #8ab4ff; --a2: #c58bff; }
+html, body { overflow-x: clip; }
+/* Film grain and a soft vignette over the whole page, like a lens. */
+body::before { content: ''; position: fixed; inset: 0; z-index: 99; pointer-events: none; background: radial-gradient(120% 90% at 50% 35%, transparent 55%, rgba(0, 0, 0, .42)); }
+body::after { content: ''; position: fixed; inset: -50%; z-index: 100; pointer-events: none; opacity: .05; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation: grain .9s steps(5) infinite; }
+@keyframes grain { 20% { transform: translate(-3%, 2%); } 40% { transform: translate(2%, -3%); } 60% { transform: translate(-2%, -1%); } 80% { transform: translate(3%, 3%); } }
+
+.hero { position: relative; isolation: isolate; }
+/* The look's own light behind the hero (its colours follow the chosen look). */
+.hero::before { content: ''; position: absolute; inset: -20% -30% -10% 10%; z-index: -2; pointer-events: none;
+  background: radial-gradient(38% 46% at 70% 46%, color-mix(in srgb, var(--a2) 30%, transparent), transparent 70%), radial-gradient(28% 34% at 86% 72%, color-mix(in srgb, var(--a1) 20%, transparent), transparent 70%); }
+.hero h1 span { background: linear-gradient(100deg, var(--cfx-accent) 30%, color-mix(in srgb, var(--cfx-accent) 45%, white) 48%, var(--cfx-accent) 66%) 0 0 / 260% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shine 7s cubic-bezier(.6, 0, .4, 1) 1.2s infinite; }
+@keyframes shine { 0% { background-position: 100% 0; } 45%, 100% { background-position: -60% 0; } }
+
+.stage { position: relative; --tilt: 44deg; gap: 14px; }
+.aura { position: absolute; inset: -18% -22% 12%; z-index: -1; pointer-events: none; opacity: .9; filter: blur(22px);
+  background: conic-gradient(from 210deg at 50% 42%, transparent 0 8%, color-mix(in srgb, var(--a1) 26%, transparent) 13%, transparent 20% 42%, color-mix(in srgb, var(--a2) 22%, transparent) 48%, transparent 56% 78%, color-mix(in srgb, var(--a1) 14%, transparent) 84%, transparent 90%);
+  -webkit-mask: radial-gradient(closest-side, #000 25%, transparent); mask: radial-gradient(closest-side, #000 25%, transparent); animation: beams 30s linear infinite; }
+@keyframes beams { to { rotate: 360deg; } }
+.scene { perspective: 1250px; perspective-origin: 50% 20%; padding: 4% 4% 0; margin: -8% -4% -3%; }
+.rig { --rx: 0deg; --ry: 0deg; transform-style: preserve-3d; transform: rotateX(var(--rx)) rotateY(var(--ry)); }
+.table { --thick: clamp(12px, 2.6vw, 22px); position: relative; transform-style: preserve-3d; transform: rotateX(var(--tilt)); animation: arrive 1.9s cubic-bezier(.16, .84, .24, 1) both; }
+@keyframes arrive { from { transform: translateY(14%) rotateX(74deg) rotateZ(-12deg) scale(.8); } }
+.scene { animation: fadein .9s ease-out both; }
+@keyframes fadein { from { opacity: 0; } }
+.slab { position: relative; aspect-ratio: 1; padding: 3.2%; border-radius: 10px; transform-style: preserve-3d;
+  background: linear-gradient(155deg, #343a45, #16191f 55%, #0d0f13); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), inset 0 0 0 1px rgba(255, 255, 255, .05); }
+.edge { position: absolute; display: block; background: linear-gradient(#20242c, #07080a); }
+.e-front { left: 0; right: 0; top: 100%; height: var(--thick); transform-origin: top; transform: rotateX(-90deg); background: linear-gradient(#2b3039, #08090b); }
+.e-left { top: 0; bottom: 0; left: 0; width: var(--thick); transform-origin: left; transform: rotateY(90deg); }
+.e-right { top: 0; bottom: 0; right: 0; width: var(--thick); transform-origin: right; transform: rotateY(-90deg); }
+/* Shadow and the look's glow on the floor under the table. */
+.floor { position: absolute; inset: 2% -4% -8%; transform: translateZ(calc(var(--thick) * -3)); pointer-events: none; filter: blur(26px);
+  background: radial-gradient(closest-side, rgba(0, 0, 0, .8), transparent), radial-gradient(60% 50% at 50% 60%, color-mix(in srgb, var(--a1) 30%, transparent), transparent); }
+.board { position: relative; width: 100%; height: 100%; border-radius: 5px; overflow: hidden; background: #1e1946;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .7), 0 0 46px -8px color-mix(in srgb, var(--a1) 60%, transparent); }
+.board > * { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* A light glint that follows the pointer across the board's surface. */
+.sheen { pointer-events: none; mix-blend-mode: soft-light; background: radial-gradient(circle at var(--lx, 30%) var(--ly, 20%), rgba(255, 255, 255, .55), transparent 46%), linear-gradient(160deg, rgba(255, 255, 255, .14), transparent 38%); }
+.board.original .sheen { opacity: .5; }
+.marks { pointer-events: none; }
+.marks i { position: absolute; width: 12.5%; height: 12.5%; background: color-mix(in srgb, var(--a1) 30%, transparent); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--a1) 75%, transparent), inset 0 0 18px color-mix(in srgb, var(--a1) 55%, transparent); transition: left .35s cubic-bezier(.2, .8, .2, 1), top .35s cubic-bezier(.2, .8, .2, 1); }
+
+.pieces { position: absolute; inset: 3.2%; transform-style: preserve-3d; transform: translateZ(1px); pointer-events: none; }
+.pc { position: absolute; left: 0; top: 0; width: 12.5%; height: 12.5%; transform-style: preserve-3d; transition: transform .4s cubic-bezier(.2, .8, .2, 1), translate .45s cubic-bezier(.2, .8, .2, 1); }
+/* Contact shadow on the square. */
+.pc::before { content: ''; position: absolute; left: 12%; right: 12%; top: 50%; height: 36%; border-radius: 50%; background: radial-gradient(closest-side, rgba(0, 0, 0, .6), transparent); }
+/* The piece stands up from its square and turns back by the board's own angles, so it always faces the viewer. */
+.pc img { position: absolute; left: -14%; bottom: 30%; width: 128%; height: auto; aspect-ratio: 1; transform-origin: 50% 100%;
+  transform: rotateX(calc(-1 * var(--tilt))) rotateY(calc(-1 * var(--ry))) rotateX(calc(-1 * var(--rx)));
+  filter: drop-shadow(0 0 5px var(--glow-w, transparent)); animation: bob 3.6s ease-in-out var(--bd, 0s) infinite; }
+.pc.b img { filter: drop-shadow(0 0 5px var(--glow-b, transparent)); }
+@keyframes bob { 50% { translate: 0 0 5px; } }
+.pc.drop { animation: drop 1s cubic-bezier(.3, 1.35, .5, 1) var(--d, 0s) backwards; }
+@keyframes drop { from { translate: 0 0 160px; } }
+.pc.drop img { animation: bob 3.6s ease-in-out var(--bd, 0s) infinite, fadein .35s ease-out var(--d, 0s) backwards; }
+.pc.gone { translate: 0 0 60px; }
+.pc.gone img { opacity: 0; transition: opacity .4s; }
+/* Checkmate: the beaten king topples. */
+.pc.fall img { rotate: 0 1 0 80deg; transition: rotate 1.1s cubic-bezier(.55, 0, .9, .45) .15s; }
+.stage.paused .pc img, .stage.paused .aura { animation-play-state: paused; }
+.stage.original .pc img { filter: none; animation: none; }
+.stage.original .board { box-shadow: 0 0 0 1px rgba(0, 0, 0, .7); }
+
+.board-bar { padding: 8px 8px 8px 16px; border-radius: 16px; border: 1px solid var(--cfx-glass-line, var(--cfx-line)); background: color-mix(in srgb, var(--cfx-ink-1) 80%, transparent); box-shadow: var(--cfx-glass-hi, none); }
+@supports (backdrop-filter: blur(1px)) { .board-bar { backdrop-filter: blur(12px); } }
+
+/* ===== The rest of the page: reveals on scroll, richer cards and tiles ===== */
+.js [data-reveal] { opacity: 0; translate: 0 28px; transition: opacity .9s cubic-bezier(.2, .8, .2, 1) var(--rd, 0s), translate .9s cubic-bezier(.2, .8, .2, 1) var(--rd, 0s); }
+.js [data-reveal].in { opacity: 1; translate: 0 0; }
+.tile { box-shadow: 0 18px 40px -26px rgba(0, 0, 0, .9); }
+.tile img { transition: transform .7s cubic-bezier(.2, .8, .2, 1), filter .7s; }
+.tile:hover img, .tile:focus-visible img { transform: scale(1.07); filter: saturate(1.15); }
+.tile:hover { border-color: color-mix(in srgb, var(--cfx-accent) 55%, transparent); box-shadow: 0 24px 50px -24px rgba(0, 0, 0, .95), 0 0 0 1px color-mix(in srgb, var(--cfx-accent) 30%, transparent); }
+.card { position: relative; overflow: hidden; background: linear-gradient(170deg, color-mix(in srgb, var(--cfx-ink-2) 70%, transparent), var(--cfx-ink-1) 60%); }
+.card::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(60% 50% at 0% 0%, color-mix(in srgb, var(--cfx-accent) 14%, transparent), transparent 70%); opacity: 0; transition: opacity .4s; }
+.card:hover { border-color: color-mix(in srgb, var(--cfx-accent) 40%, transparent); }
+.card:hover::after { opacity: 1; }
+.ic { display: grid; place-items: center; width: 42px; height: 42px; margin-bottom: 16px; border-radius: 12px; color: var(--cfx-accent); background: color-mix(in srgb, var(--cfx-accent) 12%, transparent); border: 1px solid color-mix(in srgb, var(--cfx-accent) 28%, transparent); }
+.ic svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.steps li::before { box-shadow: 0 0 0 6px color-mix(in srgb, var(--cfx-go) 18%, transparent); }
+.final { position: relative; overflow: hidden; border-radius: 28px; margin-top: 110px; border: 1px solid var(--cfx-glass-line, var(--cfx-line)); background: radial-gradient(70% 90% at 50% 0%, color-mix(in srgb, var(--a2) 22%, transparent), transparent 70%), var(--cfx-ink-1); }
+.final h2 { font-size: clamp(36px, 5.4vw, 68px); }
+
+@media (max-width: 920px) {
+  .stage { --tilt: 38deg; }
+  .scene { padding: 8% 4% 2%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body::after, .aura, .hero h1 span, .pc img, .pc.drop, .table { animation: none; }
+  .js [data-reveal] { opacity: 1; translate: none; transition: none; }
+  .pc, .marks i, .tile img { transition: none; }
+}
+
+/* The 3D hero fits one screen: less room above, the board's caption tight under it. */
+.hero { padding-top: 28px; padding-bottom: 28px; }
+/* The board scales with the window's height too, so the board, its caption and the looks fit one screen. */
+@media (max-width: 920px) { .hero { overflow-x: clip; } }
+/* Looks: one row that scrolls sideways, fading at the edges. */
+.chips { flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; padding: 2px 2px 4px; -webkit-mask: linear-gradient(90deg, transparent, #000 18px, #000 calc(100% - 28px), transparent); mask: linear-gradient(90deg, transparent, #000 18px, #000 calc(100% - 28px), transparent); }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; scroll-snap-align: start; }
+.hero { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); }
+.hero h1 { font-size: clamp(44px, min(7vw, 10.5vh), 96px); }
+@media (max-width: 920px) { .hero { grid-template-columns: minmax(0, 1fr); } }
+/* Phones: buttons side by side and compact stats, so the board shows sooner. */
+@media (max-width: 620px) {
+  .ctas { flex-wrap: nowrap; }
+  .ctas .btn-lg { flex: 1 1 0; min-height: 48px; padding: 11px 12px; font-size: 15px; white-space: nowrap; }
+  .lede { margin: 16px 0 20px; }
+  .stats-row { gap: 8px 20px; margin-top: 20px; }
+  .stats-row b { font-size: 22px; }
+  .hero { gap: 12px; }
+}
+/* ===== Council round 1 (visual): finish and depth ===== */
+[hidden] { display: none !important; }
+@font-face { font-family: 'Inter Tight'; src: url(fonts/inter-tight-800.woff2) format('woff2'); font-weight: 800 900; font-display: swap; }
+h1, h2, .final h2 { font-family: 'Inter Tight', var(--cfx-font); font-weight: 800; letter-spacing: -.04em; }
+.sec h2 { font-size: clamp(32px, 4.2vw, 56px); }
+.lede { max-width: 36ch; text-wrap: pretty; }
+.sub { text-wrap: pretty; }
+/* Calmer, premium buttons: a soft lit top edge and a coloured glow instead of the game-style lip. */
+.btn-go { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), 0 10px 28px -12px color-mix(in srgb, var(--cfx-go) 80%, transparent); }
+.btn-go:hover { filter: brightness(1.1); }
+.btn[aria-disabled="true"] { cursor: default; }
+/* Stronger depth: a closer camera, a thicker lit slab. */
+.scene { perspective: 900px; perspective-origin: 50% 0%; }
+.table { --thick: clamp(16px, 3.4vw, 34px); }
+.e-front { background: linear-gradient(#4a525f 0 2px, #1a1e25 2px, #050607); }
+.slab { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .24), inset 0 -2px 0 rgba(0, 0, 0, .6), inset 0 0 0 1px rgba(255, 255, 255, .05); }
+/* Pieces sit on the board: a darker, wider contact shadow, a grounding shadow, and further ranks a touch darker. */
+.pc::before { left: 4%; right: 4%; top: 44%; height: 44%; background: radial-gradient(closest-side, rgba(0, 0, 0, .75), transparent); }
+.pc img { filter: brightness(var(--dim, 1)) drop-shadow(0 6px 4px rgba(0, 0, 0, .45)) drop-shadow(0 0 5px var(--glow-w, transparent)); }
+.pc.b img { filter: brightness(var(--dim, 1)) drop-shadow(0 6px 4px rgba(0, 0, 0, .45)) drop-shadow(0 0 5px var(--glow-b, transparent)); }
+.stage.original .pc img { filter: brightness(var(--dim, 1)) drop-shadow(0 6px 4px rgba(0, 0, 0, .4)); }
+/* One control row under the board, the width of the board's front edge: looks scroll, then compare and pause. */
+.board-bar { width: 92%; margin-inline: auto; gap: 10px; padding: 6px 6px 6px 8px; min-width: 0; }
+.board-bar .chips { flex: 1 1 auto; min-width: 0; }
+.chip { min-height: 36px; padding: 3px 12px 3px 3px; font-size: 13px; }
+.chip img { width: 28px; height: 28px; }
+.seg, .icon-btn { flex: none; }
+/* Film grain: still, light and lens-sized (no repaints). */
+body::after { inset: 0; opacity: .035; animation: none; }
+/* Looks tiles echo the hero's tilt. */
+.tile { transition: transform .45s cubic-bezier(.2, .8, .2, 1), border-color .2s, box-shadow .3s, opacity .9s cubic-bezier(.2, .8, .2, 1) var(--rd, 0s), translate .9s cubic-bezier(.2, .8, .2, 1) var(--rd, 0s); }
+.tile:hover { transform: perspective(700px) rotateX(6deg) translateY(-4px); }
+.final { margin-bottom: 96px; }
+.foot { border-top: 0; padding-top: 40px; }
+@media (max-width: 620px) {
+  .lede { font-size: 16px; }
+  .stats-row { flex-wrap: nowrap; gap: 16px; }
+  .stats-row span { font-size: 12px; }
+  .board-bar { width: 100%; flex-wrap: wrap; }
+  .board-bar .chips { flex-basis: 100%; order: 2; }
+  .board-bar .seg { margin-right: auto; }
+}
+@media (prefers-reduced-motion: reduce) { .tile:hover { transform: none; } }
+/* Controls under the board: compare + pause centred, the looks on their own row below (centred, scrolling if needed). */
+.scene { margin-bottom: 0; }
+.board-bar { flex-wrap: wrap; justify-content: center; width: 100%; padding: 0; border: 0; background: none; box-shadow: none; backdrop-filter: none; }
+.board-bar .chips { flex-basis: 100%; order: 2; justify-content: safe center; }
+.board-bar .seg { margin-right: 0; }
+.lede { max-width: 44ch; }
+.board-bar { margin-top: 15%; }
+@media (max-width: 920px) { .board-bar { margin-top: 7%; } }
+
+/* Off screen (or tab hidden): the hero's endless animations rest (site.js toggles html.hero-off). */
+.hero-off .hero h1 span, .hero-off .aura, .hero-off .pc img { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) { .scene, .pc.drop img { animation: none; } }
+
+/* ===== Council round 1 (responsive) ===== */
+/* The hero's board: as big as the window's height allows (board + two control rows), centred; capped on tablets. */
+.stage { width: min(100%, calc(100svh - 300px)); justify-self: center; }
+@media (max-width: 920px) { .stage { width: min(100%, 520px); } }
+.acct { margin-left: auto; }
+.nav { z-index: 101; }
+.nav nav a, .acct a, .acct button { white-space: nowrap; }
+@media (max-width: 900px) { .nav nav { display: none; } }
+.final { margin-inline: max(20px, calc((100% - 1180px) / 2)); }
+@media (max-width: 620px) {
+  .stage { --tilt: 36deg; }
+  .scene { margin-inline: 0; }
+  .stats-row { gap: 14px; justify-content: space-between; }
+  .stats-row span { white-space: nowrap; }
+}
+@media (max-width: 380px) { .eyebrow { letter-spacing: .08em; font-size: 12px; } }
+/* The controls paint above the 3D scene. */
+.board-bar { position: relative; z-index: 2; }
+/* Phones: each stat's label sits under its number, so all three fit side by side. */
+@media (max-width: 620px) { .stats-row li { flex-direction: column; align-items: flex-start; gap: 0; } }
