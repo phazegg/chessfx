@@ -3,7 +3,7 @@
 (() => {
   // An email link that landed on the home page (no redirect page set): hand it to the confirm page.
   if (/access_token=|error_description=/.test(location.hash)) { location.replace('confirm.html' + location.hash); return; }
-  // Store pages: fill in once the listings are live. Until then the buttons scroll to the closing section, which says so.
+  // Store pages: fill in once the listings are live. Until then the page shows its built-in "Coming soon" wording.
   const STORE = { chrome: '', edge: '' };
   const D = window.SITE;
   const $ = (id) => document.getElementById(id);
@@ -12,17 +12,17 @@
   // ---------- store buttons: Chrome (also Brave and other Chromium browsers) or Edge ----------
   const isEdge = /\bEdg\//.test(navigator.userAgent);
   const store = isEdge ? STORE.edge || STORE.chrome : STORE.chrome;
-  for (const a of document.querySelectorAll('[data-store]')) {
-    if (store) { a.href = store; a.target = '_blank'; a.rel = 'noopener'; if (isEdge) a.textContent = a.textContent.replace('Chrome', 'Edge'); }
-  }
-  if (!store) {
-    $('getNote').textContent = 'ChessFX is launching soon on the Chrome Web Store. Free, cosmetic only, and ready in one click.';
-    const heroGet = document.querySelector('.ctas [data-store]');
-    heroGet.textContent = 'Coming soon to Chrome';
-    const soon = document.createElement('p');
-    soon.className = 'soon';
-    soon.textContent = 'Coming soon to Chrome';
-    document.querySelector('#get [data-store]').replaceWith(soon);
+  // Once listed: each "Coming soon" pill becomes the store button, and the launch FAQ entry goes.
+  if (store) {
+    for (const p of document.querySelectorAll('[data-soon]')) {
+      const a = document.createElement('a');
+      a.className = `btn btn-${p.dataset.soon} btn-lg`;
+      a.href = store; a.target = '_blank'; a.rel = 'noopener';
+      a.textContent = `Add to ${isEdge ? 'Edge' : 'Chrome'}, it's free`;
+      p.replaceWith(a);
+    }
+    $('getNote').textContent = 'Free, cosmetic only, and ready in one click.';
+    $('faqWhen').remove();
   }
 
   // The header gains a solid edge once the page scrolls under it.
@@ -167,7 +167,7 @@
     if (!visible || document.hidden) { timer = setTimeout(play, 700); return; }
     if (step >= D.demo.length) { timer = setTimeout(() => { step = 0; cap.textContent = 'Opera Game, Paris 1858'; setup(!rm.matches); timer = setTimeout(play, rm.matches ? 0 : 1700); }, 3500); return; }
     const m = D.demo[step++];
-    cap.textContent = `Opera Game, move ${Math.ceil(step / 2)} of ${Math.ceil(D.demo.length / 2)}`;
+    cap.textContent = `Move ${Math.ceil(step / 2)} of ${Math.ceil(D.demo.length / 2)} · Opera Game`;
     if (m.captured && at.has(m.to)) { const v = at.get(m.to); v.classList.add('gone'); setTimeout(() => v.remove(), 300); burst(m.to, 26, 1.4); }
     const img = at.get(m.from);
     at.delete(m.from);
@@ -205,6 +205,7 @@
     const u = new URL(location.href);
     u.searchParams.set('look', lookId);
     if (boardId) u.searchParams.set('board', boardId); else u.searchParams.delete('board');
+    u.hash = '';
     history.replaceState(history.state, '', u);
   };
   const chips = $('chips');
@@ -279,11 +280,11 @@
   for (const c of D.credits) { const li = document.createElement('li'); li.textContent = `${c.set}: ${c.licence}`; $('creditList').append(li); }
 
   // ---------- start: poster first, shader when the page is idle ----------
-  setup(!rm.matches);
   // A shared link (?look=inferno, optionally &board=lava) opens on that look.
   const q = new URLSearchParams(location.search);
   const qLook = D.looks.find((l) => l.id === q.get('look')), qBoard = D.boards.find((bd) => bd.id === q.get('board'));
   if (qLook) { look = qLook; pieceSet = { w: look.white, b: look.black }; for (const [i, c] of [...chips.children].entries()) c.setAttribute('aria-pressed', String(D.looks[i] === look && !qBoard)); }
+  setup(!rm.matches);
   if (qBoard) for (const c of chips.children) c.setAttribute('aria-pressed', 'false');
   if (qBoard) applyLook({ ...look, board: qBoard.id, L: qBoard.L, D: qBoard.D }, qBoard.name); else applyLook(look);
   board.classList.remove('swap'); $('heroPiece').classList.remove('swap');
