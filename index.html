@@ -14,9 +14,10 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0b1410">
 <link rel="icon" href="assets/icon.png">
+<script>document.documentElement.classList.add('js')</script>
 <link rel="preload" as="image" href="assets/boards/galaxy.jpg" fetchpriority="high">
-<link rel="stylesheet" href="assets/tokens.css">
-<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="assets/tokens.css?v=3">
+<link rel="stylesheet" href="site.css?v=3">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"SoftwareApplication","name":"ChessFX","applicationCategory":"BrowserApplication","operatingSystem":"Chrome, Edge, Brave","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Animated boards, piece sets, effects and sounds for Chess.com. Cosmetic only."}
 </script>
@@ -52,11 +53,13 @@
 
     <div class="stage" aria-label="Live preview">
       <div class="glow" aria-hidden="true"></div>
+      <div class="board-wrap">
       <figure class="board-card">
         <div class="board" id="board" role="img" aria-label="Live preview of the Cosmic look playing the Opera Game">
           <img class="poster" id="poster" src="assets/boards/galaxy.jpg" alt="" width="800" height="800" fetchpriority="high">
           <canvas id="shader" aria-hidden="true"></canvas>
           <div class="flat" aria-hidden="true"></div>
+          <div class="marks" id="marks" aria-hidden="true" hidden><i></i><i></i></div>
           <div class="pieces" id="pieces" aria-hidden="true"></div>
           <canvas id="fx" aria-hidden="true"></canvas>
         </div>
@@ -70,6 +73,7 @@
         </figcaption>
       </figure>
       <img class="hero-piece" id="heroPiece" src="assets/pieces/maestro/wN.png" alt="" width="256" height="256" aria-hidden="true">
+      </div>
       <div class="chips" id="chips" role="group" aria-label="Try a look"></div>
       <p class="apply-row" id="applyRow" hidden><button type="button" class="btn btn-go" id="applyBtn">Apply to my ChessFX</button><span id="applyMsg" role="status" aria-live="polite"></span></p>
     </div>
@@ -161,13 +165,13 @@
   <details id="credits" class="credits"><summary>Credits and licences</summary><p>Piece sets shown on this page come from the Lichess project and their authors:</p><ul id="creditList"></ul></details>
 </footer>
 
-<script src="assets/data.js"></script>
-<script src="assets/shaders.js"></script>
-<script src="assets/catalog.js"></script>
-<script src="assets/presets.js"></script>
-<script src="assets/settings.js"></script>
-<script src="assets/cloud-config.js"></script>
-<script src="auth.js"></script>
-<script src="site.js" defer></script>
+<script src="assets/data.js?v=3"></script>
+<script src="assets/shaders.js?v=3"></script>
+<script src="assets/catalog.js?v=3"></script>
+<script src="assets/presets.js?v=3"></script>
+<script src="assets/settings.js?v=3"></script>
+<script src="assets/cloud-config.js?v=3"></script>
+<script src="auth.js?v=3"></script>
+<script src="site.js?v=3" defer></script>
 </body>
 </html>
