@@ -473,3 +473,18 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 @media (max-width: 440px) { .pfull { display: none; } .pshort { display: inline; } }
 .caps { gap: 0; padding-left: 2px; }
 .caps img { width: 20px; height: 20px; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .5)); }
+/* The looks' rows depend on the stage's own width (it shrinks on short screens too): reserve them by container size. */
+.stage { container-type: inline-size; }
+@container (max-width: 523px) { .js .chips { min-height: 136px; } }
+@container (max-width: 370px) { .js .chips { min-height: 184px; } }
+@container (max-width: 300px) { .js .chips { min-height: 232px; } }
+/* A narrow board column on a laptop (short screen): the die shows as an icon (name in its label and tooltip) so the
+   look's name keeps its room. Phones keep the label: their controls have a row of their own. */
+@media (min-width: 441px) { @container (max-width: 480px) {
+  .chip-dice { width: 40px; padding: 0; justify-content: center; }
+  .dice-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+} }
+/* The wall's fade reaches fully transparent before the section's sides. */
+.wall { -webkit-mask: radial-gradient(ellipse 50% 60% at 50% 50%, transparent 18%, #000 45%, #000 62%, transparent 96%); mask: radial-gradient(ellipse 50% 60% at 50% 50%, transparent 18%, #000 45%, #000 62%, transparent 96%); }
+/* The wall's box spans exactly the section's width, so its edge fade lands on the section's sides. */
+.wall { inset: -30% 0; }
