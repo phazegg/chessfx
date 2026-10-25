@@ -41,8 +41,59 @@
   const title = () => (look.label || look.name) + (pieceOverride ? ` · ${setName(pieceOverride)} pieces` : '');
   const src = (c, p) => `assets/pieces/${original ? 'cburnett' : pieceSet[c]}/${c}${p.toUpperCase()}.png`;
   const place = (img, sq) => { const f = sq.charCodeAt(0) - 97, r = +sq[1] - 1; img.style.transform = `translate(${f * 100}%, ${(7 - r) * 100}%)`; img.style.setProperty('--k', f + 7 - r); img.dataset.sq = sq; };
+  // Player bars: each side's clock runs on its move; captured pieces collect beside the player who took them.
+  const clk = { w: 180, b: 180 };
+  let turn = 'w', clockLive = false;
+  const fmt = (t) => `${Math.floor(Math.max(0, t) / 60)}:${String(Math.floor(Math.max(0, t) % 60)).padStart(2, '0')}`;
+  const paintClocks = () => {
+    for (const c of ['w', 'b']) { const el = $(c === 'w' ? 'clockW' : 'clockB'); el.textContent = fmt(clk[c]); el.classList.toggle('on', clockLive && turn === c); }
+  };
+  setInterval(() => { if (clockLive && !paused && visible && !document.hidden) { clk[turn] -= 0.25; paintClocks(); } }, 250);
+  const capture = (taker, piece) => {
+    const img = document.createElement('img');
+    img.alt = ''; img.dataset.c = taker === 'w' ? 'b' : 'w'; img.dataset.p = piece;
+    img.src = src(img.dataset.c, piece);
+    $(taker === 'w' ? 'capsB' : 'capsW').append(img);
+  };
+  // Sound (off until the visitor turns it on): short synthesised wood clicks, a heavier capture, a check chime.
+  let actx = null, soundOn = false;
+  const sfx = (kind) => {
+    if (!soundOn || !actx || paused || !visible || document.hidden) return;
+    const t0 = actx.currentTime, out = actx.createGain();
+    out.gain.value = kind === 'capture' ? 0.5 : 0.35;
+    out.connect(actx.destination);
+    const knock = (freq, dur, vol) => {
+      const n = actx.createBuffer(1, Math.ceil(actx.sampleRate * dur), actx.sampleRate), d = n.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 4);
+      const src0 = actx.createBufferSource(), bp = actx.createBiquadFilter(), g = actx.createGain();
+      src0.buffer = n; bp.type = 'bandpass'; bp.frequency.value = freq; bp.Q.value = 1.2; g.gain.value = vol;
+      src0.connect(bp).connect(g).connect(out); src0.start(t0);
+    };
+    const note = (freq, at, dur, vol) => {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = 'sine'; o.frequency.value = freq;
+      g.gain.setValueAtTime(0, t0 + at); g.gain.linearRampToValueAtTime(vol, t0 + at + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t0 + at + dur);
+      o.connect(g).connect(out); o.start(t0 + at); o.stop(t0 + at + dur + 0.05);
+    };
+    if (kind === 'move') { knock(1900, 0.07, 1.6); note(190, 0, 0.09, 0.5); }
+    if (kind === 'capture') { knock(1200, 0.1, 2.2); note(120, 0, 0.14, 0.8); }
+    if (kind === 'check') { note(660, 0, 0.18, 0.25); note(880, 0.09, 0.22, 0.25); }
+    if (kind === 'mate') { for (const [f, at] of [[523, 0], [659, 0.08], [784, 0.16], [1047, 0.24]]) note(f, at, 0.9, 0.18); }
+  };
+  $('sound').addEventListener('click', () => {
+    soundOn = !soundOn;
+    if (soundOn && !actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { soundOn = false; } }
+    if (actx && actx.state === 'suspended') actx.resume();
+    $('sound').setAttribute('aria-pressed', String(soundOn));
+    $('sound').title = soundOn ? 'Turn sound off' : 'Turn sound on';
+    if (!soundOn && actx) actx.suspend();
+    if (soundOn) sfx('move');
+  });
+
   const setup = (intro) => {
     layer.textContent = '';
+    $('capsW').textContent = ''; $('capsB').textContent = '';
+    clk.w = clk.b = 180; turn = 'w'; clockLive = false; paintClocks();
     marks.hidden = true;
     at = new Map();
     START.split('/').forEach((row, ri) => {
@@ -68,7 +119,10 @@
   // Last move: its two squares light up under the pieces.
   const marks = $('marks');
   const mark = (from, to) => { marks.hidden = original; [from, to].forEach((sq, i) => { marks.children[i].style.transform = `translate(${(sq.charCodeAt(0) - 97) * 100}%, ${(8 - +sq[1]) * 100}%)`; }); };
-  const repaintPieces = () => { for (const img of layer.children) img.src = src(img.className.includes('w') ? 'w' : 'b', img.dataset.p); };
+  const repaintPieces = () => {
+    for (const img of layer.children) img.src = src(img.className.includes('w') ? 'w' : 'b', img.dataset.p);
+    for (const img of document.querySelectorAll('.caps img')) img.src = src(img.dataset.c, img.dataset.p);
+  };
 
   // ---------- board: the shader (the extension's own GLSL from assets/shaders.js) ----------
   const cv = $('shader');
@@ -169,10 +223,12 @@
     timer = 0;
     if (paused) return;
     if (!visible || document.hidden) { timer = setTimeout(play, 700); return; }
-    if (step >= D.demo.length) { timer = setTimeout(() => { step = 0; cap.textContent = 'Opera Game, Paris 1858'; setup(!rm.matches); timer = setTimeout(play, rm.matches ? 0 : 1700); }, 3500); return; }
+    if (step >= D.demo.length) { timer = setTimeout(() => { step = 0; cap.textContent = 'The Opera Game, 1858'; setup(!rm.matches); timer = setTimeout(play, rm.matches ? 0 : 1700); }, 3500); return; }
     const m = D.demo[step++];
-    cap.textContent = `Move ${Math.ceil(step / 2)} of ${Math.ceil(D.demo.length / 2)} · Opera Game`;
-    if (m.captured && at.has(m.to)) { const v = at.get(m.to); v.classList.add('gone'); setTimeout(() => v.remove(), 300); burst(m.to, 26, 1.4); }
+    cap.textContent = `Move ${Math.ceil(step / 2)} of ${Math.ceil(D.demo.length / 2)} · Opera Game, 1858`;
+    clockLive = true;
+    sfx(m.mate ? 'mate' : m.check ? 'check' : m.captured ? 'capture' : 'move');
+    if (m.captured && at.has(m.to)) { const v = at.get(m.to); capture(m.color, v.dataset.p); v.classList.add('gone'); setTimeout(() => v.remove(), 300); burst(m.to, 26, 1.4); }
     const img = at.get(m.from);
     at.delete(m.from);
     place(img, m.to);
@@ -181,6 +237,9 @@
     if (m.rook) { const r = at.get(m.rook[0]); at.delete(m.rook[0]); place(r, m.rook[1]); at.set(m.rook[1], r); }
     if (m.promo) { img.dataset.p = m.promo; img.src = src(m.color, m.promo); }
     if (m.check) { const k = kingOf(m.color === 'w' ? 'b' : 'w'); if (k) ring(k, m.mate ? look.palette[0] : '#ff5a4f'); }
+    turn = m.color === 'w' ? 'b' : 'w';
+    if (m.mate) clockLive = false;
+    paintClocks();
     if (m.mate) setTimeout(() => { const k = kingOf(m.color === 'w' ? 'b' : 'w'); if (k) { burst(k, 60, 2.2); ring(k, look.palette[1]); } }, 350);
     if (!running() && !rm.matches) fxTick(performance.now());
     timer = setTimeout(play, m.mate ? 1800 : 1050);
@@ -276,16 +335,37 @@
     history.replaceState(history.state, '', u);
   };
   const chips = $('chips');
+  const lookChips = () => chips.querySelectorAll('[data-look]');
   for (const l of D.looks) {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'chip';
+    b.dataset.look = l.id;
     b.innerHTML = `<img src="assets/boards/${l.board}.jpg" alt="" loading="lazy" width="30" height="30"><span></span>`;
     b.querySelector('span').textContent = l.name;
     b.setAttribute('aria-pressed', String(l === look));
-    b.addEventListener('click', () => { for (const c of chips.children) c.setAttribute('aria-pressed', String(c === b)); pieceOverride = null; applyLook(l); share(); });
+    b.addEventListener('click', () => { for (const c of lookChips()) c.setAttribute('aria-pressed', String(c === b)); pieceOverride = null; applyLook(l); share(); });
     chips.append(b);
   }
+  const dice = document.createElement('button');
+  dice.type = 'button';
+  dice.className = 'chip chip-dice';
+  dice.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="9" cy="9" r="1.3"/><circle cx="15" cy="15" r="1.3"/><circle cx="15" cy="9" r="1.3"/><circle cx="9" cy="15" r="1.3"/><circle cx="12" cy="12" r="1.3"/></svg><span class="dice-label">Surprise me</span>';
+  dice.setAttribute('aria-label', 'Surprise me: a random board and piece set');
+  dice.title = 'Surprise me';
+  const pick = (a) => a[Math.floor(Math.random() * a.length)];
+  dice.addEventListener('click', () => {
+    let bd, set;
+    do { bd = pick(D.boards); set = pick(SETS); } while (bd.id === look.board && set === pieceSet.w);
+    const base = pick(D.looks);
+    for (const c of lookChips()) c.setAttribute('aria-pressed', 'false');
+    pieceOverride = set === base.white ? null : set;
+    applyLook({ ...base, board: bd.id, L: bd.L, D: bd.D }, bd.name);
+    share();
+    dice.classList.remove('roll'); void dice.offsetWidth; dice.classList.add('roll');
+  });
+  // It sits with the board's controls (the look buttons stay two rows).
+  $('mOriginal').parentElement.before(dice);
   const gal = $('gallery');
   for (const bd of D.boards) {
     const t = document.createElement('button');
@@ -295,7 +375,7 @@
     t.querySelector('span').textContent = bd.name;
     t.setAttribute('aria-label', `Try the ${bd.name} board on the preview`);
     t.addEventListener('click', () => {
-      for (const c of chips.children) c.setAttribute('aria-pressed', 'false');
+      for (const c of lookChips()) c.setAttribute('aria-pressed', 'false');
       applyLook({ ...look, board: bd.id, L: bd.L, D: bd.D }, bd.name);
       share();
       tileLive(null);
@@ -409,6 +489,11 @@
     });
   });
 
+  // ---------- the closing wall of boards ----------
+  const wall = $('wall');
+  for (const bd of [...D.boards, ...D.boards]) { const i = document.createElement('img'); i.src = `assets/boards/${bd.id}.jpg`; i.alt = ''; i.loading = 'lazy'; i.width = i.height = 120; wall.append(i); }
+  new IntersectionObserver(([e]) => wall.classList.toggle('run', e.isIntersecting)).observe($('get'));
+
   // ---------- credits ----------
   for (const c of D.credits) { const li = document.createElement('li'); li.textContent = `${c.set}: ${c.licence}`; $('creditList').append(li); }
 
@@ -417,10 +502,10 @@
   const q = new URLSearchParams(location.search);
   const qLook = D.looks.find((l) => l.id === q.get('look')), qBoard = D.boards.find((bd) => bd.id === q.get('board'));
   if (SETS.includes(q.get('pieces'))) pieceOverride = q.get('pieces');
-  if (qLook) { look = qLook; pieceSet = pieceOverride ? { w: pieceOverride, b: pieceOverride } : { w: look.white, b: look.black }; for (const [i, c] of [...chips.children].entries()) c.setAttribute('aria-pressed', String(D.looks[i] === look && !qBoard)); }
+  if (qLook) { look = qLook; pieceSet = pieceOverride ? { w: pieceOverride, b: pieceOverride } : { w: look.white, b: look.black }; for (const [i, c] of [...lookChips()].entries()) c.setAttribute('aria-pressed', String(D.looks[i] === look && !qBoard)); }
   if (pieceOverride && !qLook) pieceSet = { w: pieceOverride, b: pieceOverride };
   setup(!rm.matches);
-  if (qBoard) for (const c of chips.children) c.setAttribute('aria-pressed', 'false');
+  if (qBoard) for (const c of lookChips()) c.setAttribute('aria-pressed', 'false');
   if (qBoard) applyLook({ ...look, board: qBoard.id, L: qBoard.L, D: qBoard.D }, qBoard.name); else applyLook(look);
   board.classList.remove('swap'); $('heroPiece').classList.remove('swap');
   const start = () => { if (initGL()) draw(); clearTimeout(timer); if (paused) setPaused(true); else { sync(); timer = setTimeout(play, 1600); } };
