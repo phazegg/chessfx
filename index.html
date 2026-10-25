@@ -14,9 +14,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0b1410">
 <link rel="icon" href="assets/icon.png">
-<script>document.documentElement.classList.add('js')</script>
 <link rel="preload" as="image" href="assets/boards/galaxy.jpg" fetchpriority="high">
-<link rel="preload" as="font" type="font/woff2" href="fonts/inter-tight-800.woff2" crossorigin>
 <link rel="stylesheet" href="assets/tokens.css">
 <link rel="stylesheet" href="site.css">
 <script type="application/ld+json">
@@ -32,14 +30,15 @@
   </nav>
   <div class="acct" id="acct"></div>
 </header>
+<p class="announce">Every board, piece set and sound pack is free. No paywall, nothing to configure. <a href="#how">How it works</a></p>
 
 <main id="main">
   <!-- Hero: the product itself, live. -->
   <section class="hero" id="top">
     <div class="hero-copy">
-      <p class="eyebrow line">For Chess.com · Free, no paywall</p>
+      <p class="eyebrow line">For Chess.com · Every move</p>
       <h1>Your board.<br><span>Upgraded.</span></h1>
-      <p class="lede">Animated boards, 40+ piece sets, capture effects and sounds for Chess.com. Try a look on this board, then play with it in one click.</p>
+      <p class="lede">Animated boards, 40+ piece sets, capture effects and sound packs for Chess.com. Try a look on the board here, then play with it in one click.</p>
       <div class="ctas">
         <a class="btn btn-go btn-lg" href="#looks">Find your look <span aria-hidden="true">↗</span></a>
         <a class="btn btn-ghost btn-lg" data-store href="#get">Get the extension</a>
@@ -51,38 +50,27 @@
       </ul>
     </div>
 
-    <div class="stage" id="stage" role="region" aria-label="Live preview">
-      <div class="aura" aria-hidden="true"></div>
-      <!-- A 3D table: the rig turns toward the pointer, the table leans back, pieces stand and face the viewer. -->
-      <div class="scene">
-        <div class="rig" id="rig">
-          <div class="table">
-            <div class="floor" aria-hidden="true"></div>
-            <div class="slab">
-              <div class="board" id="board" role="img" aria-label="Live preview of the Cosmic look playing the Opera Game">
-                <img class="poster" id="poster" src="assets/boards/galaxy.jpg" alt="" width="800" height="800" fetchpriority="high">
-                <canvas id="shader" aria-hidden="true"></canvas>
-                <div class="flat" aria-hidden="true"></div>
-                <div class="marks" id="marks" aria-hidden="true"><i></i><i></i></div>
-                <canvas id="fx" aria-hidden="true"></canvas>
-                <div class="sheen" aria-hidden="true"></div>
-              </div>
-              <i class="edge e-front" aria-hidden="true"></i><i class="edge e-left" aria-hidden="true"></i><i class="edge e-right" aria-hidden="true"></i>
-            </div>
-            <div class="pieces" id="pieces" aria-hidden="true"></div>
-          </div>
+    <div class="stage" aria-label="Live preview">
+      <div class="glow" aria-hidden="true"></div>
+      <figure class="board-card">
+        <div class="board" id="board" role="img" aria-label="Live preview of the Cosmic look playing the Opera Game">
+          <img class="poster" id="poster" src="assets/boards/galaxy.jpg" alt="" width="800" height="800" fetchpriority="high">
+          <canvas id="shader" aria-hidden="true"></canvas>
+          <div class="flat" aria-hidden="true"></div>
+          <div class="pieces" id="pieces" aria-hidden="true"></div>
+          <canvas id="fx" aria-hidden="true"></canvas>
         </div>
-      </div>
-      <!-- One control row: the looks, Original vs ChessFX, pause. The look's name is announced to screen readers. -->
-      <div class="board-bar">
-        <div class="chips" id="chips" role="group" aria-label="Try a look"></div>
-        <span class="seg" role="group" aria-label="Compare">
-          <button type="button" id="mOriginal" aria-pressed="false">Original</button>
-          <button type="button" id="mFx" aria-pressed="true">ChessFX</button>
-        </span>
-        <button type="button" id="pause" class="icon-btn" aria-pressed="false" aria-label="Pause the preview">❚❚</button>
-        <span id="lookName" class="sr" aria-live="polite">Cosmic</span>
-      </div>
+        <figcaption class="board-bar">
+          <span id="lookName" class="look-name">Cosmic</span>
+          <span class="seg" role="group" aria-label="Compare">
+            <button type="button" id="mOriginal" aria-pressed="false">Original</button>
+            <button type="button" id="mFx" aria-pressed="true">ChessFX</button>
+          </span>
+          <button type="button" id="pause" class="icon-btn" aria-pressed="false" aria-label="Pause the preview">❚❚</button>
+        </figcaption>
+      </figure>
+      <img class="hero-piece" id="heroPiece" src="assets/pieces/maestro/wN.png" alt="" width="256" height="256" aria-hidden="true">
+      <div class="chips" id="chips" role="group" aria-label="Try a look"></div>
       <p class="apply-row" id="applyRow" hidden><button type="button" class="btn btn-go" id="applyBtn">Apply to my ChessFX</button><span id="applyMsg" role="status" aria-live="polite"></span></p>
     </div>
   </section>
@@ -91,40 +79,40 @@
   <section class="steps" id="how" aria-labelledby="stepsH">
     <h2 id="stepsH" class="sr">How it works</h2>
     <ol>
-      <li data-reveal><b>Add ChessFX</b><span>One click from the store. No sign-up.</span></li>
-      <li data-reveal><b>Pick a look</b><span>Choose from the welcome page or any time from the toolbar.</span></li>
-      <li data-reveal><b>Play on Chess.com</b><span>Your board, pieces, effects and sounds, in every game.</span></li>
+      <li><b>Add ChessFX</b><span>One click from the store. No sign-up.</span></li>
+      <li><b>Pick a look</b><span>Choose from the welcome page or any time from the toolbar.</span></li>
+      <li><b>Play on Chess.com</b><span>Your board, pieces, effects and sounds, in every game.</span></li>
     </ol>
   </section>
 
   <!-- Looks gallery: every animated board, each one clickable into the live board above. -->
   <section class="sec" id="looks" aria-labelledby="looksH">
-    <p class="eyebrow" data-reveal>21 animated boards</p>
-    <h2 id="looksH" data-reveal>Boards that move.</h2>
-    <p class="sub" data-reveal>Every board is drawn live, not a video: stars drift, water ripples, rain falls. Click one to try it on the board above.</p>
+    <p class="eyebrow">21 animated boards</p>
+    <h2 id="looksH">Boards that move.</h2>
+    <p class="sub">Every board is drawn live, not a video: stars drift, water ripples, rain falls. Click one to try it on the board above.</p>
     <div class="gallery" id="gallery"></div>
   </section>
 
   <section class="sec" id="features" aria-labelledby="featH">
-    <p class="eyebrow" data-reveal>Everything included</p>
-    <h2 id="featH" data-reveal>Make every move feel like yours.</h2>
+    <p class="eyebrow">Everything included</p>
+    <h2 id="featH">Make every move feel like yours.</h2>
     <div class="grid">
-      <article class="card" data-reveal><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 20h9M9 20c0-4 1-6 3-8-2 0-4-1-4-3 2-1 3-4 7-4 2 2 3 6 2 15"/></svg></span><h3>40+ piece sets</h3><p>Classic, modern, pixel and hand-drawn sets, mix and match white and black, or upload your own pieces and board.</p></article>
-      <article class="card" data-reveal><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></svg></span><h3>Effects that land</h3><p>Shatter, burst and lightning captures, a halo on check, and a cinematic finish on checkmate. Pieces hop, knights leap.</p></article>
-      <article class="card" data-reveal><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2"/></svg></span><h3>Sound packs</h3><p>Lichess sound sets, synth voices, or your own sounds. Quietly reads moves aloud if you want it to.</p></article>
-      <article class="card" data-reveal><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/></svg></span><h3>Focus and clocks</h3><p>Hide the noise while you play, a clear warning when time runs low, and a guard against accidental mouse-slip moves.</p></article>
-      <article class="card" data-reveal><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 20V11M11 20V5M17 20v-7M3 20h18"/></svg></span><h3>Your games</h3><p>A personal history with streaks, openings and stats, plus a one-click review on Lichess after the game.</p></article>
-      <article class="card" data-reveal><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg></span><h3>Saved looks</h3><p>Save your favourite combinations and switch with a shortcut. Optional account to keep them on every browser.</p></article>
+      <article class="card"><h3>40+ piece sets</h3><p>Classic, modern, pixel and hand-drawn sets, mix and match white and black, or upload your own pieces and board.</p></article>
+      <article class="card"><h3>Effects that land</h3><p>Shatter, burst and lightning captures, a halo on check, and a cinematic finish on checkmate. Pieces hop, knights leap.</p></article>
+      <article class="card"><h3>Sound packs</h3><p>Lichess sound sets, synth voices, or your own sounds. Quietly reads moves aloud if you want it to.</p></article>
+      <article class="card"><h3>Focus and clocks</h3><p>Hide the noise while you play, a clear warning when time runs low, and a guard against accidental mouse-slip moves.</p></article>
+      <article class="card"><h3>Your games</h3><p>A personal history with streaks, openings and stats, plus a one-click review on Lichess after the game.</p></article>
+      <article class="card"><h3>Saved looks</h3><p>Save your favourite combinations and switch with a shortcut. Optional account to keep them on every browser.</p></article>
     </div>
   </section>
 
   <section class="sec trust" id="fair" aria-labelledby="fairH">
     <div>
-      <p class="eyebrow" data-reveal>Fair play</p>
-      <h2 id="fairH" data-reveal>Cosmetic only. Always.</h2>
-      <p class="sub" data-reveal>ChessFX changes how Chess.com looks and sounds. It never helps you play.</p>
+      <p class="eyebrow">Fair play</p>
+      <h2 id="fairH">Cosmetic only. Always.</h2>
+      <p class="sub">ChessFX changes how Chess.com looks and sounds. It never helps you play.</p>
     </div>
-    <ul class="checks" data-reveal>
+    <ul class="checks">
       <li>No engine, evaluation, hints or move suggestions on Chess.com.</li>
       <li>Never makes or changes a move. Effects only react to moves already played.</li>
       <li>During your game it doesn't read the position; reviews and the Lichess hand-off appear only after it ends.</li>
@@ -134,11 +122,11 @@
 
   <section class="sec trust" aria-labelledby="privH">
     <div>
-      <p class="eyebrow" data-reveal>Privacy</p>
-      <h2 id="privH" data-reveal>Your data stays with you.</h2>
-      <p class="sub" data-reveal>No tracking and no ads. As a guest, nothing leaves your browser.</p>
+      <p class="eyebrow">Privacy</p>
+      <h2 id="privH">Your data stays with you.</h2>
+      <p class="sub">No tracking and no ads. As a guest, nothing leaves your browser.</p>
     </div>
-    <ul class="checks" data-reveal>
+    <ul class="checks">
       <li>Settings, looks and game history are saved in your browser.</li>
       <li>An account is optional and only syncs your ChessFX settings between browsers.</li>
       <li>Game history syncs only if you turn it on. Delete your account any time.</li>
@@ -146,18 +134,18 @@
   </section>
 
   <section class="sec" id="faq" aria-labelledby="faqH">
-    <h2 id="faqH" data-reveal>Questions</h2>
+    <h2 id="faqH">Questions</h2>
     <div class="faq">
-      <details data-reveal><summary>Is ChessFX allowed on Chess.com?</summary><p>ChessFX is purely cosmetic and never assists your play. Chess.com's terms restrict third-party software in general, so use it at your own risk. It is not affiliated with Chess.com.</p></details>
-      <details data-reveal><summary>Does it slow my board down?</summary><p>Animated boards run on your graphics card and lower their quality automatically if your computer struggles, in bullet games, or when you ask your system to reduce motion.</p></details>
-      <details data-reveal><summary>Which browsers does it work in?</summary><p>Chrome, Edge, Brave and other Chromium browsers on desktop. Chess.com's mobile app isn't supported.</p></details>
-      <details data-reveal><summary>Does it cost anything?</summary><p>No. Every board, piece set, effect and sound pack is free, and you don't need an account.</p></details>
-      <details data-reveal><summary>Why does it ask for access to chess.com?</summary><p>To restyle chess.com pages and swap Chess.com's own board, piece and sound files for the ones you pick. It doesn't run on other websites.</p></details>
-      <details data-reveal><summary>How do I remove it?</summary><p>Right-click the ChessFX icon and choose Remove. Chess.com goes back to exactly how it was.</p></details>
+      <details><summary>Is ChessFX allowed on Chess.com?</summary><p>ChessFX is purely cosmetic and never assists your play. Chess.com's terms restrict third-party software in general, so use it at your own risk. It is not affiliated with Chess.com.</p></details>
+      <details><summary>Does it slow my board down?</summary><p>Animated boards run on your graphics card and lower their quality automatically if your computer struggles, in bullet games, or when you ask your system to reduce motion.</p></details>
+      <details><summary>Which browsers does it work in?</summary><p>Chrome, Edge, Brave and other Chromium browsers on desktop. Chess.com's mobile app isn't supported.</p></details>
+      <details><summary>Does it cost anything?</summary><p>No. Every board, piece set, effect and sound pack is free, and you don't need an account.</p></details>
+      <details><summary>Why does it ask for access to chess.com?</summary><p>To restyle chess.com pages and swap Chess.com's own board, piece and sound files for the ones you pick. It doesn't run on other websites.</p></details>
+      <details><summary>How do I remove it?</summary><p>Right-click the ChessFX icon and choose Remove. Chess.com goes back to exactly how it was.</p></details>
     </div>
   </section>
 
-  <section class="final" id="get" data-reveal aria-labelledby="getH">
+  <section class="final" id="get" aria-labelledby="getH">
     <h2 id="getH">Upgrade your board.</h2>
     <p class="sub" id="getNote">Free, cosmetic only, and ready in one click.</p>
     <a class="btn btn-go btn-lg" data-store href="#get">Add to Chrome, it's free</a>
@@ -170,7 +158,7 @@
     <nav aria-label="Legal"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="#credits" id="creditsLink">Credits</a></nav>
   </div>
   <p class="disclaimer">ChessFX is an independent project, not affiliated with or endorsed by Chess.com. Chess.com is a trademark of its owner.</p>
-  <details id="credits" class="credits"><summary>Credits and licences</summary><p>Piece sets shown on this page come from the Lichess project and their authors:</p><ul id="creditList"></ul><p>Headline typeface: Inter Tight by The Inter Project Authors, under the SIL Open Font License 1.1 (<a href="fonts/OFL.txt">licence</a>).</p></details>
+  <details id="credits" class="credits"><summary>Credits and licences</summary><p>Piece sets shown on this page come from the Lichess project and their authors:</p><ul id="creditList"></ul></details>
 </footer>
 
 <script src="assets/data.js"></script>
