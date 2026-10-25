@@ -3,7 +3,7 @@
 (() => {
   // An email link that landed on the home page (no redirect page set): hand it to the confirm page.
   if (/access_token=|error_description=/.test(location.hash)) { location.replace('confirm.html' + location.hash); return; }
-  // Store pages: fill in once the listings are live. Until then the buttons scroll to the closing section, which says so.
+  // Store pages: fill in once the listings are live. Until then the page shows its built-in "Coming soon" wording.
   const STORE = { chrome: '', edge: '' };
   const D = window.SITE;
   const $ = (id) => document.getElementById(id);
@@ -12,15 +12,17 @@
   // ---------- store buttons: Chrome (also Brave and other Chromium browsers) or Edge ----------
   const isEdge = /\bEdg\//.test(navigator.userAgent);
   const store = isEdge ? STORE.edge || STORE.chrome : STORE.chrome;
-  for (const a of document.querySelectorAll('[data-store]')) {
-    if (store) { a.href = store; a.target = '_blank'; a.rel = 'noopener'; if (isEdge) a.textContent = a.textContent.replace('Chrome', 'Edge'); }
-  }
-  if (!store) {
-    $('getNote').textContent = 'ChessFX is launching soon on the Chrome Web Store. Free, cosmetic only, and ready in one click.';
-    const soon = document.createElement('p');
-    soon.className = 'soon';
-    soon.textContent = 'Coming soon to Chrome';
-    document.querySelector('#get [data-store]').replaceWith(soon);
+  // Once listed: each "Coming soon" pill becomes the store button, and the launch FAQ entry goes.
+  if (store) {
+    for (const p of document.querySelectorAll('[data-soon]')) {
+      const a = document.createElement('a');
+      a.className = `btn btn-${p.dataset.soon} btn-lg`;
+      a.href = store; a.target = '_blank'; a.rel = 'noopener';
+      a.textContent = `Add to ${isEdge ? 'Edge' : 'Chrome'}, it's free`;
+      p.replaceWith(a);
+    }
+    $('getNote').textContent = 'Free and cosmetic only. Works in Chrome, Edge and Brave.';
+    $('faqWhen').remove();
   }
 
   // The header gains a solid edge once the page scrolls under it.
@@ -61,12 +63,12 @@
   };
   // Last move: its two squares light up under the pieces.
   const marks = $('marks');
-  const mark = (from, to) => { marks.hidden = original; [from, to].forEach((sq, i) => { marks.children[i].style.cssText = `left:${(sq.charCodeAt(0) - 97) * 12.5}%;top:${(8 - +sq[1]) * 12.5}%`; }); };
+  const mark = (from, to) => { marks.hidden = original; [from, to].forEach((sq, i) => { marks.children[i].style.transform = `translate(${(sq.charCodeAt(0) - 97) * 100}%, ${(8 - +sq[1]) * 100}%)`; }); };
   const repaintPieces = () => { for (const img of layer.children) img.src = src(img.className.includes('w') ? 'w' : 'b', img.dataset.p); };
 
   // ---------- board: the shader (the extension's own GLSL from assets/shaders.js) ----------
   const cv = $('shader');
-  let gl = null, progs = {}, simT = 37, lastDraw = 0, raf = 0, visible = true, paused = rm.matches;
+  let gl = null, progs = {}, simT = 37, lastDraw = 0, raf = 0, visible = true, paused = false;
   const VS = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
   const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
   const initGL = () => {
@@ -112,7 +114,8 @@
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     board.classList.add('live');
   };
-  // Animate only while on screen, the tab is visible and nobody pressed pause (reduced motion starts paused).
+  // The preview plays on its own, also with reduced motion (which only drops the intro, bursts and ripples);
+  // the pause button stops it. It animates only while on screen, the tab is visible and nobody pressed pause.
   const running = () => !paused && visible && !document.hidden && !original;
   const tick = (now) => {
     raf = 0;
@@ -155,14 +158,16 @@
   };
 
   // ---------- the demo game (Morphy's Opera Game), looped ----------
+  const cap = $('moveCap');
   let step = 0, timer = 0;
   const kingOf = (color) => [...at].find(([, img]) => img.dataset.p === 'k' && img.classList.contains(color))?.[0];
   const play = () => {
     timer = 0;
     if (paused) return;
     if (!visible || document.hidden) { timer = setTimeout(play, 700); return; }
-    if (step >= D.demo.length) { timer = setTimeout(() => { step = 0; setup(!rm.matches); timer = setTimeout(play, rm.matches ? 0 : 1700); }, 3500); return; }
+    if (step >= D.demo.length) { timer = setTimeout(() => { step = 0; cap.textContent = 'Opera Game, Paris 1858'; setup(!rm.matches); timer = setTimeout(play, rm.matches ? 0 : 1700); }, 3500); return; }
     const m = D.demo[step++];
+    cap.textContent = `Move ${Math.ceil(step / 2)} of ${Math.ceil(D.demo.length / 2)} · Opera Game`;
     if (m.captured && at.has(m.to)) { const v = at.get(m.to); v.classList.add('gone'); setTimeout(() => v.remove(), 300); burst(m.to, 26, 1.4); }
     const img = at.get(m.from);
     at.delete(m.from);
@@ -196,6 +201,13 @@
   };
   board.addEventListener('animationend', (e) => { if (e.target === board && e.animationName === 'sweep') board.classList.remove('swap'); });
   $('heroPiece').addEventListener('animationend', (e) => { if (e.animationName === 'pop') e.target.classList.remove('swap'); });
+  const share = (lookId, boardId) => {
+    const u = new URL(location.href);
+    u.searchParams.set('look', lookId);
+    if (boardId) u.searchParams.set('board', boardId); else u.searchParams.delete('board');
+    u.hash = '';
+    history.replaceState(history.state, '', u);
+  };
   const chips = $('chips');
   for (const l of D.looks) {
     const b = document.createElement('button');
@@ -204,7 +216,7 @@
     b.innerHTML = `<img src="assets/boards/${l.board}.jpg" alt="" loading="lazy" width="30" height="30"><span></span>`;
     b.querySelector('span').textContent = l.name;
     b.setAttribute('aria-pressed', String(l === look));
-    b.addEventListener('click', () => { for (const c of chips.children) c.setAttribute('aria-pressed', String(c === b)); applyLook(l); });
+    b.addEventListener('click', () => { for (const c of chips.children) c.setAttribute('aria-pressed', String(c === b)); applyLook(l); share(l.id); });
     chips.append(b);
   }
   const gal = $('gallery');
@@ -218,6 +230,7 @@
     t.addEventListener('click', () => {
       for (const c of chips.children) c.setAttribute('aria-pressed', 'false');
       applyLook({ ...look, board: bd.id, L: bd.L, D: bd.D }, bd.name);
+      share(look.id, bd.id);
       $('top').scrollIntoView({ behavior: rm.matches ? 'auto' : 'smooth' });
     });
     gal.append(t);
@@ -267,8 +280,13 @@
   for (const c of D.credits) { const li = document.createElement('li'); li.textContent = `${c.set}: ${c.licence}`; $('creditList').append(li); }
 
   // ---------- start: poster first, shader when the page is idle ----------
+  // A shared link (?look=inferno, optionally &board=lava) opens on that look.
+  const q = new URLSearchParams(location.search);
+  const qLook = D.looks.find((l) => l.id === q.get('look')), qBoard = D.boards.find((bd) => bd.id === q.get('board'));
+  if (qLook) { look = qLook; pieceSet = { w: look.white, b: look.black }; for (const [i, c] of [...chips.children].entries()) c.setAttribute('aria-pressed', String(D.looks[i] === look && !qBoard)); }
   setup(!rm.matches);
-  applyLook(look);
+  if (qBoard) for (const c of chips.children) c.setAttribute('aria-pressed', 'false');
+  if (qBoard) applyLook({ ...look, board: qBoard.id, L: qBoard.L, D: qBoard.D }, qBoard.name); else applyLook(look);
   board.classList.remove('swap'); $('heroPiece').classList.remove('swap');
   const start = () => { if (initGL()) draw(); clearTimeout(timer); if (paused) setPaused(true); else { sync(); timer = setTimeout(play, 1600); } };
   if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 1200 }); else setTimeout(start, 300);

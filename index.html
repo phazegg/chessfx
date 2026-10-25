@@ -16,8 +16,8 @@
 <link rel="icon" href="assets/icon.png">
 <script>document.documentElement.classList.add('js')</script>
 <link rel="preload" as="image" href="assets/boards/galaxy.jpg" fetchpriority="high">
-<link rel="stylesheet" href="assets/tokens.css?v=3">
-<link rel="stylesheet" href="site.css?v=3">
+<link rel="stylesheet" href="assets/tokens.css?v=8">
+<link rel="stylesheet" href="site.css?v=8">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"SoftwareApplication","name":"ChessFX","applicationCategory":"BrowserApplication","operatingSystem":"Chrome, Edge, Brave","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Animated boards, piece sets, effects and sounds for Chess.com. Cosmetic only."}
 </script>
@@ -31,19 +31,19 @@
   </nav>
   <div class="acct" id="acct"></div>
 </header>
-<p class="announce">Every board, piece set and sound pack is free. No paywall, nothing to configure. <a href="#how">How it works</a></p>
 
 <main id="main">
   <!-- Hero: the product itself, live. -->
   <section class="hero" id="top">
     <div class="hero-copy">
-      <p class="eyebrow line">For Chess.com · Every move</p>
+      <p class="eyebrow line">Free extension for Chess.com</p>
       <h1>Your board.<br><span>Upgraded.</span></h1>
-      <p class="lede">Animated boards, 40+ piece sets, capture effects and sound packs for Chess.com. Try a look on the board here, then play with it in one click.</p>
+      <p class="lede">Animated boards, 40+ piece sets, capture effects and sound packs for Chess.com. Try any look on the board here.</p>
       <div class="ctas">
         <a class="btn btn-go btn-lg" href="#looks">Find your look <span aria-hidden="true">↗</span></a>
-        <a class="btn btn-ghost btn-lg" data-store href="#get">Get the extension</a>
+        <p class="soon" data-soon="ghost">Coming soon to Chrome</p>
       </div>
+      <p class="ctas-note">Works in Chrome, Edge and Brave. Cosmetic only: it never touches your moves.</p>
       <ul class="stats-row" aria-label="At a glance">
         <li><b>21</b><span>animated boards</span></li>
         <li><b>40+</b><span>piece sets</span></li>
@@ -52,8 +52,8 @@
     </div>
 
     <div class="stage" aria-label="Live preview">
-      <div class="glow" aria-hidden="true"></div>
       <div class="board-wrap">
+      <div class="glow" aria-hidden="true"></div>
       <figure class="board-card">
         <div class="board" id="board" role="img" aria-label="Live preview of the Cosmic look playing the Opera Game">
           <img class="poster" id="poster" src="assets/boards/galaxy.jpg" alt="" width="800" height="800" fetchpriority="high">
@@ -64,7 +64,7 @@
           <canvas id="fx" aria-hidden="true"></canvas>
         </div>
         <figcaption class="board-bar">
-          <span id="lookName" class="look-name">Cosmic</span>
+          <span class="look-name"><span id="lookName">Cosmic</span><small id="moveCap" aria-hidden="true">Opera Game, Paris 1858</small></span>
           <span class="seg" role="group" aria-label="Compare">
             <button type="button" id="mOriginal" aria-pressed="false">Original</button>
             <button type="button" id="mFx" aria-pressed="true">ChessFX</button>
@@ -83,7 +83,7 @@
   <section class="steps" id="how" aria-labelledby="stepsH">
     <h2 id="stepsH" class="sr">How it works</h2>
     <ol>
-      <li><b>Add ChessFX</b><span>One click from the store. No sign-up.</span></li>
+      <li><b>Add ChessFX</b><span>Free from the Chrome Web Store. No sign-up.</span></li>
       <li><b>Pick a look</b><span>Choose from the welcome page or any time from the toolbar.</span></li>
       <li><b>Play on Chess.com</b><span>Your board, pieces, effects and sounds, in every game.</span></li>
     </ol>
@@ -143,6 +143,7 @@
       <details><summary>Is ChessFX allowed on Chess.com?</summary><p>ChessFX is purely cosmetic and never assists your play. Chess.com's terms restrict third-party software in general, so use it at your own risk. It is not affiliated with Chess.com.</p></details>
       <details><summary>Does it slow my board down?</summary><p>Animated boards run on your graphics card and lower their quality automatically if your computer struggles, in bullet games, or when you ask your system to reduce motion.</p></details>
       <details><summary>Which browsers does it work in?</summary><p>Chrome, Edge, Brave and other Chromium browsers on desktop. Chess.com's mobile app isn't supported.</p></details>
+      <details id="faqWhen"><summary>When can I install it?</summary><p>ChessFX is launching soon on the Chrome Web Store. It will be free, and this page will link to it the day it's live.</p></details>
       <details><summary>Does it cost anything?</summary><p>No. Every board, piece set, effect and sound pack is free, and you don't need an account.</p></details>
       <details><summary>Why does it ask for access to chess.com?</summary><p>To restyle chess.com pages and swap Chess.com's own board, piece and sound files for the ones you pick. It doesn't run on other websites.</p></details>
       <details><summary>How do I remove it?</summary><p>Right-click the ChessFX icon and choose Remove. Chess.com goes back to exactly how it was.</p></details>
@@ -151,8 +152,8 @@
 
   <section class="final" id="get" aria-labelledby="getH">
     <h2 id="getH">Upgrade your board.</h2>
-    <p class="sub" id="getNote">Free, cosmetic only, and ready in one click.</p>
-    <a class="btn btn-go btn-lg" data-store href="#get">Add to Chrome, it's free</a>
+    <p class="sub" id="getNote">Free and cosmetic only. ChessFX is launching soon on the Chrome Web Store, for Chrome, Edge and Brave.</p>
+    <p class="soon" data-soon="go">Coming soon to Chrome</p>
   </section>
 </main>
 
@@ -165,13 +166,13 @@
   <details id="credits" class="credits"><summary>Credits and licences</summary><p>Piece sets shown on this page come from the Lichess project and their authors:</p><ul id="creditList"></ul></details>
 </footer>
 
-<script src="assets/data.js?v=3"></script>
-<script src="assets/shaders.js?v=3"></script>
-<script src="assets/catalog.js?v=3"></script>
-<script src="assets/presets.js?v=3"></script>
-<script src="assets/settings.js?v=3"></script>
-<script src="assets/cloud-config.js?v=3"></script>
-<script src="auth.js?v=3"></script>
-<script src="site.js?v=3" defer></script>
+<script src="assets/data.js?v=8"></script>
+<script src="assets/shaders.js?v=8"></script>
+<script src="assets/catalog.js?v=8"></script>
+<script src="assets/presets.js?v=8"></script>
+<script src="assets/settings.js?v=8"></script>
+<script src="assets/cloud-config.js?v=8"></script>
+<script src="auth.js?v=8"></script>
+<script src="site.js?v=8" defer></script>
 </body>
 </html>
