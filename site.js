@@ -66,7 +66,7 @@
 
   // ---------- board: the shader (the extension's own GLSL from assets/shaders.js) ----------
   const cv = $('shader');
-  let gl = null, progs = {}, simT = 37, lastDraw = 0, raf = 0, visible = true, paused = rm.matches;
+  let gl = null, progs = {}, simT = 37, lastDraw = 0, raf = 0, visible = true, paused = false;
   const VS = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
   const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
   const initGL = () => {
@@ -112,7 +112,8 @@
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     board.classList.add('live');
   };
-  // Animate only while on screen, the tab is visible and nobody pressed pause (reduced motion starts paused).
+  // The preview plays on its own, also with reduced motion (which only drops the intro, bursts and ripples);
+  // the pause button stops it. It animates only while on screen, the tab is visible and nobody pressed pause.
   const running = () => !paused && visible && !document.hidden && !original;
   const tick = (now) => {
     raf = 0;
