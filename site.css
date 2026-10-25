@@ -350,3 +350,9 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
   .look-name { flex: 1 1 100%; }
   .board-bar .seg { margin-left: auto; }
 }
+/* The look buttons are built by site.js after first paint: reserve their rows so the hero doesn't re-centre. */
+.js .chips { min-height: 88px; }
+@media (min-width: 921px) and (max-width: 1100px) { .js .chips { min-height: 136px; } }
+@media (max-width: 400px) { .js .chips { min-height: 184px; } }
+/* Phones: the "Coming soon" status spans the width, like the button above it. */
+@media (max-width: 620px) { .ctas .soon { width: 100%; justify-content: center; } }

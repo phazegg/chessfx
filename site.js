@@ -21,7 +21,7 @@
       a.textContent = `Add to ${isEdge ? 'Edge' : 'Chrome'}, it's free`;
       p.replaceWith(a);
     }
-    $('getNote').textContent = 'Free, cosmetic only, and ready in one click.';
+    $('getNote').textContent = 'Free and cosmetic only. Works in Chrome, Edge and Brave.';
     $('faqWhen').remove();
   }
 
