@@ -453,3 +453,16 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 .board-bar .chip-dice { margin-right: auto; }
 .board-bar .seg { margin-left: 0; }
 @media (max-width: 440px) { .board-bar .seg { flex: 1; } }
+/* The finale wall is bigger than the section on purpose: the section clips it (no sideways scroll). */
+.final { position: relative; overflow: hidden; }
+/* Phones: the bar in three tidy rows: name and move count, the compare toggle full width, then die, sound and pause. */
+@media (max-width: 440px) {
+  .look-name { flex-direction: column; align-items: flex-start; gap: 2px; }
+  #lookName { max-width: 100%; }
+  .board-bar .seg { flex: 1 1 100%; order: 2; }
+  .board-bar .chip-dice, #sound, #pause { order: 3; }
+  #sound { margin-left: auto; }
+}
+/* Narrower bars (small laptops, phones): the move count goes under the name; on phones a long name may wrap. */
+@media (min-width: 921px) and (max-width: 1100px) { .look-name { flex-direction: column; align-items: flex-start; gap: 2px; } }
+@media (max-width: 440px) { #lookName { white-space: normal; } }
