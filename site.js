@@ -36,7 +36,7 @@
   const START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
   let look = D.looks[0], at = new Map(), pieceSet = { w: look.white, b: look.black }, original = false, pieceOverride = null;
   const SETS = [...new Set(D.looks.map((l) => l.white))];
-  const setName = (id) => id.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  const setName = (id) => (id === 'cburnett' ? 'Classic' : id.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()));
   // What the board shows, in words: the look (or gallery board), plus the piece set when it was picked separately.
   const title = () => (look.label || look.name) + (pieceOverride ? ` · ${setName(pieceOverride)} pieces` : '');
   const src = (c, p) => `assets/pieces/${original ? 'cburnett' : pieceSet[c]}/${c}${p.toUpperCase()}.png`;
@@ -187,6 +187,7 @@
   };
 
   // ---------- gallery: the pointed-at tile plays its board live ----------
+  let lastPointer = '';
   const tcv = document.createElement('canvas');
   tcv.className = 'tile-live';
   tcv.setAttribute('aria-hidden', 'true');
@@ -297,11 +298,13 @@
       for (const c of chips.children) c.setAttribute('aria-pressed', 'false');
       applyLook({ ...look, board: bd.id, L: bd.L, D: bd.D }, bd.name);
       share();
+      tileLive(null);
       showBoard();
     });
+    t.addEventListener('pointerdown', (e) => { lastPointer = e.pointerType; });
     t.addEventListener('pointerenter', (e) => { if (e.pointerType !== 'touch') tileLive(t, bd); });
     t.addEventListener('pointerleave', () => tileLive(null));
-    t.addEventListener('focus', () => tileLive(t, bd));
+    t.addEventListener('focus', () => { if (lastPointer !== 'touch') tileLive(t, bd); });
     t.addEventListener('blur', () => tileLive(null));
     gal.append(t);
   }
