@@ -403,3 +403,53 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 .cmp-copy h2 { text-wrap: balance; }
 @media (min-width: 621px) and (max-width: 1100px) { .sets { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (max-width: 620px) { .sets { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .set { padding: 10px; } .set b { font-size: 14px; } }
+
+/* ===== A real game around the board: player bars, clocks, captures; sound; surprise; the finale wall ===== */
+.pbar { display: flex; align-items: center; gap: 10px; min-height: 34px; padding: 4px 4px; font-size: 13px; }
+.pbar:first-child { padding-top: 0; }
+.pname { flex: none; color: var(--cfx-text); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; }
+.pname small { margin-left: 6px; color: var(--cfx-text-3); font-weight: 600; }
+.caps { display: flex; flex: 1 1 auto; min-width: 0; overflow: hidden; }
+.caps img { width: 18px; height: 18px; margin-right: -5px; animation: capIn .35s cubic-bezier(.3, 1.4, .5, 1); }
+@keyframes capIn { from { scale: .2; opacity: 0; } }
+.clock { flex: none; min-width: 58px; padding: 3px 9px; border-radius: 7px; background: var(--cfx-ink-2); color: var(--cfx-text-3); font-weight: 800; font-size: 14px; font-variant-numeric: tabular-nums; text-align: center; transition: background-color .25s, color .25s; }
+.clock.on { background: #e9ece9; color: #101512; }
+.board.original ~ .pbar .caps img { filter: none; }
+@media (max-width: 440px) { .pname { max-width: 55%; font-size: 12px; } .pname small { display: none; } .clock { min-width: 50px; font-size: 13px; } }
+
+/* Sound toggle: speaker with waves when on, a cross when off. */
+#sound svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+#sound .spk { fill: currentColor; stroke: none; }
+#sound .on { display: none; }
+#sound[aria-pressed="true"] .on { display: inline; }
+#sound[aria-pressed="true"] .off { display: none; }
+#sound[aria-pressed="true"] { border-color: var(--cfx-accent); color: var(--cfx-accent); }
+.icon-btn { display: inline-grid; place-items: center; flex: none; }
+
+/* Surprise me: a dashed chip with a die that tumbles on each roll. */
+.chip-dice { border-style: dashed; padding-left: 10px; }
+.chip-dice svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+.chip-dice svg circle { fill: currentColor; stroke: none; }
+.chip-dice.roll svg { animation: roll .5s cubic-bezier(.3, 1.3, .5, 1); }
+@keyframes roll { from { rotate: -200deg; scale: .7; } }
+
+/* The finale: a tilted, slowly drifting wall of every board behind the closing call. */
+.final { isolation: isolate; }
+.wall { position: absolute; inset: -30% -10%; z-index: -1; display: grid; grid-template-columns: repeat(14, 120px); grid-auto-rows: 120px; gap: 14px; place-content: center; rotate: -10deg; opacity: .2; pointer-events: none;
+  -webkit-mask: radial-gradient(60% 55% at 50% 50%, transparent 20%, #000 70%); mask: radial-gradient(60% 55% at 50% 50%, transparent 20%, #000 70%); }
+.wall img { width: 120px; height: 120px; border-radius: 14px; object-fit: cover; }
+.wall.run { animation: drift 70s linear infinite alternate; }
+@keyframes drift { from { translate: -6% 0; } to { translate: 6% 0; } }
+
+@media (prefers-reduced-motion: reduce) { .wall.run, .caps img, .chip-dice.roll svg { animation: none; } .clock { transition: none; } }
+@media (forced-colors: active) { .clock.on { outline: 2px solid Highlight; } }
+/* The die is a compact round button (its name is in the label and tooltip), so the looks keep two rows on desktop. */
+.chip-dice { width: 40px; padding: 0; justify-content: center; border-radius: 50%; }
+.chip-dice span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+/* Board bar, two rows at every width: the look's name and move count, then the controls (die, compare, sound, pause). */
+.board-bar { flex-wrap: wrap; row-gap: 8px; }
+.look-name { flex: 1 1 100%; flex-direction: row; align-items: baseline; justify-content: space-between; gap: 12px; }
+.look-name small { flex: none; }
+.board-bar .chip-dice { margin-right: auto; }
+.board-bar .seg { margin-left: 0; }
+@media (max-width: 440px) { .board-bar .seg { flex: 1; } }
