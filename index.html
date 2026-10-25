@@ -16,8 +16,8 @@
 <link rel="icon" href="assets/icon.png">
 <script>document.documentElement.classList.add('js')</script>
 <link rel="preload" as="image" href="assets/boards/galaxy.jpg" fetchpriority="high">
-<link rel="stylesheet" href="assets/tokens.css?v=8">
-<link rel="stylesheet" href="site.css?v=8">
+<link rel="stylesheet" href="assets/tokens.css?v=9">
+<link rel="stylesheet" href="site.css?v=9">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"SoftwareApplication","name":"ChessFX","applicationCategory":"BrowserApplication","operatingSystem":"Chrome, Edge, Brave","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Animated boards, piece sets, effects and sounds for Chess.com. Cosmetic only."}
 </script>
@@ -27,7 +27,7 @@
 <header class="nav">
   <a class="brand" href="#top" aria-label="ChessFX home"><img src="assets/icon.png" alt="" width="28" height="28"><b>ChessFX</b><span class="tag">Free</span></a>
   <nav aria-label="Sections">
-    <a href="#looks">Looks</a><a href="#how">How it works</a><a href="#features">Features</a><a href="#fair">Fair play</a><a href="#faq">FAQ</a>
+    <a href="#looks">Looks</a><a href="#piece-sets">Pieces</a><a href="#how">How it works</a><a href="#features">Features</a><a href="#fair">Fair play</a><a href="#faq">FAQ</a>
   </nav>
   <div class="acct" id="acct"></div>
 </header>
@@ -89,12 +89,37 @@
     </ol>
   </section>
 
+  <!-- Before and after: the same position on Chess.com's default board and on the look picked above. -->
+  <section class="sec cmp-sec" id="compare" aria-labelledby="cmpH">
+    <div class="cmp-copy">
+      <p class="eyebrow">Before and after</p>
+      <h2 id="cmpH">Same game. Your board.</h2>
+      <p class="sub">Drag across the board to compare the default look with the one you picked above.</p>
+    </div>
+    <figure class="cmp-fig">
+    <div class="cmp" id="cmp" style="--pos: 50%">
+      <div class="cmp-layer cmp-orig" aria-hidden="true"><div class="cmp-pieces" id="cmpOrig"></div></div>
+      <div class="cmp-layer cmp-fx" aria-hidden="true"><img id="cmpPoster" src="assets/boards/galaxy.jpg" alt="" width="800" height="800" loading="lazy"><div class="cmp-pieces" id="cmpFx"></div></div>
+      <span class="cmp-handle" aria-hidden="true"></span>
+      <input class="cmp-range" id="cmpRange" type="range" min="0" max="100" value="50" aria-label="Compare Chess.com's default board with ChessFX">
+    </div>
+    <figcaption class="cmp-labels" aria-hidden="true"><span>&larr; Default</span><span id="cmpTag">Cosmic</span></figcaption>
+    </figure>
+  </section>
+
   <!-- Looks gallery: every animated board, each one clickable into the live board above. -->
   <section class="sec" id="looks" aria-labelledby="looksH">
     <p class="eyebrow">21 animated boards</p>
     <h2 id="looksH">Boards that move.</h2>
-    <p class="sub">Every board is drawn live, not a video: stars drift, water ripples, rain falls. Click one to try it on the board above.</p>
+    <p class="sub">Every board is drawn live, not a video: stars drift, water ripples, rain falls. Point at one to see it move, click to try it on the board above.</p>
     <div class="gallery" id="gallery"></div>
+  </section>
+
+  <section class="sec" id="piece-sets" aria-labelledby="piecesH">
+    <p class="eyebrow">40+ piece sets</p>
+    <h2 id="piecesH">Pieces with character.</h2>
+    <p class="sub">Eight of the sets in ChessFX. Click one to play the board above with it; mix it with any board.</p>
+    <div class="sets" id="sets" role="group" aria-label="Try a piece set"></div>
   </section>
 
   <section class="sec" id="features" aria-labelledby="featH">
@@ -166,13 +191,13 @@
   <details id="credits" class="credits"><summary>Credits and licences</summary><p>Piece sets shown on this page come from the Lichess project and their authors:</p><ul id="creditList"></ul></details>
 </footer>
 
-<script src="assets/data.js?v=8"></script>
-<script src="assets/shaders.js?v=8"></script>
-<script src="assets/catalog.js?v=8"></script>
-<script src="assets/presets.js?v=8"></script>
-<script src="assets/settings.js?v=8"></script>
-<script src="assets/cloud-config.js?v=8"></script>
-<script src="auth.js?v=8"></script>
-<script src="site.js?v=8" defer></script>
+<script src="assets/data.js?v=9"></script>
+<script src="assets/shaders.js?v=9"></script>
+<script src="assets/catalog.js?v=9"></script>
+<script src="assets/presets.js?v=9"></script>
+<script src="assets/settings.js?v=9"></script>
+<script src="assets/cloud-config.js?v=9"></script>
+<script src="auth.js?v=9"></script>
+<script src="site.js?v=9" defer></script>
 </body>
 </html>

@@ -77,7 +77,7 @@ window.CX_WEB = (() => {
     return rows && rows[0] ? rows[0] : null;
   };
   // Apply a look to the account: the newest stamp wins in the extension's merge (src/cloud.js), so it takes this one.
-  const applyLook = async (presetId, board) => {
+  const applyLook = async (presetId, board, pieces) => {
     const s = await session();
     if (!s) throw fail('auth', 'Sign in again.');
     const cur = await row();
@@ -85,6 +85,8 @@ window.CX_WEB = (() => {
     let settings = CX_SETTINGS.presetSettings(presetId, CX_SETTINGS.sanitize(data.cfx));
     // A board picked from the gallery on top of a look: that look, with this board (a Custom mix, like in Settings).
     if (board && 'fx:' + board !== settings.board.src) settings = CX_SETTINGS.sanitize({ ...settings, preset: 'custom', board: { ...settings.board, src: 'fx:' + board } });
+    // A piece set picked on the website on top of a look: that look, with these pieces (sanitize keeps only known sets).
+    if (pieces && 'lichess:' + pieces !== settings.pieces.white) settings = CX_SETTINGS.sanitize({ ...settings, preset: 'custom', pieces: { ...settings.pieces, white: 'lichess:' + pieces, black: 'lichess:' + pieces } });
     const next = { ...data, cfx: settings, stamps: { ...(data.stamps || {}), cfx: Date.now() } };
     await call('/rest/v1/user_state?on_conflict=user_id', { token: s.access_token, headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: { user_id: s.user.id, data: next, updated_at: new Date().toISOString() } });
     return settings;
