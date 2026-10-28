@@ -315,6 +315,7 @@
     cmpPaint();
     for (const c of $('sets').children) c.setAttribute('aria-pressed', String(c.dataset.set === pieceSet.w));
     if (original) setOriginal(false); else { repaintPieces(); draw(); }
+    capLoad();
     if (!rm.matches) {
       for (const i of layer.children) i.classList.remove('set');
       for (const el of [board, $('heroPiece')]) { el.classList.remove('swap'); void el.offsetWidth; el.classList.add('swap'); }
@@ -459,6 +460,7 @@
     parts = []; rings = []; g.clearRect(0, 0, fx.width, fx.height);
     if (on) marks.hidden = true;
     repaintPieces();
+    capLoad();
     sync();
   };
   $('mOriginal').addEventListener('click', () => setOriginal(true));
@@ -488,6 +490,73 @@
       } catch (e) { $('applyMsg').textContent = e.message; }
     });
   });
+
+  // ---------- features: a capture on the chosen look's own board, looping while it is on screen ----------
+  // A 4x4 corner of the board (a1-d4): the white knight hops b1-c3 and takes the bishop in a burst of the look's colours.
+  const capCv = $('capDemo'), capG = capCv.getContext('2d');
+  const capImg = { board: new Image(), n: new Image(), b: new Image() };
+  const CAP = 3.4, CS = capCv.width / 4;
+  let capParts = [], capRing = 0, capBoomed = false, capT0 = 0, capLast = 0, capRaf = 0, capSeen = false;
+  // New images load off to the side and swap in when ready, so a look switch never flashes an empty board.
+  const capStill = () => { if (!capRaf) capFrame(rm.matches ? 1.4 : 0); };
+  const capSwap = (k, url) => {
+    if (capImg[k].src.endsWith(url)) return;
+    const i = new Image();
+    i.onload = () => { capImg[k] = i; capStill(); };
+    i.src = url;
+  };
+  function capLoad() {
+    if (!original) capSwap('board', `assets/boards/${look.board}.jpg`);
+    capSwap('n', src('w', 'n')); capSwap('b', src('b', 'b'));
+    capStill();
+  }
+  const capSq = (c, r) => [c * CS, (3 - r) * CS];
+  const capDraw = (img, c, r, lift = 0, scale = 1, alpha = 1) => {
+    if (!img.complete || !img.naturalWidth || alpha <= 0) return;
+    const [x, y] = capSq(c, r), w = CS * scale;
+    capG.globalAlpha = alpha;
+    capG.drawImage(img, x + (CS - w) / 2, y + (CS - w) / 2 - lift, w, w);
+    capG.globalAlpha = 1;
+  };
+  const capFrame = (t, dt = 0) => {
+    const W = capCv.width;
+    if (original || !capImg.board.complete || !capImg.board.naturalWidth) {
+      // Original mode: a plain green corner, like the hero board.
+      for (let c = 0; c < 4; c++) for (let r = 0; r < 4; r++) { capG.fillStyle = (c + r) % 2 ? '#eeeed2' : '#769656'; capG.fillRect(c * CS, (3 - r) * CS, CS, CS); }
+    } else {
+      const iw = capImg.board.naturalWidth;
+      capG.drawImage(capImg.board, 0, iw / 2, iw / 2, iw / 2, 0, 0, W, W);
+    }
+    // Knight: waits, hops (rises and grows a little at the top), lands on the bishop's square.
+    const k = Math.min(1, Math.max(0, (t - 0.7) / 0.45)), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    const fade = t > CAP - 0.35 ? (CAP - t) / 0.35 : t < 0.25 ? t / 0.25 : 1;
+    if (t < 1.15) capDraw(capImg.b, 2, 2, 0, 1, fade);
+    else if (t < 1.4) capDraw(capImg.b, 2, 2, 0, 1 + (t - 1.15) * 1.6, 1 - (t - 1.15) / 0.25);
+    if (t >= 1.15 && !capBoomed) {
+      capBoomed = true; capRing = 1;
+      if (!rm.matches) for (let i = 0; i < 46; i++) { const a = Math.random() * Math.PI * 2, v = (0.35 + Math.random()) * CS * 2.4; capParts.push({ x: 2.5 * CS, y: 1.5 * CS, vx: Math.cos(a) * v, vy: Math.sin(a) * v - CS, r: CS * (0.03 + Math.random() * 0.05), c: look.palette[i % look.palette.length], life: 1 }); }
+    }
+    capG.globalCompositeOperation = 'lighter';
+    if (capRing > 0) { capRing = Math.max(0, capRing - dt * 1.4); capG.globalAlpha = capRing; capG.strokeStyle = look.palette[0]; capG.lineWidth = CS * 0.07; capG.beginPath(); capG.arc(2.5 * CS, 1.5 * CS, CS * (0.5 + (1 - capRing) * 0.9), 0, 7); capG.stroke(); }
+    capParts = capParts.filter((p) => (p.life -= dt * 1.1) > 0);
+    for (const p of capParts) { p.vy += W * 0.9 * dt; p.x += p.vx * dt; p.y += p.vy * dt; capG.globalAlpha = p.life; capG.fillStyle = p.c; capG.beginPath(); capG.arc(p.x, p.y, p.r, 0, 7); capG.fill(); }
+    capG.globalAlpha = 1; capG.globalCompositeOperation = 'source-over';
+    capDraw(capImg.n, 1 + e, 0 + 2 * e, Math.sin(Math.PI * k) * CS * 0.5, 1 + Math.sin(Math.PI * k) * 0.12, fade);
+  };
+  const capTick = (now) => {
+    capRaf = 0;
+    if (!capSeen || document.hidden || rm.matches) return;
+    const dt = Math.min((now - (capLast || now)) / 1000, 0.05); capLast = now;
+    let t = (now - capT0) / 1000;
+    if (t >= CAP) { capT0 = now; t = 0; capBoomed = false; capParts = []; }
+    capFrame(t, dt);
+    capRaf = requestAnimationFrame(capTick);
+  };
+  const capRun = () => { if (capSeen && !document.hidden && !rm.matches && !capRaf) { capT0 = capLast = performance.now(); capBoomed = false; capParts = []; capRaf = requestAnimationFrame(capTick); } };
+  new IntersectionObserver(([e]) => { capSeen = e.isIntersecting; capRun(); }).observe(capCv);
+  document.addEventListener('visibilitychange', capRun);
+  // Sound bars: a fixed waveform; each bar's phase for the hover animation.
+  [38, 62, 90, 54, 76, 100, 68, 44, 82, 58, 34, 70, 48, 26].forEach((h, k) => { const i = document.querySelectorAll('.art-sound i')[k]; if (i) { i.style.setProperty('--h', h); i.style.setProperty('--k', k); } });
 
   // ---------- the closing wall of boards ----------
   const wall = $('wall');

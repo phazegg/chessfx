@@ -16,8 +16,9 @@
 <link rel="icon" href="assets/icon.png">
 <script>document.documentElement.classList.add('js')</script>
 <link rel="preload" as="image" href="assets/boards/galaxy.jpg" fetchpriority="high">
-<link rel="stylesheet" href="assets/tokens.css?v=18">
-<link rel="stylesheet" href="site.css?v=18">
+<link rel="preload" as="font" type="font/woff2" href="fonts/archivo-var.woff2" crossorigin>
+<link rel="stylesheet" href="assets/tokens.css?v=19">
+<link rel="stylesheet" href="site.css?v=19">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"SoftwareApplication","name":"ChessFX","applicationCategory":"BrowserApplication","operatingSystem":"Chrome, Edge, Brave","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Animated boards, piece sets, effects and sounds for Chess.com. Cosmetic only."}
 </script>
@@ -36,19 +37,13 @@
   <!-- Hero: the product itself, live. -->
   <section class="hero" id="top">
     <div class="hero-copy">
-      <p class="eyebrow line">Free extension for Chess.com</p>
-      <h1>Your board.<br><span>Upgraded.</span></h1>
-      <p class="lede">Animated boards, 40+ piece sets, capture effects and sound packs for Chess.com. Try any look on the board here.</p>
+      <h1>Your board.<br>Upgraded.</h1>
+      <p class="lede">A free extension that gives Chess.com animated boards, 40+ piece sets, capture effects and sound packs. Try any look on the board here.</p>
       <div class="ctas">
         <a class="btn btn-go btn-lg" href="#looks">Find your look <span aria-hidden="true">↗</span></a>
         <p class="soon" data-soon="ghost">Coming soon to Chrome</p>
       </div>
       <p class="ctas-note">Works in Chrome, Edge and Brave. Cosmetic only: it never touches your moves.</p>
-      <ul class="stats-row" aria-label="At a glance">
-        <li><b>21</b><span>animated boards</span></li>
-        <li><b>40+</b><span>piece sets</span></li>
-        <li><b>0</b><span>ads or paywalls</span></li>
-      </ul>
     </div>
 
     <div class="stage" aria-label="Live preview">
@@ -86,16 +81,15 @@
   <section class="steps" id="how" aria-labelledby="stepsH">
     <h2 id="stepsH" class="sr">How it works</h2>
     <ol>
-      <li><b>Add ChessFX</b><span>Free from the Chrome Web Store. No sign-up.</span></li>
-      <li><b>Pick a look</b><span>Choose from the welcome page or any time from the toolbar.</span></li>
-      <li><b>Play on Chess.com</b><span>Your board, pieces, effects and sounds, in every game.</span></li>
+      <li><b>Add ChessFX</b> to Chrome, Edge or Brave. No sign-up.</li>
+      <li><b>Pick a look</b> on its welcome page, or later from the toolbar.</li>
+      <li><b>Play on Chess.com</b> as usual. Every game wears it.</li>
     </ol>
   </section>
 
   <!-- Before and after: the same position on a standard green board and on the look picked above. -->
   <section class="sec cmp-sec" id="compare" aria-labelledby="cmpH">
     <div class="cmp-copy">
-      <p class="eyebrow">Before and after</p>
       <h2 id="cmpH">Same game. Your board.</h2>
       <p class="sub">Drag the handle to compare a standard board with the look you picked above.</p>
     </div>
@@ -112,57 +106,71 @@
 
   <!-- Looks gallery: every animated board, each one clickable into the live board above. -->
   <section class="sec" id="looks" aria-labelledby="looksH">
-    <p class="eyebrow">21 animated boards</p>
     <h2 id="looksH">Boards that move.</h2>
-    <p class="sub">Every board is drawn live, not a video: stars drift, water ripples, rain falls. Pick one to try it on the board above.</p>
+    <p class="sub">All 21 are drawn live, not looped videos: stars drift, water ripples, rain falls. Pick one to try it on the board above.</p>
     <div class="gallery" id="gallery"></div>
   </section>
 
   <section class="sec" id="piece-sets" aria-labelledby="piecesH">
-    <p class="eyebrow">40+ piece sets</p>
     <h2 id="piecesH">Pieces with character.</h2>
     <p class="sub">Eight of the 40+ sets. Pick one to see it on the board above, then mix it with any board.</p>
     <div class="sets" id="sets" role="group" aria-label="Try a piece set"></div>
   </section>
 
-  <section class="sec" id="features" aria-labelledby="featH">
-    <p class="eyebrow">Everything included</p>
-    <h2 id="featH">Make every move feel like yours.</h2>
-    <div class="grid">
-      <article class="card"><h3>40+ piece sets</h3><p>Classic, modern, pixel and hand-drawn sets, mix and match white and black, or upload your own pieces and board.</p></article>
-      <article class="card"><h3>Effects that land</h3><p>Shatter, burst and lightning captures, a halo on check, and a cinematic finish on checkmate. Pieces hop, knights leap.</p></article>
-      <article class="card"><h3>Sound packs</h3><p>Lichess sound sets, synth voices, or your own sounds. Quietly reads moves aloud if you want it to.</p></article>
-      <article class="card"><h3>Focus and clocks</h3><p>Hide the noise while you play, a clear warning when time runs low, and a guard against accidental mouse-slip moves.</p></article>
-      <article class="card"><h3>Your games</h3><p>A personal history with streaks, openings and stats, plus a one-click review on Lichess after the game.</p></article>
-      <article class="card"><h3>Saved looks</h3><p>Save your favourite combinations and switch with a shortcut. Optional account to keep them on every browser.</p></article>
+  <section class="sec feat-sec" id="features" aria-labelledby="featH">
+    <h2 id="featH">More than a new skin.</h2>
+    <p class="sub">All of it free, and none of it touches your moves.</p>
+    <div class="feat-grid">
+      <article class="feat feat-main">
+        <div class="feat-art art-capture" aria-hidden="true"><canvas id="capDemo" width="360" height="360"></canvas></div>
+        <h3>Captures you can feel</h3>
+        <p>Shatter, burst and lightning captures, a halo on check and a proper finish on checkmate. Pieces hop, knights leap.</p>
+      </article>
+      <article class="feat">
+        <div class="feat-art art-clock" aria-hidden="true"><span class="clk">0:09</span></div>
+        <h3>A clock you notice</h3>
+        <p>A clear warning when time runs low, a focus mode that hides the noise, and a guard against mouse-slip moves.</p>
+      </article>
+      <article class="feat">
+        <div class="feat-art art-sound" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <h3>Sound packs</h3>
+        <p>Lichess sound sets, synth voices or your own recordings. It can read moves aloud too.</p>
+      </article>
+      <article class="feat">
+        <div class="feat-art art-games" aria-hidden="true"><svg viewBox="0 0 200 64" preserveAspectRatio="none"><path class="area" d="M0 50 L22 44 L44 47 L66 36 L88 39 L110 28 L132 31 L154 20 L176 22 L200 10 L200 64 L0 64 Z"/><path class="line" d="M0 50 L22 44 L44 47 L66 36 L88 39 L110 28 L132 31 L154 20 L176 22 L200 10"/></svg></div>
+        <h3>Your games, remembered</h3>
+        <p>Streaks, openings and rating goals from your own games, and a one-click review on Lichess afterwards.</p>
+      </article>
+      <article class="feat">
+        <div class="feat-art art-looks" aria-hidden="true"><img src="assets/boards/sunset.jpg" alt="" loading="lazy" width="80" height="80"><img src="assets/boards/ocean.jpg" alt="" loading="lazy" width="80" height="80"><img src="assets/boards/galaxy.jpg" alt="" loading="lazy" width="80" height="80"></div>
+        <h3>Looks you keep</h3>
+        <p>Save up to eight combinations and switch with a shortcut. An optional account carries them to every browser.</p>
+      </article>
     </div>
   </section>
 
-  <section class="sec trust" id="fair" aria-labelledby="fairH">
-    <div>
-      <p class="eyebrow">Fair play</p>
-      <h2 id="fairH">Cosmetic only. Always.</h2>
-      <p class="sub">ChessFX changes how Chess.com looks and sounds. It never helps you play.</p>
+  <section class="sec promise" id="fair" aria-labelledby="fairH">
+    <h2 id="fairH">Cosmetic only, private by default.</h2>
+    <div class="promise-cols">
+      <div>
+        <h3>Fair play</h3>
+        <ul class="plain">
+          <li>No engine, evaluation, hints or move suggestions on Chess.com.</li>
+          <li>It never makes or changes a move. Effects only react to moves already played.</li>
+          <li>During your game it doesn't read the position. Reviews and the Lichess hand-off appear only after it ends.</li>
+          <li>Chess.com's terms restrict third-party software, so use it at your own risk.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Your data</h3>
+        <ul class="plain">
+          <li>No tracking and no ads. As a guest, nothing leaves your browser.</li>
+          <li>Settings, looks and game history are saved in your browser.</li>
+          <li>An account is optional and only syncs your ChessFX settings between browsers.</li>
+          <li>Game history syncs only if you turn it on. You can delete your account any time.</li>
+        </ul>
+      </div>
     </div>
-    <ul class="checks">
-      <li>No engine, evaluation, hints or move suggestions on Chess.com.</li>
-      <li>Never makes or changes a move. Effects only react to moves already played.</li>
-      <li>During your game it doesn't read the position; reviews and the Lichess hand-off appear only after it ends.</li>
-      <li>Use it at your own risk under Chess.com's terms: they restrict third-party software.</li>
-    </ul>
-  </section>
-
-  <section class="sec trust" aria-labelledby="privH">
-    <div>
-      <p class="eyebrow">Privacy</p>
-      <h2 id="privH">Your data stays with you.</h2>
-      <p class="sub">No tracking and no ads. As a guest, nothing leaves your browser.</p>
-    </div>
-    <ul class="checks">
-      <li>Settings, looks and game history are saved in your browser.</li>
-      <li>An account is optional and only syncs your ChessFX settings between browsers.</li>
-      <li>Game history syncs only if you turn it on. Delete your account any time.</li>
-    </ul>
   </section>
 
   <section class="sec" id="faq" aria-labelledby="faqH">
@@ -192,16 +200,16 @@
     <nav aria-label="Legal"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="#credits" id="creditsLink">Credits</a></nav>
   </div>
   <p class="disclaimer">ChessFX is an independent project, not affiliated with or endorsed by Chess.com. Chess.com is a trademark of its owner.</p>
-  <details id="credits" class="credits"><summary>Credits and licences</summary><p>Piece sets shown on this page come from the Lichess project and their authors:</p><ul id="creditList"></ul></details>
+  <details id="credits" class="credits"><summary>Credits and licences</summary><p>Piece sets shown on this page come from the Lichess project and their authors:</p><ul id="creditList"></ul><p>Typeface: Archivo by Omnibus-Type, under the SIL Open Font License 1.1 (<a href="fonts/OFL.txt">licence</a>).</p></details>
 </footer>
 
-<script src="assets/data.js?v=18"></script>
-<script src="assets/shaders.js?v=18"></script>
-<script src="assets/catalog.js?v=18"></script>
-<script src="assets/presets.js?v=18"></script>
-<script src="assets/settings.js?v=18"></script>
-<script src="assets/cloud-config.js?v=18"></script>
-<script src="auth.js?v=18"></script>
-<script src="site.js?v=18" defer></script>
+<script src="assets/data.js?v=19"></script>
+<script src="assets/shaders.js?v=19"></script>
+<script src="assets/catalog.js?v=19"></script>
+<script src="assets/presets.js?v=19"></script>
+<script src="assets/settings.js?v=19"></script>
+<script src="assets/cloud-config.js?v=19"></script>
+<script src="auth.js?v=19"></script>
+<script src="site.js?v=19" defer></script>
 </body>
 </html>
