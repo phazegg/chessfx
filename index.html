@@ -17,8 +17,8 @@
 <script>document.documentElement.classList.add('js')</script>
 <link rel="preload" as="image" href="assets/boards/galaxy.jpg" fetchpriority="high">
 <link rel="preload" as="font" type="font/woff2" href="fonts/archivo-var.woff2" crossorigin>
-<link rel="stylesheet" href="assets/tokens.css?v=35">
-<link rel="stylesheet" href="site.css?v=35">
+<link rel="stylesheet" href="assets/tokens.css?v=41">
+<link rel="stylesheet" href="site.css?v=41">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"SoftwareApplication","name":"ChessFX","applicationCategory":"BrowserApplication","operatingSystem":"Chrome, Edge, Brave","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Animated boards, piece sets, effects and sounds for Chess.com. Cosmetic only."}
 </script>
@@ -35,10 +35,11 @@
 <a class="skip" href="#main">Skip to content</a>
 <header class="nav">
   <a class="brand" href="#top" aria-label="ChessFX home"><img src="assets/icon.png" alt="" width="28" height="28"><b>ChessFX</b><span class="tag">Free</span></a>
-  <nav aria-label="Sections">
-    <a href="#looks">Looks</a><a href="#how">How it works</a><a href="#features">Features</a><a href="#fair">Fair play</a><a href="#faq">FAQ</a>
+  <nav id="navMenu" aria-label="Sections">
+    <a href="#looks">Looks</a><a href="#how">How it works</a><a href="#features">Features</a><a href="#faq">FAQ</a>
   </nav>
   <div class="acct" id="acct"></div>
+  <button type="button" class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="navMenu" aria-label="Open the menu"><span></span><span></span></button>
 </header>
 
 <main id="main">
@@ -46,12 +47,12 @@
   <section class="hero" id="top">
     <div class="hero-copy">
       <h1>Your board.<br>Upgraded.</h1>
-      <p class="lede">A free extension that gives Chess.com animated boards, 40+ piece sets, capture effects and sound packs. Try any look on the board here.</p>
+      <p class="lede">Animated boards, 40+ piece sets, capture effects and sounds for Chess.com. Free, and it never touches your moves. Try every look on the board right here.</p>
       <div class="ctas">
         <a class="btn btn-go btn-lg" href="#looks">Find your look <span aria-hidden="true">↗</span></a>
         <p class="soon" data-soon="ghost">Coming soon to Chrome</p>
       </div>
-      <p class="ctas-note">Works in Chrome, Edge and Brave. Cosmetic only: it never touches your moves.</p>
+      <p class="ctas-note">For Chrome, Edge and Brave on desktop. No account needed.</p>
     </div>
 
     <div class="stage" aria-label="Live preview">
@@ -89,26 +90,29 @@
           <button type="button" id="pause" class="icon-btn" aria-pressed="false" aria-label="Pause the preview">❚❚</button>
         </div>
       </div>
+      <p class="hint" id="cardHint">Drag the board to turn it · Click a square · <kbd>←</kbd> <kbd>→</kbd> to change looks</p>
       <p class="apply-row" id="applyRow" hidden><button type="button" class="btn btn-go" id="applyBtn">Apply to my ChessFX</button><span id="applyMsg" role="status" aria-live="polite"></span></p>
     </div>
   </section>
 
   <!-- How it works: three steps, no account. -->
-  <section class="steps" id="how" aria-labelledby="stepsH">
-    <h2 id="stepsH" class="sr">How it works</h2>
+  <section class="sec steps" id="how" aria-labelledby="stepsH">
+    <h2 id="stepsH">Three steps. No sign-up.</h2>
     <ol>
-      <li><b>Add ChessFX</b> to Chrome, Edge or Brave. No sign-up.</li>
-      <li><b>Pick a look</b> on its welcome page, or later from the toolbar.</li>
-      <li><b>Play on Chess.com</b> as usual. Every game wears it.</li>
+      <li><b>Add ChessFX</b><span>Free on the Chrome Web Store at launch. Works in Chrome, Edge and Brave.</span></li>
+      <li><b>Pick a look</b><span>On the welcome page, or any time from the toolbar button.</span></li>
+      <li><b>Play on Chess.com</b><span>Every game wears it. Switch it off in one click.</span></li>
     </ol>
   </section>
 
-  <!-- Looks: the ready-made presets first; Boards and Pieces tabs to mix your own. -->
-  <section class="sec" id="looks" aria-labelledby="looksH">
+  <!-- Looks studio: choices on the left (presets first; Boards and Pieces tabs to mix your own), the live preview with
+       its before/after slider on the right. Picking something updates the preview in place: no jumping back up. -->
+  <section class="sec studio" id="looks" aria-labelledby="looksH">
+  <div class="studio-main">
     <div class="looks-head">
       <div>
         <h2 id="looksH">Pick a look.</h2>
-        <p class="sub">Each look is a board, a piece set and effects made to go together. Want your own mix? Swap the board or the pieces.</p>
+        <p class="sub">Each look is a board, a piece set and effects made to go together. Mix your own from the Boards and Pieces tabs; the preview follows every pick.</p>
       </div>
       <div class="tabs" role="tablist" aria-label="Browse looks, boards or pieces">
         <span class="tab-lens" aria-hidden="true"></span>
@@ -127,30 +131,29 @@
       <p class="panel-note">Eight of the 40+ sets in ChessFX. Pick one to put it on your current board.</p>
       <div class="sets" id="sets" role="group" aria-label="Piece sets"></div>
     </div>
+  </div>
+  <aside class="studio-preview" aria-labelledby="cmpH">
+    <div class="studio-sticky">
+      <div class="studio-head"><h3 id="cmpH"><span id="studioName">Cosmic</span></h3><p>Drag across the board to compare it with a standard one.</p></div>
+      <figure class="cmp-fig">
+      <div class="cmp" id="cmp" style="--pos: 50%">
+        <div class="cmp-layer cmp-orig" aria-hidden="true"><div class="cmp-pieces" id="cmpOrig"></div></div>
+        <div class="cmp-layer cmp-fx" aria-hidden="true"><img id="cmpPoster" src="assets/boards/galaxy.jpg" alt="" width="800" height="800" loading="lazy"><canvas id="cmpLive"></canvas><div class="cmp-pieces" id="cmpFx"></div></div>
+        <span class="cmp-handle" aria-hidden="true"></span>
+        <input class="cmp-range" id="cmpRange" type="range" min="0" max="100" value="50" aria-label="Compare a standard green board with ChessFX">
+      </div>
+      <figcaption class="cmp-labels" aria-hidden="true"><span>Standard</span><span id="cmpTag">Cosmic</span></figcaption>
+      </figure>
+    </div>
+  </aside>
   </section>
 
-  <!-- Before and after: the same position on a standard green board and on the look picked above. -->
-  <section class="sec cmp-sec" id="compare" aria-labelledby="cmpH">
-    <div class="cmp-copy">
-      <h2 id="cmpH">Same game. Your board.</h2>
-      <p class="sub">Drag the handle to compare a standard board with the look you picked above.</p>
-    </div>
-    <figure class="cmp-fig">
-    <div class="cmp" id="cmp" style="--pos: 50%">
-      <div class="cmp-layer cmp-orig" aria-hidden="true"><div class="cmp-pieces" id="cmpOrig"></div></div>
-      <div class="cmp-layer cmp-fx" aria-hidden="true"><img id="cmpPoster" src="assets/boards/galaxy.jpg" alt="" width="800" height="800" loading="lazy"><canvas id="cmpLive"></canvas><div class="cmp-pieces" id="cmpFx"></div></div>
-      <span class="cmp-handle" aria-hidden="true"></span>
-      <input class="cmp-range" id="cmpRange" type="range" min="0" max="100" value="50" aria-label="Compare a standard green board with ChessFX">
-    </div>
-    <figcaption class="cmp-labels" aria-hidden="true"><span>Standard</span><span id="cmpTag">Cosmic</span></figcaption>
-    </figure>
-  </section>
 
 
 
   <section class="sec feat-sec" id="features" aria-labelledby="featH">
     <h2 id="featH">More than a new skin.</h2>
-    <p class="sub">All of it free, and none of it touches your moves.</p>
+    <p class="sub">All of it free. None of it plays for you.</p>
     <div class="feat-grid">
       <article class="feat feat-main">
         <div class="feat-art art-capture" aria-hidden="true"><canvas id="capDemo" width="360" height="360"></canvas></div>
@@ -160,7 +163,7 @@
       <article class="feat">
         <div class="feat-art art-clock" aria-hidden="true"><span class="clk">0:09</span></div>
         <h3>A clock you notice</h3>
-        <p>A clear warning when time runs low, a focus mode that hides the noise, and a guard against mouse-slip moves.</p>
+        <p>A clear warning when time runs low, a focus mode that hides the noise, and an optional guard that ignores clicks that miss your own pieces.</p>
       </article>
       <article class="feat">
         <div class="feat-art art-sound" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
@@ -181,13 +184,14 @@
   </section>
 
   <section class="sec promise" id="fair" aria-labelledby="fairH">
-    <h2 id="fairH">Cosmetic only, private by default.</h2>
+    <h2 id="fairH">It never plays for you. It keeps your data to you.</h2>
     <div class="promise-cols">
       <div>
         <h3>Fair play</h3>
         <ul class="plain">
           <li>No engine, evaluation, hints or move suggestions on Chess.com.</li>
-          <li>It never makes or changes a move. Effects only react to moves already played.</li>
+          <li>It never makes or changes a move. Effects react only to moves already played.</li>
+          <li>The optional mouse-slip guard only ignores a click that isn't on one of your own pieces; drags always go through.</li>
           <li>During your game it doesn't read the position. Reviews and the Lichess hand-off appear only after it ends.</li>
           <li>Chess.com's terms restrict third-party software, so use it at your own risk.</li>
         </ul>
@@ -217,29 +221,34 @@
   </section>
 
   <section class="final" id="get" aria-labelledby="getH">
-    <div class="wall" id="wall" aria-hidden="true"></div>
-    <h2 id="getH">Make every game look like yours.</h2>
-    <p class="sub" id="getNote">Free and cosmetic only. ChessFX is launching soon on the Chrome Web Store, for Chrome, Edge and Brave.</p>
-    <p class="soon" data-soon="go">Coming soon to Chrome</p>
+    <div class="final-look" aria-hidden="true"><img id="finalImg" src="assets/boards/galaxy.jpg" alt="" width="400" height="400" loading="lazy"><div class="final-pieces" id="finalPieces"></div></div>
+    <div class="final-copy">
+      <h2 id="getH">Your board is ready.</h2>
+      <p class="final-pick">You picked <b id="finalName">Cosmic</b>. In ChessFX it's one click away.</p>
+      <p class="sub" id="getNote">Free and cosmetic only. ChessFX is launching soon on the Chrome Web Store, for Chrome, Edge and Brave.</p>
+      <p class="soon" data-soon="go">Coming soon to Chrome</p>
+    </div>
   </section>
 </main>
 
 <footer class="foot">
-  <div class="foot-row">
-    <span class="brand"><img src="assets/icon.png" alt="" width="22" height="22"><b>ChessFX</b></span>
-    <nav aria-label="Legal"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="#credits" id="creditsLink">Credits</a></nav>
+  <div class="foot-grid">
+    <div class="foot-brand"><span class="brand"><img src="assets/icon.png" alt="" width="24" height="24"><b>ChessFX</b></span><p>Animated boards, piece sets and effects for Chess.com. Free, and it never plays for you.</p></div>
+    <nav aria-label="Product"><p class="foot-h">Product</p><a href="#looks">Looks</a><a href="#features">Features</a><a href="#faq">Questions</a></nav>
+    <nav aria-label="Account"><p class="foot-h">Account</p><a href="account.html#signin">Sign in</a><a href="me.html">My account</a></nav>
+    <nav aria-label="Legal"><p class="foot-h">Legal</p><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="#credits" id="creditsLink">Credits</a></nav>
   </div>
   <p class="disclaimer">ChessFX is an independent project, not affiliated with or endorsed by Chess.com. Chess.com is a trademark of its owner.</p>
   <details id="credits" class="credits"><summary>Credits and licences</summary><p>Piece sets shown on this page come from the Lichess project and their authors:</p><ul id="creditList"></ul><p>Typeface: Archivo by Omnibus-Type, under the SIL Open Font License 1.1 (<a href="fonts/OFL.txt">licence</a>).</p></details>
 </footer>
 
-<script src="assets/data.js?v=35"></script>
-<script src="assets/shaders.js?v=35"></script>
-<script src="assets/catalog.js?v=35"></script>
-<script src="assets/presets.js?v=35"></script>
-<script src="assets/settings.js?v=35"></script>
-<script src="assets/cloud-config.js?v=35"></script>
-<script src="auth.js?v=35"></script>
-<script src="site.js?v=35" defer></script>
+<script src="assets/data.js?v=41"></script>
+<script src="assets/shaders.js?v=41"></script>
+<script src="assets/catalog.js?v=41"></script>
+<script src="assets/presets.js?v=41"></script>
+<script src="assets/settings.js?v=41"></script>
+<script src="assets/cloud-config.js?v=41"></script>
+<script src="auth.js?v=41"></script>
+<script src="site.js?v=41" defer></script>
 </body>
 </html>

@@ -225,15 +225,16 @@
   const fx = $('fx'), g = fx.getContext('2d');
   let parts = [], rings = [];
   const centre = (sq) => { const s = fx.width / 8; return [(sq.charCodeAt(0) - 97 + 0.5) * s, (8 - +sq[1] + 0.5) * s, s]; };
-  const burst = (sq, n, spread) => {
-    if (rm.matches || original) return;
+  // `asked`: the visitor clicked for it, so it plays even with reduced motion (that only calms automatic motion).
+  const burst = (sq, n, spread, asked) => {
+    if ((rm.matches && !asked) || original) return;
     const [x, y, s] = centre(sq);
     for (let i = 0; i < n; i++) {
       const a = Math.random() * Math.PI * 2, v = (0.4 + Math.random()) * s * spread;
       parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - s * 0.6, r: s * (0.04 + Math.random() * 0.05), c: look.palette[i % look.palette.length], life: 1 });
     }
   };
-  const ring = (sq, color) => { if (!rm.matches && !original) rings.push({ sq, c: color, life: 1 }); };
+  const ring = (sq, color, asked) => { if ((!rm.matches || asked) && !original) rings.push({ sq, c: color, life: 1 }); };
   let lastFx = 0;
   const fxTick = (now) => {
     const dt = Math.min((now - (lastFx || now)) / 1000, 0.05); lastFx = now;
@@ -315,6 +316,7 @@
     if (r.bottom <= 0 || r.top >= innerHeight || r.right <= 0 || r.left >= innerWidth) return;
     const pr = tprog(tBoard.id);
     if (!pr) return;
+    if (tLast && now - tLast < 1000 / 30 - 2) { tRaf = requestAnimationFrame(tileFrame); return; }
     tT += Math.min(now - (tLast || now), 100) / 1000; tLast = now;
     tgl.viewport(0, 0, tcv.width, tcv.height);
     tgl.useProgram(pr.p);
@@ -339,8 +341,8 @@
     look = { ...l, label: label || l.name };
     if (pieceOverride === l.white) pieceOverride = null;
     pieceSet = pieceOverride ? { w: pieceOverride, b: pieceOverride } : { w: l.white, b: l.black };
-    hero.style.setProperty('--tint', l.palette[0] || l.glowW);
-    hero.style.setProperty('--tint2', l.palette[1] || l.glowB);
+    document.documentElement.style.setProperty('--tint', l.palette[0] || l.glowW);
+    document.documentElement.style.setProperty('--tint2', l.palette[1] || l.glowB);
     board.style.setProperty('--glow-w', l.glowW);
     board.style.setProperty('--glow-b', l.glowB);
     $('poster').src = `assets/boards/${l.board}.jpg`;
@@ -349,19 +351,18 @@
     $('applyMsg').textContent = '';
     board.setAttribute('aria-label', `Live preview of the ${title()} look playing the Opera Game`);
     cmpPaint();
+    $('studioName').textContent = title();
+    finalPaint();
     for (const c of $('sets').children) c.setAttribute('aria-pressed', String(c.dataset.set === pieceSet.w));
     if (original) setOriginal(false); else { repaintPieces(); draw(); }
     capLoad();
     paintMix();
-    if (!rm.matches) {
+    if (!rm.matches && started) {
       for (const i of layer.children) i.classList.remove('set');
       board.classList.remove('swap'); void board.offsetWidth; board.classList.add('swap');
     }
   };
   board.addEventListener('animationend', (e) => { if (e.target === board && e.animationName === 'sweep') board.classList.remove('swap'); });
-  // After picking a board or piece set further down: bring the board itself into view (on phones the hero's top is
-  // the headline, far above the board).
-  const showBoard = () => $('board').scrollIntoView({ behavior: rm.matches ? 'auto' : 'smooth', block: 'center' });
   const share = () => {
     const base = D.looks.find((x) => x.id === look.id) || D.looks[0];
     const u = new URL(location.href);
@@ -379,6 +380,7 @@
     b.className = 'chip';
     b.dataset.look = l.id;
     b.title = l.name;
+    b.dataset.name = l.name;
     b.innerHTML = `<img src="assets/boards/${l.board}.jpg" alt="" loading="lazy" width="30" height="30"><span></span>`;
     b.querySelector('span').textContent = l.name;
     b.setAttribute('aria-pressed', String(l === look));
@@ -418,7 +420,7 @@
       applyLook({ ...look, board: bd.id, L: bd.L, D: bd.D }, bd.name);
       share();
       tileLive(null);
-      showBoard();
+      studioView();
     });
     t.addEventListener('pointerdown', (e) => { lastPointer = e.pointerType; });
     t.addEventListener('pointerenter', (e) => { if (e.pointerType !== 'touch') tileLive(t, bd); });
@@ -445,6 +447,8 @@
     return h;
   };
   const presetsBox = $('presets');
+  // On narrow screens the preview sits above the choices: after a pick, bring it into view (desktop keeps it sticky).
+  const studioView = () => { if (matchMedia('(max-width: 960px)').matches) $('cmp').scrollIntoView({ behavior: rm.matches ? 'auto' : 'smooth', block: 'center' }); };
   const usePreset = (l) => {
     pieceOverride = null;
     for (const c of lookChips()) c.setAttribute('aria-pressed', String(c.dataset.look === l.id));
@@ -459,7 +463,7 @@
     b.innerHTML = `<span class="preset-art" style="--glow-w:${l.glowW};--glow-b:${l.glowB}" aria-hidden="true"><img class="preset-board" src="assets/boards/${l.board}.jpg" alt="" loading="lazy" width="400" height="400"><span class="preset-pieces">${miniPieces({ w: l.white, b: l.black })}</span></span><span class="preset-text"><b></b><small></small></span>`;
     b.querySelector('b').textContent = l.name;
     b.querySelector('small').textContent = l.blurb;
-    b.addEventListener('click', () => { usePreset(l); showBoard(); });
+    b.addEventListener('click', () => { usePreset(l); studioView(); });
     presetsBox.append(b);
   }
   // Tabs: click, or arrow keys between them (the selected tab is the one in the tab order).
@@ -524,7 +528,7 @@
       pieceOverride = id;
       applyLook(look, look.label);
       share();
-      showBoard();
+      studioView();
     });
     setsBox.append(b);
   }
@@ -561,6 +565,7 @@
   };
   cmpFill($('cmpOrig'), { w: 'cburnett', b: 'cburnett' });
   function cmpPaint() {
+    $('cmpLive').classList.remove('on');
     $('cmpPoster').src = `assets/boards/${look.board}.jpg`;
     $('cmpTag').textContent = look.label || look.name;
     cmp.style.setProperty('--glow-w', look.glowW); cmp.style.setProperty('--glow-b', look.glowB);
@@ -714,7 +719,7 @@
         T.tx = base.x;
         wake();
       } else if (d.sq && e.type === 'pointerup' && running()) {
-        burst(d.sq, 24, 1.3); ring(d.sq, look.palette[0]); sfx('capture');
+        burst(d.sq, 24, 1.3, true); ring(d.sq, look.palette[0], true); sfx('capture');
       }
     };
     card.addEventListener('pointerup', release);
@@ -790,10 +795,30 @@
   // Sound bars: a fixed waveform; each bar's phase for the hover animation.
   [38, 62, 90, 54, 76, 100, 68, 44, 82, 58, 34, 70, 48, 26].forEach((h, k) => { const i = document.querySelectorAll('.art-sound i')[k]; if (i) { i.style.setProperty('--h', h); i.style.setProperty('--k', k); } });
 
-  // ---------- the closing wall of boards ----------
-  const wall = $('wall');
-  for (const bd of [...D.boards, ...D.boards]) { const i = document.createElement('img'); i.src = `assets/boards/${bd.id}.jpg`; i.alt = ''; i.loading = 'lazy'; i.width = i.height = 120; wall.append(i); }
-  new IntersectionObserver(([e]) => wall.classList.toggle('run', e.isIntersecting)).observe($('get'));
+  // ---------- the closing: the visitor's own look, ready to take to Chess.com ----------
+  function finalPaint() {
+    $('finalImg').src = `assets/boards/${look.board}.jpg`;
+    $('finalPieces').innerHTML = miniPieces(pieceSet);
+    $('finalPieces').style.setProperty('--glow-w', look.glowW); $('finalPieces').style.setProperty('--glow-b', look.glowB);
+    $('finalName').textContent = title();
+  }
+
+  // ---------- keyboard: left/right arrows step through the looks while the hero is on screen ----------
+  addEventListener('keydown', (e) => {
+    if (!visible || e.defaultPrevented || e.shiftKey || e.altKey || e.ctrlKey || e.metaKey || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
+    if (e.target.closest && e.target.closest('input, textarea, select, [role="tab"], [contenteditable], .tabs')) return;
+    e.preventDefault();
+    const i = Math.max(0, D.looks.findIndex((x) => x.id === look.id)), n = D.looks.length;
+    usePreset(D.looks[(i + (e.key === 'ArrowRight' ? 1 : -1) + n) % n]);
+  });
+
+  // ---------- the hint under the board matches the device; the menu for narrow screens ----------
+  if (!matchMedia('(hover: hover) and (pointer: fine)').matches) $('cardHint').textContent = 'Swipe the board sideways to spin it · Tap a square';
+  const menuBtn = $('menuBtn');
+  const setMenu = (open) => { nav.classList.toggle('open', open); menuBtn.setAttribute('aria-expanded', String(open)); menuBtn.setAttribute('aria-label', open ? 'Close the menu' : 'Open the menu'); };
+  menuBtn.addEventListener('click', () => { const open = !nav.classList.contains('open'); setMenu(open); if (open) $('navMenu').querySelector('a').focus(); });
+  $('navMenu').addEventListener('click', (e) => { if (e.target.closest('a')) setMenu(false); });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && nav.classList.contains('open')) { setMenu(false); menuBtn.focus(); } });
 
   // ---------- credits ----------
   for (const c of D.credits) { const li = document.createElement('li'); li.textContent = `${c.set}: ${c.licence}`; $('creditList').append(li); }

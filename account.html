@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sign in · ChessFX</title>
 <link rel="icon" href="assets/icon.png">
-<link rel="stylesheet" href="assets/tokens.css?v=35">
-<link rel="stylesheet" href="assets/ui.css?v=35">
-<link rel="stylesheet" href="assets/account.css?v=35">
-<link rel="stylesheet" href="site.css?v=35">
+<link rel="stylesheet" href="assets/tokens.css?v=41">
+<link rel="stylesheet" href="assets/ui.css?v=41">
+<link rel="stylesheet" href="assets/account.css?v=41">
+<link rel="stylesheet" href="site.css?v=41">
 </head>
 <body>
 <header class="nav"><a class="brand" href="index.html"><img src="assets/icon.png" alt="" width="28" height="28"><b>ChessFX</b></a><div class="acct" id="acct"></div></header>
@@ -41,10 +41,10 @@
         <input id="email" type="email" autocomplete="email" required aria-describedby="emailErr">
         <small id="emailErr" class="a-err"></small>
       </label>
-      <label class="a-field"><span class="a-labelrow">Password <button type="button" id="toForgot" class="a-link a-small">Forgot password?</button></span>
+      <div class="a-field"><span class="a-labelrow"><label for="password">Password</label> <button type="button" id="toForgot" class="a-link a-small">Forgot password?</button></span>
         <span class="a-pw"><input id="password" type="password" required aria-describedby="pwErr pwRules"><button type="button" id="showPw" class="a-link" aria-pressed="false">Show</button></span>
         <small id="pwErr" class="a-err"></small>
-      </label>
+      </div>
       <ul id="pwRules" class="a-rules" aria-label="Password rules">
         <li data-rule="len">At least 8 characters</li>
         <li data-rule="mail">Not your email</li>
@@ -89,11 +89,11 @@
   </section>
   <p class="a-foot">ChessFX is an independent extension, not affiliated with Chess.com.</p>
 </main>
-<script src="assets/catalog.js?v=35"></script>
-<script src="assets/presets.js?v=35"></script>
-<script src="assets/settings.js?v=35"></script>
-<script src="assets/cloud-config.js?v=35"></script>
-<script src="auth.js?v=35"></script>
-<script src="account-page.js?v=35"></script>
+<script src="assets/catalog.js?v=41"></script>
+<script src="assets/presets.js?v=41"></script>
+<script src="assets/settings.js?v=41"></script>
+<script src="assets/cloud-config.js?v=41"></script>
+<script src="auth.js?v=41"></script>
+<script src="account-page.js?v=41"></script>
 </body>
 </html>
