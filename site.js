@@ -8,6 +8,10 @@
   const D = window.SITE;
   const $ = (id) => document.getElementById(id);
   const rm = matchMedia('(prefers-reduced-motion: reduce)');
+  const hero = document.querySelector('.hero');
+  // URL backdrop filters are enabled only in Chromium; parsing support alone also passes in some other engines.
+  const chromium = navigator.userAgentData?.brands.some((b) => /Chromium/.test(b.brand)) || /Chrome|Chromium|Edg\//.test(navigator.userAgent);
+  if (chromium && window.SVGFEDisplacementMapElement && CSS.supports('backdrop-filter', 'url(#glassRefraction) blur(6px) saturate(1.5)') && CSS.supports('clip-path', 'polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0)')) hero.classList.add('glass-refract');
 
   // ---------- store buttons: Chrome (also Brave and other Chromium browsers) or Edge ----------
   const isEdge = /\bEdg\//.test(navigator.userAgent);
@@ -25,7 +29,7 @@
     $('faqWhen').remove();
   }
 
-  // The header gains a solid edge once the page scrolls under it.
+  // The floating header becomes a little more opaque as the page scrolls under it.
   const nav = document.querySelector('.nav');
   const onScroll = () => nav.classList.toggle('scrolled', scrollY > 8);
   addEventListener('scroll', onScroll, { passive: true });
@@ -335,11 +339,12 @@
     look = { ...l, label: label || l.name };
     if (pieceOverride === l.white) pieceOverride = null;
     pieceSet = pieceOverride ? { w: pieceOverride, b: pieceOverride } : { w: l.white, b: l.black };
+    hero.style.setProperty('--tint', l.palette[0] || l.glowW);
+    hero.style.setProperty('--tint2', l.palette[1] || l.glowB);
     board.style.setProperty('--glow-w', l.glowW);
     board.style.setProperty('--glow-b', l.glowB);
     $('poster').src = `assets/boards/${l.board}.jpg`;
     $('lookName').textContent = title();
-    $('heroPiece').src = `assets/pieces/${pieceSet.w}/wN.png`;
     $('backImg').src = `assets/boards/${look.board}.jpg`; $('backName').textContent = title();
     $('applyMsg').textContent = '';
     board.setAttribute('aria-label', `Live preview of the ${title()} look playing the Opera Game`);
@@ -350,11 +355,10 @@
     paintMix();
     if (!rm.matches) {
       for (const i of layer.children) i.classList.remove('set');
-      for (const el of [board, $('heroPiece')]) { el.classList.remove('swap'); void el.offsetWidth; el.classList.add('swap'); }
+      board.classList.remove('swap'); void board.offsetWidth; board.classList.add('swap');
     }
   };
   board.addEventListener('animationend', (e) => { if (e.target === board && e.animationName === 'sweep') board.classList.remove('swap'); });
-  $('heroPiece').addEventListener('animationend', (e) => { if (e.animationName === 'pop') e.target.classList.remove('swap'); });
   // After picking a board or piece set further down: bring the board itself into view (on phones the hero's top is
   // the headline, far above the board).
   const showBoard = () => $('board').scrollIntoView({ behavior: rm.matches ? 'auto' : 'smooth', block: 'center' });
@@ -398,7 +402,7 @@
     share();
     dice.classList.remove('roll'); void dice.offsetWidth; dice.classList.add('roll');
   });
-  // It sits with the board's controls (the look buttons stay two rows).
+  // The die shares the steady glass dock with the other preview controls.
   $('mOriginal').parentElement.before(dice);
   const gal = $('gallery');
   for (const bd of D.boards) {
@@ -460,10 +464,23 @@
   }
   // Tabs: click, or arrow keys between them (the selected tab is the one in the tab order).
   const tabs = [...document.querySelectorAll('#looks [role="tab"]')];
+  const tabTrack = tabs[0].parentElement, tabLens = tabTrack.querySelector('.tab-lens');
+  const positionTabLens = () => {
+    const selected = tabs.find((t) => t.getAttribute('aria-selected') === 'true');
+    tabLens.style.width = selected.offsetWidth + 'px';
+    tabLens.style.transform = `translateX(${selected.offsetLeft}px)`;
+    tabTrack.classList.add('lens-ready');
+  };
   const showTab = (t, focus) => {
     for (const x of tabs) { const on = x === t; x.setAttribute('aria-selected', String(on)); x.tabIndex = on ? 0 : -1; $(x.getAttribute('aria-controls')).hidden = !on; }
+    positionTabLens();
     if (focus) t.focus();
   };
+  positionTabLens();
+  addEventListener('resize', positionTabLens);
+  // Font loading and responsive wrapping can change segment widths independently of the viewport.
+  new ResizeObserver(positionTabLens).observe(tabTrack);
+  document.fonts.ready.then(positionTabLens);
   tabs.forEach((t, i) => {
     t.addEventListener('click', () => showTab(t));
     t.addEventListener('keydown', (e) => {
@@ -607,7 +624,7 @@
   // ---------- the hero card: leans toward the pointer, spins a full turn when dragged, bursts where you click ----------
   // One spring per axis; the loop runs only while the card is moving. It moves only when you move the pointer, so it
   // also runs with reduced motion, just without the bounce (critically damped).
-  const card = document.querySelector('.board-card'), knight = $('heroPiece');
+  const card = document.querySelector('.board-card');
   const fineHover = matchMedia('(hover: hover) and (pointer: fine)');
   const rest = () => ({ x: 0, y: 0 });
   const T = { x: rest().x, y: rest().y, vx: 0, vy: 0, tx: rest().x, ty: rest().y };
@@ -617,9 +634,6 @@
   const paintCard = () => {
     card.style.setProperty('--rx', T.x.toFixed(2) + 'deg');
     card.style.setProperty('--ry', T.y.toFixed(2) + 'deg');
-    const yaw = ((T.y + 180) % 360 + 360) % 360 - 180;
-    knight.style.setProperty('--kx', clampN(-yaw * 0.8, 22).toFixed(1) + 'px');
-    knight.style.setProperty('--ky', clampN(T.x * 0.8, 16).toFixed(1) + 'px');
   };
   const stepCard = (now) => {
     cardRaf = 0;
@@ -645,11 +659,9 @@
       card.style.setProperty('--gx', (50 + nx * 45).toFixed(1) + '%');
       card.style.setProperty('--gy', (50 + ny * 45).toFixed(1) + '%');
       card.style.setProperty('--go', 1);
-      const kr = knight.getBoundingClientRect();
-      knight.classList.toggle('face-right', e.clientX > kr.left + kr.width / 2);
       wake();
     });
-    document.documentElement.addEventListener('pointerleave', () => { if (!drag) { aimRest(); knight.classList.remove('face-right'); } });
+    document.documentElement.addEventListener('pointerleave', () => { if (!drag) aimRest(); });
     addEventListener('resize', () => { if (!drag) aimRest(); });
     // Drag sideways to spin (vertical drags still scroll the page on touch screens); let go and it keeps turning,
     // then lands facing front. A press that doesn't move is a click: a burst from the square under it.
@@ -781,7 +793,7 @@
   setup(!rm.matches);
   if (qBoard) for (const c of lookChips()) c.setAttribute('aria-pressed', 'false');
   if (qBoard) applyLook({ ...look, board: qBoard.id, L: qBoard.L, D: qBoard.D }, qBoard.name); else applyLook(look);
-  board.classList.remove('swap'); $('heroPiece').classList.remove('swap');
+  board.classList.remove('swap');
   const start = () => { started = true; if (initGL()) draw(); clearTimeout(timer); if (paused) setPaused(true); else { sync(); timer = setTimeout(play, 1600); } };
   if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 1200 }); else setTimeout(start, 300);
 })();

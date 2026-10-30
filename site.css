@@ -1,6 +1,6 @@
 /* ChessFX website. Colours, radii and type come from the extension's own tokens (assets/tokens.css, html.cfx-app). */
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+html { scroll-behavior: smooth; }
 body { margin: 0; background: var(--cfx-env, var(--cfx-ink-0)); background-attachment: fixed; color: var(--cfx-text); font: 400 16px/1.6 var(--cfx-font); -webkit-font-smoothing: antialiased; }
 a { color: inherit; }
 h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
@@ -18,8 +18,6 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 .btn-lg { min-height: 52px; padding: 13px 24px; font-size: 17px; }
 
 /* Nav */
-.nav { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 24px; padding: 12px max(20px, calc((100% - 1180px) / 2)); background: color-mix(in srgb, var(--cfx-ink-0) 82%, transparent); border-bottom: 1px solid var(--cfx-line); }
-@supports (backdrop-filter: blur(1px)) { .nav { backdrop-filter: blur(14px); } }
 .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-size: 18px; }
 .nav nav { display: flex; gap: 22px; margin-left: auto; }
 .nav nav a { color: var(--cfx-text-2); text-decoration: none; font-weight: 600; font-size: 15px; }
@@ -50,9 +48,8 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 #fx { pointer-events: none; }
 .board-bar { display: flex; align-items: center; gap: 12px; padding: 12px 4px 2px; }
 .look-name { font-weight: 800; font-size: 17px; margin-right: auto; }
-.seg { display: inline-flex; padding: 3px; border-radius: 10px; background: var(--cfx-ink-2); border: 1px solid var(--cfx-line); }
-.seg button { min-height: 32px; padding: 4px 12px; border: 0; border-radius: 8px; background: none; color: var(--cfx-text-2); font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; }
-.seg button[aria-pressed="true"] { background: var(--cfx-go); color: var(--cfx-on-go); }
+.seg { display: inline-flex; padding: 3px; }
+.seg button { min-height: 32px; padding: 4px 12px; border: 0; background: none; color: var(--cfx-text-2); font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; }
 .icon-btn { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--cfx-line-strong); background: var(--cfx-ink-2); color: var(--cfx-text); font-size: 13px; cursor: pointer; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 4px 14px 4px 4px; border-radius: 999px; border: 1px solid var(--cfx-line-strong); background: var(--cfx-ink-1); color: var(--cfx-text); font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; }
@@ -96,7 +93,6 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
   .hero { grid-template-columns: 1fr; gap: 36px; padding-top: 40px; }
 }
 @media (max-width: 620px) {
-  .nav nav { display: none; }
   .nav-cta { margin-left: auto; }
   .gallery { grid-template-columns: repeat(2, 1fr); }
   .lede { font-size: 17px; }
@@ -115,7 +111,7 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 .doc h2 { font-size: 21px; margin: 32px 0 8px; }
 .doc p, .doc li { color: var(--cfx-text-2); }
 
-/* ===== chessskins-style header, hero and accounts (council: keep the live board, add a hero piece) ===== */
+/* ===== chessskins-style header, hero and accounts ===== */
 .tag { margin-left: 2px; padding: 1px 6px; border: 1px solid var(--cfx-accent); border-radius: 5px; color: var(--cfx-accent); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 .nav nav { margin-left: auto; margin-right: auto; }
 .acct { display: flex; align-items: center; gap: 16px; }
@@ -132,10 +128,6 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 .glow { position: absolute; inset: -12% -18% -6% -10%; z-index: -1; pointer-events: none; background: radial-gradient(closest-side, color-mix(in srgb, var(--cfx-accent) 26%, transparent), transparent 75%); filter: blur(10px); }
 .board-card { transform: rotateY(-9deg) rotateX(4deg); transform-origin: 60% 50%; transition: transform .6s var(--cfx-ease, ease); }
 .stage:hover .board-card { transform: rotateY(-4deg) rotateX(2deg); }
-.hero-piece { position: absolute; left: -11%; bottom: 9%; width: 30%; height: auto; pointer-events: none; filter: drop-shadow(0 26px 30px rgba(0, 0, 0, .65)) drop-shadow(0 0 22px color-mix(in srgb, var(--cfx-accent) 45%, transparent)); animation: float 5s ease-in-out infinite; }
-@keyframes float { 50% { transform: translateY(-14px) rotate(-3deg); } }
-/* The floating piece sits on the board card's lower-left corner: the caption starts after it. */
-.stage .board-bar { padding-left: 21%; }
 .apply-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 0; color: var(--cfx-text-2); font-size: 14px; }
 
 /* My Account */
@@ -176,38 +168,28 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 @media (max-width: 920px) {
   .hero { min-height: 0; }
   .board-card, .stage:hover .board-card { transform: none; }
-  .hero-piece { width: 22%; left: -3%; bottom: 12%; }
-  .stage .board-bar { padding-left: 18%; }
   .me-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 620px) {
   .acct .nav-link { display: none; }
-  .hero-piece { display: none; }
-  .stage .board-bar { padding-left: 4px; }
 }
-@media (prefers-reduced-motion: reduce) { .hero-piece { animation: none; } .board-card { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .board-card { transition: none; } }
 @media (max-width: 620px) { .nav-cta { white-space: nowrap; padding: 8px 12px; font-size: 13px; } .tag { display: none; } }
 
 /* ===== Fixes and finish ===== */
 [hidden] { display: none !important; }
 /* The glow behind the board stays inside the hero (it used to widen the page below 1300px). */
 .hero { overflow-x: clip; }
-/* The knight sits on the board card's lower-left corner, clear of the look buttons. */
 .board-wrap { position: relative; }
-.hero-piece { left: -15%; bottom: -2%; width: 24%; }
-@media (max-width: 1100px) { .hero-piece { left: -13%; width: 21%; bottom: -2%; } }
-@media (max-width: 920px) { .hero-piece { width: 17%; left: -1%; bottom: -1%; } .stage .board-bar { padding-left: 17%; } }
 .btn[aria-disabled="true"] { cursor: default; }
 .btn:active:not([aria-disabled="true"]) { transform: translateY(1px); }
-.nav { transition: background-color .3s, box-shadow .3s; }
-.nav.scrolled { background: color-mix(in srgb, var(--cfx-ink-0) 94%, transparent); box-shadow: 0 10px 30px -18px rgba(0, 0, 0, .9); }
 
 /* Last move: the two squares glow under the pieces and glide to each new move. */
 .marks { pointer-events: none; }
 .marks i { position: absolute; width: 12.5%; height: 12.5%; background: color-mix(in srgb, var(--glow-w, #fff) 30%, rgb(255 214 64 / .18)); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--glow-w, #fff) 70%, transparent), inset 0 0 0 3px rgb(0 0 0 / .28); left: 0; top: 0; transition: transform .32s cubic-bezier(.2, .8, .2, 1); }
 
 /* ===== The one orchestrated moment: the page loads ===== */
-/* Headline lines rise in turn while the board card settles in, the pieces set up rank by rank, the knight lands. */
+/* Headline lines rise in turn while the board card settles in, the pieces set up rank by rank. */
 .js .hero-copy > * { animation: rise .9s cubic-bezier(.2, .8, .2, 1) backwards; }
 .js .hero-copy > :nth-child(2) { animation-delay: .08s; }
 .js .hero-copy > :nth-child(3) { animation-delay: .2s; }
@@ -218,8 +200,6 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 @keyframes settle { from { opacity: 0; transform: translateY(26px) rotateY(-18deg) rotateX(10deg) scale(.96); } }
 .pieces img.set { animation: set .55s cubic-bezier(.3, 1.35, .5, 1) var(--d, 0s) backwards; }
 @keyframes set { from { opacity: 0; translate: 0 -55%; } }
-.js .hero-piece { animation: land .9s cubic-bezier(.3, 1.3, .5, 1) 1.5s backwards, float 5s ease-in-out 2.4s infinite; }
-@keyframes land { from { opacity: 0; translate: -18px -46px; rotate: -14deg; } }
 .js .chips { animation: rise .8s cubic-bezier(.2, .8, .2, 1) 1.1s backwards; }
 
 /* ===== Motion that answers what you do ===== */
@@ -252,17 +232,14 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 .faq details[open] { border-color: var(--cfx-line-strong); }
 
 @media (prefers-reduced-motion: reduce) {
-  .js .hero-copy > *, .js .board-card, .js .hero-piece, .js .chips, .pieces img.set, .board.swap::after, .board.swap .pieces img, .board.swap #shader, .board.swap .poster, .hero-piece.swap { animation: none; }
+  .js .hero-copy > *, .js .board-card, .js .chips, .pieces img.set, .board.swap::after, .board.swap .pieces img, .board.swap #shader, .board.swap .poster { animation: none; }
   .flat { transition: none; }
   .marks i, .faq details::details-content, .faq summary::after { transition: none; }
 }
 
 /* ===== Council round 1 ===== */
-/* The knight answers a look switch like the board does. */
-.js .hero-piece.swap { animation: pop .45s cubic-bezier(.3, 1.4, .5, 1), float 5s ease-in-out .45s infinite; }
-/* Header: one line at every width (links hide below 900px, account actions stay on the right). */
+/* Header labels stay on one line. */
 .nav-link, .nav-cta, .acct a, .acct button, .nav nav a { white-space: nowrap; }
-@media (max-width: 900px) { .nav nav { display: none; } .acct { margin-left: auto; } }
 /* Tablets: the board card stays a comfortable size instead of filling the width. */
 @media (min-width: 621px) and (max-width: 920px) { .stage { width: 100%; max-width: 560px; justify-self: center; } }
 /* Look names never break inside a button. */
@@ -284,10 +261,6 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
   .marks i { outline: 2px solid Highlight; outline-offset: -2px; }
 }
 @media (prefers-reduced-motion: reduce) { .btn, .credits summary::after { transition: none; } }
-/* Tablets: the knight sits a little further out so the a1 rook stays readable. Narrow phones: tighter stats. */
-@media (min-width: 621px) and (max-width: 920px) { .hero-piece { left: -3.5%; bottom: -2%; width: 16%; } .stage .board-bar { padding-left: 15%; } }
-/* Phones: no knight, so the caption bar needs no room for it. */
-@media (max-width: 620px) { .stage .board-bar { padding-left: 4px; } }
 
 /* ===== UX research pass (council-approved) ===== */
 /* No announcement bar any more: the hero fills the screen under the 65px header. */
@@ -316,7 +289,7 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
   .board-bar .seg { flex: 1; }
   .board-bar .seg button { flex: 1; }
 }
-/* Desktop: 2px more for the caption. Small laptops (921-1100px, where the knight takes a fifth of the bar): two rows, like phones. */
+/* Desktop: 2px more for the caption. Small laptops (921-1100px): two rows, like phones. */
 .board-bar { column-gap: 10px; }
 @media (min-width: 921px) and (max-width: 1100px) {
   .board-bar { flex-wrap: wrap; row-gap: 8px; }
@@ -563,20 +536,15 @@ html.js .stage .chips { min-height: 46px; }
 .cb-mark img { width: 64px; height: 64px; margin-bottom: 8px; border-radius: 16px; box-shadow: 0 14px 34px rgba(0, 0, 0, .6); }
 .cb-mark b { font-stretch: 125%; font-weight: 800; font-size: 36px; line-height: 1; letter-spacing: -.03em; }
 #backName { color: var(--cfx-text); font-weight: 600; opacity: .85; }
-/* The knight drifts against the card's lean and turns to face the pointer. */
-.hero-piece { translate: var(--kx, 0px) var(--ky, 0px); transition: scale .35s cubic-bezier(.3, 1.4, .5, 1); }
-.hero-piece.face-right { scale: -1 1; }
 @media (max-width: 920px) { .board-card, .stage:hover .board-card { --rx: 0deg; --ry: 0deg; } }
-@media (prefers-reduced-motion: reduce) { .hero-piece { transition: none; } }
 
 /* ===== Looks: the presets first; Boards and Pieces tabs to mix your own ===== */
 .looks-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px 40px; }
 .looks-head .sub { max-width: 34em; }
-.tabs { display: inline-flex; flex: none; padding: 4px; border-radius: 14px; border: 1px solid var(--cfx-line); background: var(--cfx-ink-1); }
-.tabs [role="tab"] { min-height: 40px; padding: 6px 16px; border: 0; border-radius: 10px; background: none; color: var(--cfx-text-2); font: inherit; font-weight: 700; font-size: 15px; cursor: pointer; transition: background-color .2s, color .2s; }
+.tabs { display: inline-flex; flex: none; padding: 4px; }
+.tabs [role="tab"] { min-height: 40px; padding: 6px 16px; border: 0; background: none; color: var(--cfx-text-2); font: inherit; font-weight: 700; font-size: 15px; cursor: pointer; transition: color .2s; }
 .tabs [role="tab"]:hover { color: var(--cfx-text); }
 .tabs [role="tab"] small { margin-left: 6px; color: var(--cfx-text-3); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
-.tabs [aria-selected="true"] { background: var(--cfx-ink-3); color: var(--cfx-text); }
 .panel { margin-top: 28px; }
 .panel-note { margin: 0 0 16px; color: var(--cfx-text-2); font-size: 15px; }
 .panel .gallery, .panel .sets { margin-top: 0; }
@@ -636,8 +604,6 @@ html.js .stage .chips { min-height: 46px; }
 .stage .chip:hover img { transform: scale(1.08); }
 .stage .chip img { transition: transform .2s; }
 
-/* Council polish (visual). The header's logo lines up with the page's content edge. */
-.nav { padding-inline: max(20px, calc((100% - 1140px) / 2)); }
 /* Primary buttons: a soft lit edge and glow instead of the game-style lip. */
 .btn-go { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), 0 10px 26px -12px color-mix(in srgb, var(--cfx-go) 75%, transparent); }
 /* Feature cards: a faint lit surface and a top highlight, so they read as objects rather than flat boxes. */
@@ -660,4 +626,79 @@ html.js .stage .chips { min-height: 46px; }
   .icon-btn { width: 44px; height: 44px; }
   .stage .chip { width: 44px; height: 44px; }
   .linkbtn { min-height: 44px; }
+}
+
+/* ===== Liquid glass (step 1) ===== */
+.hero { --tint: #a98dff; --tint2: #61dfff; }
+.glass-filters { position: absolute; pointer-events: none; }
+.stage { gap: 20px; }
+.stage .glow { inset: -12% -12% 2%; background: radial-gradient(ellipse at 22% 30%, color-mix(in srgb, var(--tint) 30%, transparent), transparent 65%), radial-gradient(ellipse at 85% 65%, color-mix(in srgb, var(--tint2) 24%, transparent), transparent 65%); filter: blur(32px); }
+/* Filters live on a childless rim, never on the preserve-3d card or its sharp content planes. */
+.board-card { background: transparent; border-color: color-mix(in srgb, var(--tint) 28%, #ffffff38); box-shadow: 0 40px 90px -40px #000, 0 0 18px -6px color-mix(in srgb, var(--tint2) 45%, transparent), inset 0 1px 0 #ffffff70; }
+.board-card::before { content: ''; position: absolute; inset: 11px; border-radius: 12px; background: var(--cfx-ink-1); transform: translateZ(0); backface-visibility: hidden; pointer-events: none; }
+.board-card::after { content: ''; position: absolute; inset: 11px; border: 1px solid transparent; border-top-color: #ffffff80; border-left-color: color-mix(in srgb, var(--tint) 55%, #ffffff55); border-radius: 12px; transform: translateZ(2px); backface-visibility: hidden; pointer-events: none; }
+.glass-rim { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; transform: translateZ(1px); background: linear-gradient(135deg, #ffffff26, color-mix(in srgb, var(--tint) 16%, transparent) 40%, color-mix(in srgb, var(--tint2) 20%, transparent)); box-shadow: inset 1px 1px 0 #ffffff8c, inset -1px -1px 0 color-mix(in srgb, var(--tint2) 45%, transparent);
+  clip-path: polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, 12px 12px, 12px calc(100% - 12px), calc(100% - 12px) calc(100% - 12px), calc(100% - 12px) 12px, 12px 12px);
+  -webkit-backdrop-filter: blur(6px) saturate(1.5); backdrop-filter: blur(6px) saturate(1.5); }
+/* Exactly one surface uses refraction, clipped to the 12px perimeter. Other engines keep the frost above. */
+.glass-refract .glass-rim { backdrop-filter: url(#glassRefraction) blur(6px) saturate(1.5); }
+.board-card > .pbar, .board-card > .board-bar { background: var(--cfx-ink-1); }
+.board-card > .pbar { border-radius: 8px; }
+.board-card > .pbar:first-of-type { padding-top: 0; }
+.stage .board-bar { padding: 10px 4px 3px; }
+.stage .board-bar::after { content: none; }
+.stage .look-name { flex: 1 1 auto; }
+.glare { background: radial-gradient(ellipse at var(--gx, 50%) var(--gy, 30%), #ffffff42, color-mix(in srgb, var(--tint) 10%, transparent) 22%, transparent 48%), linear-gradient(125deg, #ffffff0a, transparent 32%, color-mix(in srgb, var(--tint2) 5%, transparent) 75%, transparent); }
+.glass-dock { display: flex; align-items: center; gap: 6px; min-width: 0; padding: 8px; border-radius: 999px; border: 1px solid #ffffff30; background: linear-gradient(135deg, #ffffff12, #ffffff03), rgb(13 25 20 / .78); -webkit-backdrop-filter: blur(18px) saturate(1.6); backdrop-filter: blur(18px) saturate(1.6); box-shadow: inset 0 1px 0 #ffffff38, inset 1px 0 0 #ffffff14, 0 18px 36px -20px #000; }
+html.js .stage .glass-dock .chips { min-height: 40px; }
+.stage .glass-dock .chips { flex: 1 1 0; min-width: 44px; justify-content: safe center; gap: 5px; padding: 4px; animation: none; }
+.stage .glass-dock .chip { width: 32px; height: 32px; background: #ffffff08; }
+.stage .glass-dock .chip img { width: 26px; height: 26px; }
+.glass-dock .seg { flex: none; }
+.glass-dock .seg button { padding-inline: 8px; border-radius: 999px; font-size: 12px; }
+.glass-dock .icon-btn, .stage .glass-dock .chip-dice { flex: none; width: 36px; height: 36px; min-height: 36px; margin: 0; padding: 0; border-radius: 50%; background: #ffffff08; border-color: #ffffff26; align-self: center; }
+.glass-dock .chip-dice .dice-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.glass-dock #sound, .glass-dock #pause { order: 0; margin: 0; }
+/* Compact columns and phones wrap within the same dock; all eight swatches stay available. */
+@container (max-width: 420px) {
+  .glass-dock { flex-wrap: wrap; justify-content: center; border-radius: 26px; }
+  .stage .glass-dock .chips { flex-basis: 100%; flex-wrap: wrap; overflow: visible; }
+}
+@media (pointer: coarse) {
+  .stage .glass-dock .chip { width: 44px; height: 44px; }
+  .glass-dock .icon-btn, .stage .glass-dock .chip-dice { width: 44px; height: 44px; min-height: 44px; }
+  .glass-dock .seg button { min-height: 40px; }
+}
+@media (prefers-reduced-motion: reduce) { .glare { transition: none; } }
+@media (forced-colors: active) { .glass-dock, .glass-rim { border: 1px solid CanvasText; } .stage .glow { display: none; } }
+
+/* ===== Liquid glass (step 2) ===== */
+/* Leave room for the capsule's top gap, height and focus outline at anchor destinations. */
+html { scroll-padding-top: 100px; }
+.nav { position: sticky; top: 12px; z-index: 20; display: flex; align-items: center; gap: 24px; width: calc(100% - 24px); max-width: 1180px; margin: 12px auto 0; padding: 12px 20px; border-radius: 999px; border: 1px solid #ffffff30; background: linear-gradient(135deg, #ffffff12, #ffffff03), rgb(13 25 20 / .82); -webkit-backdrop-filter: blur(18px) saturate(1.6); backdrop-filter: blur(18px) saturate(1.6); box-shadow: inset 0 1px 0 #ffffff38, inset 1px 0 0 #ffffff14, 0 18px 36px -20px #000; transition: background-color .3s; }
+.nav.scrolled { background-color: rgb(13 25 20 / .9); }
+.nav .brand { flex: none; }
+.nav .acct { margin-left: auto; flex: none; }
+
+/* Both segmented controls share a frosted track and a softly raised, highlighted lens. */
+.tabs, .glass-dock .seg { border-radius: 999px; border: 1px solid #ffffff26; background: linear-gradient(135deg, #ffffff0d, #ffffff03), rgb(13 25 20 / .78); -webkit-backdrop-filter: blur(18px) saturate(1.6); backdrop-filter: blur(18px) saturate(1.6); box-shadow: inset 0 1px 0 #ffffff20; }
+.tabs { position: relative; isolation: isolate; max-width: 100%; }
+.tabs [role="tab"], .seg button { border-radius: 999px; }
+.tabs [role="tab"] { position: relative; z-index: 1; min-width: 0; }
+.tab-lens, .tabs:not(.lens-ready) [aria-selected="true"], .glass-dock .seg button[aria-pressed="true"] { background: linear-gradient(180deg, #ffffff24, #ffffff0b); box-shadow: inset 0 1px 0 #ffffff66, inset 0 0 0 1px #ffffff24, 0 3px 8px #00000040; }
+.tabs [aria-selected="true"], .tabs [aria-selected="true"] small, .glass-dock .seg button[aria-pressed="true"] { color: var(--cfx-accent); }
+.tab-lens { position: absolute; top: 4px; bottom: 4px; left: 0; border-radius: 999px; pointer-events: none; visibility: hidden; }
+.lens-ready .tab-lens { visibility: visible; transition: transform .28s cubic-bezier(.2, .8, .2, 1), width .28s cubic-bezier(.2, .8, .2, 1); }
+/* Hide section links before they crowd the auth actions, including extension Settings. */
+@media (max-width: 1100px) { .nav nav { display: none; } }
+@media (max-width: 620px) {
+  .nav { top: 10px; width: calc(100% - 20px); margin-top: 10px; padding: 8px 12px; gap: 10px; }
+  .nav > .nav-link { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .nav, .lens-ready .tab-lens, .tabs [role="tab"], .glass-dock .seg button { transition: none; } }
+@media (forced-colors: active) {
+  .nav, .tabs, .glass-dock .seg { border: 1px solid CanvasText; }
+  .tab-lens { display: none; }
+  .tabs [aria-selected="true"], .glass-dock .seg button[aria-pressed="true"] { background: Highlight; color: HighlightText; box-shadow: none; forced-color-adjust: none; }
+  .tabs [aria-selected="true"] small { color: inherit; }
 }
