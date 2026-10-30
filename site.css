@@ -652,3 +652,12 @@ html.js .stage .chips { min-height: 46px; }
 .cmp-labels span { padding: 4px 10px; border-radius: 999px; background: rgba(0, 0, 0, .55); color: #fff; font-size: 13px; }
 @supports (backdrop-filter: blur(1px)) { .cmp-labels span { background: rgba(0, 0, 0, .4); backdrop-filter: blur(8px); } }
 @media (prefers-reduced-motion: reduce) { .feat { transition: none; } .feat:hover { translate: none; } }
+
+/* ===== Static audit fixes ===== */
+/* Keep compact controls comfortably usable on touch screens without changing their desktop layout. */
+@media (pointer: coarse) {
+  .seg button { min-height: 40px; }
+  .icon-btn { width: 44px; height: 44px; }
+  .stage .chip { width: 44px; height: 44px; }
+  .linkbtn { min-height: 44px; }
+}

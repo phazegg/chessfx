@@ -48,7 +48,19 @@
   const paintClocks = () => {
     for (const c of ['w', 'b']) { const el = $(c === 'w' ? 'clockW' : 'clockB'); el.textContent = fmt(clk[c]); el.classList.toggle('on', clockLive && turn === c); }
   };
-  setInterval(() => { if (clockLive && !paused && visible && !document.hidden) { clk[turn] -= 0.25; paintClocks(); } }, 250);
+  // Do not leave a repeating timer behind while the preview is paused, off-screen or in a background tab.
+  let clockTimer = 0;
+  const stopClock = () => { clearTimeout(clockTimer); clockTimer = 0; };
+  const tickClock = () => {
+    clockTimer = 0;
+    if (!clockLive || paused || !visible || document.hidden) return;
+    clk[turn] -= 0.25;
+    paintClocks();
+    clockTimer = setTimeout(tickClock, 250);
+  };
+  const startClock = () => {
+    if (clockLive && !paused && visible && !document.hidden && !clockTimer) clockTimer = setTimeout(tickClock, 250);
+  };
   const capture = (taker, piece) => {
     const img = document.createElement('img');
     img.alt = ''; img.dataset.c = taker === 'w' ? 'b' : 'w'; img.dataset.p = piece;
@@ -85,6 +97,7 @@
     if (soundOn && !actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { soundOn = false; } }
     if (actx && actx.state === 'suspended') actx.resume();
     $('sound').setAttribute('aria-pressed', String(soundOn));
+    $('sound').setAttribute('aria-label', soundOn ? 'Turn sound off' : 'Turn sound on');
     $('sound').title = soundOn ? 'Turn sound off' : 'Turn sound on';
     if (!soundOn && actx) actx.suspend();
     if (soundOn) sfx('move');
@@ -93,7 +106,7 @@
   const setup = (intro) => {
     layer.textContent = '';
     $('capsW').textContent = ''; $('capsB').textContent = '';
-    clk.w = clk.b = 180; turn = 'w'; clockLive = false; paintClocks();
+    clk.w = clk.b = 180; turn = 'w'; clockLive = false; stopClock(); paintClocks();
     marks.hidden = true;
     at = new Map();
     START.split('/').forEach((row, ri) => {
@@ -189,8 +202,20 @@
     fxTick(now);
   };
   const sync = () => { if (running() && !raf) { lastDraw = 0; raf = requestAnimationFrame(tick); } else if (!running()) draw(); };
-  new IntersectionObserver(([e]) => { visible = e.isIntersecting; sync(); }).observe(board);
-  document.addEventListener('visibilitychange', sync);
+  new IntersectionObserver(([e]) => {
+    visible = e.isIntersecting;
+    if (!visible) stopClock();
+    sync();
+    if (started && visible && !document.hidden && !paused && !timer) timer = setTimeout(play, 0);
+  }).observe(board);
+  document.addEventListener('visibilitychange', () => {
+    sync();
+    if (document.hidden) stopClock();
+    else {
+      startClock();
+      if (started && visible && !paused && !timer) timer = setTimeout(play, 0);
+    }
+  });
 
   // ---------- effects: capture bursts, a check ring, a mate shower (drawn on the fx canvas) ----------
   const fx = $('fx'), g = fx.getContext('2d');
@@ -220,16 +245,16 @@
 
   // ---------- the demo game (Morphy's Opera Game), looped ----------
   const cap = $('moveCap');
-  let step = 0, timer = 0;
+  let step = 0, timer = 0, started = false;
   const kingOf = (color) => [...at].find(([, img]) => img.dataset.p === 'k' && img.classList.contains(color))?.[0];
   const play = () => {
     timer = 0;
-    if (paused) return;
-    if (!visible || document.hidden) { timer = setTimeout(play, 700); return; }
+    if (paused || !visible || document.hidden) return;
     if (step >= D.demo.length) { timer = setTimeout(() => { step = 0; cap.textContent = 'The Opera Game, 1858'; setup(!rm.matches); timer = setTimeout(play, rm.matches ? 0 : 1700); }, 3500); return; }
     const m = D.demo[step++];
     cap.textContent = `Move ${Math.ceil(step / 2)} of ${Math.ceil(D.demo.length / 2)} · Opera Game, 1858`;
     clockLive = true;
+    startClock();
     sfx(m.mate ? 'mate' : m.check ? 'check' : m.captured ? 'capture' : 'move');
     if (m.captured && at.has(m.to)) { const v = at.get(m.to); capture(m.color, v.dataset.p); v.classList.add('gone'); setTimeout(() => v.remove(), 300); burst(m.to, 26, 1.4); }
     const img = at.get(m.from);
@@ -241,7 +266,7 @@
     if (m.promo) { img.dataset.p = m.promo; img.src = src(m.color, m.promo); }
     if (m.check) { const k = kingOf(m.color === 'w' ? 'b' : 'w'); if (k) ring(k, m.mate ? look.palette[0] : '#ff5a4f'); }
     turn = m.color === 'w' ? 'b' : 'w';
-    if (m.mate) clockLive = false;
+    if (m.mate) { clockLive = false; stopClock(); }
     paintClocks();
     if (m.mate) setTimeout(() => { const k = kingOf(m.color === 'w' ? 'b' : 'w'); if (k) { burst(k, 60, 2.2); ring(k, look.palette[1]); } }, 350);
     if (!running() && !rm.matches) fxTick(performance.now());
@@ -281,7 +306,9 @@
   };
   const tileFrame = (now) => {
     tRaf = 0;
-    if (!tBoard || !tgl) return;
+    if (!tBoard || !tgl || document.hidden) return;
+    const r = tBoard.el.getBoundingClientRect();
+    if (r.bottom <= 0 || r.top >= innerHeight || r.right <= 0 || r.left >= innerWidth) return;
     const pr = tprog(tBoard.id);
     if (!pr) return;
     tT += Math.min(now - (tLast || now), 100) / 1000; tLast = now;
@@ -299,7 +326,7 @@
     const img = tile.querySelector('img'), px = Math.round(img.clientWidth * Math.min(devicePixelRatio || 1, 1.5));
     if (tcv.width !== px) tcv.width = tcv.height = px;
     tile.prepend(tcv);
-    tBoard = bd; tT = 37; tLast = 0;
+    tBoard = { ...bd, el: tile }; tT = 37; tLast = 0;
     tRaf = requestAnimationFrame(tileFrame);
   };
 
@@ -440,8 +467,10 @@
   tabs.forEach((t, i) => {
     t.addEventListener('click', () => showTab(t));
     t.addEventListener('keydown', (e) => {
-      const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+      const d = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
       if (d) { e.preventDefault(); showTab(tabs[(i + d + tabs.length) % tabs.length], true); }
+      if (e.key === 'Home') { e.preventDefault(); showTab(tabs[0], true); }
+      if (e.key === 'End') { e.preventDefault(); showTab(tabs[tabs.length - 1], true); }
     });
   });
   // What's on the board when it isn't a preset as-is: "Your mix", with a way back and a link to share it.
@@ -554,7 +583,8 @@
     $('pause').setAttribute('aria-label', p ? 'Play the preview' : 'Pause the preview');
     $('pause').textContent = p ? '▶' : '❚❚';
     clearTimeout(timer);
-    if (!p) play();
+    if (p) stopClock();
+    else { startClock(); play(); }
     sync();
   };
   $('pause').addEventListener('click', () => setPaused(!paused));
@@ -625,9 +655,10 @@
     // then lands facing front. A press that doesn't move is a click: a burst from the square under it.
     card.addEventListener('pointerdown', (e) => {
       if (e.button !== 0 || e.target.closest('button, a, input')) return;
-      const onBoard = e.target === board;
+      const onBoard = board.contains(e.target);
+      const boardRect = onBoard && e.target !== board ? board.getBoundingClientRect() : null;
       drag = { x0: e.clientX, y0: e.clientY, rx0: T.x, ry0: T.y, lx: e.clientX, lt: performance.now(), v: 0, moved: false,
-        sq: onBoard ? 'abcdefgh'[clampN(Math.floor(e.offsetX / board.clientWidth * 8), 7)] + (8 - clampN(Math.floor(e.offsetY / board.clientHeight * 8), 7)) : null };
+        sq: onBoard ? 'abcdefgh'[clampN(Math.floor((e.target === board ? e.offsetX : e.clientX - boardRect.left) / (e.target === board ? board.clientWidth : boardRect.width) * 8), 7)] + (8 - clampN(Math.floor((e.target === board ? e.offsetY : e.clientY - boardRect.top) / (e.target === board ? board.clientHeight : boardRect.height) * 8), 7)) : null };
       card.setPointerCapture(e.pointerId);
     });
     card.addEventListener('pointermove', (e) => {
@@ -751,6 +782,6 @@
   if (qBoard) for (const c of lookChips()) c.setAttribute('aria-pressed', 'false');
   if (qBoard) applyLook({ ...look, board: qBoard.id, L: qBoard.L, D: qBoard.D }, qBoard.name); else applyLook(look);
   board.classList.remove('swap'); $('heroPiece').classList.remove('swap');
-  const start = () => { if (initGL()) draw(); clearTimeout(timer); if (paused) setPaused(true); else { sync(); timer = setTimeout(play, 1600); } };
+  const start = () => { started = true; if (initGL()) draw(); clearTimeout(timer); if (paused) setPaused(true); else { sync(); timer = setTimeout(play, 1600); } };
   if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 1200 }); else setTimeout(start, 300);
 })();
