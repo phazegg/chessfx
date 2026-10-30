@@ -282,6 +282,20 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 /* The hero's "Coming soon" pill lines up with the button beside it. */
 .ctas { align-items: center; }
 .ctas .soon { min-height: 52px; padding-inline: 22px; }
+/* Small phones: the look name and caption get their own line; the compare toggle and pause share the next. */
+@media (max-width: 440px) {
+  .board-bar { flex-wrap: wrap; row-gap: 10px; }
+  .look-name { flex: 1 1 100%; }
+  .board-bar .seg { flex: 1; }
+  .board-bar .seg button { flex: 1; }
+}
+/* Desktop: 2px more for the caption. Small laptops (921-1100px): two rows, like phones. */
+.board-bar { column-gap: 10px; }
+@media (min-width: 921px) and (max-width: 1100px) {
+  .board-bar { flex-wrap: wrap; row-gap: 8px; }
+  .look-name { flex: 1 1 100%; }
+  .board-bar .seg { margin-left: auto; }
+}
 /* The look buttons are built by site.js after first paint: reserve their rows so the hero doesn't re-centre. */
 .js .chips { min-height: 88px; }
 @media (min-width: 921px) and (max-width: 1100px) { .js .chips { min-height: 136px; } }
@@ -378,9 +392,30 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 .final { position: relative; overflow: hidden; }
 .wall { -webkit-mask: radial-gradient(ellipse 70% 75% at 50% 50%, transparent 15%, #000 42%, #000 58%, transparent 82%); mask: radial-gradient(ellipse 70% 75% at 50% 50%, transparent 15%, #000 42%, #000 58%, transparent 82%); }
 
-/* Player names follow the preview width. Captured pieces stay legible. */
+/* Board bar. Row 1: the look's name (move count under it) beside "Surprise me". Row 2: compare, sound, pause on the right.
+   Phones: name; then the compare toggle full width; then die, sound and pause. Long names wrap instead of being cut. */
+.board-bar { flex-wrap: wrap; row-gap: 8px; }
+.board-bar::after { content: ''; flex-basis: 100%; order: 1; }
+.look-name { flex: 1 1 0; min-width: 0; flex-direction: column; align-items: flex-start; gap: 1px; }
+#lookName, .look-name small { white-space: normal; }
+.board-bar .seg, #sound, #pause { order: 2; }
+.board-bar .seg { margin-left: auto; }
+.chip-dice { align-self: flex-start; height: 40px; min-height: 40px; padding: 0 14px 0 10px; gap: 8px; border-style: solid; border-radius: 10px; }
+.board-bar .chip-dice { margin: 0; }
+@media (max-width: 440px) {
+  .board-bar::after { display: none; }
+  .look-name { flex: 1 1 100%; }
+  .board-bar .seg { flex: 1 1 100%; order: 2; margin-left: 0; }
+  .board-bar .chip-dice, #sound, #pause { order: 3; }
+  #sound { margin-left: auto; }
+}
+
+/* Short desktop screens: the board scales with the window height, so the board and its controls stay on screen. */
+@media (min-width: 921px) and (max-height: 900px) { .stage { width: min(100%, calc(100vh - 340px)); justify-self: center; } }
+
+/* Player names: the short form on phones. Captured pieces: legible. */
 .pshort { display: none; }
-@container (max-width: 419px) { .pfull { display: none; } .pshort { display: inline; } }
+@media (max-width: 440px) { .pfull { display: none; } .pshort { display: inline; } }
 .caps { gap: 0; padding-left: 2px; }
 .caps img { width: 20px; height: 20px; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .5)); }
 /* The looks' rows depend on the stage's own width (it shrinks on short screens too): reserve them by container size. */
@@ -486,9 +521,9 @@ html.js .stage .chips { min-height: 46px; }
 .board-card, .stage:hover .board-card { --rx: 0deg; --ry: 0deg; position: relative; transform: rotateX(var(--rx)) rotateY(var(--ry)); transform-origin: 50% 50%; transform-style: preserve-3d; transition: none; cursor: grab; touch-action: pan-y; -webkit-user-select: none; user-select: none; }
 .board-card.grabbing { cursor: grabbing; }
 .board-card button { cursor: pointer; }
-/* Depth: the board, player bars and controls share one plane; the glare sits just above them. */
+/* Depth: the board, player bars and caption share one plane above the card. */
 .board-card > .pbar, .board-card > .board-bar { transform: translateZ(14px); }
-.board-card > .board { transform: translateZ(14px); }
+.board-card > .board { transform: translateZ(14px); border-radius: 0; }
 .board-card > :not(.card-back) { backface-visibility: hidden; }
 .board > * { pointer-events: none; }
 /* A soft light that sits where the pointer is. */
@@ -607,9 +642,35 @@ html.js .stage .chips { min-height: 46px; }
   -webkit-backdrop-filter: blur(6px) saturate(1.5); backdrop-filter: blur(6px) saturate(1.5); }
 /* Exactly one surface uses refraction, clipped to the 12px perimeter. Other engines keep the frost above. */
 .glass-refract .glass-rim { backdrop-filter: url(#glassRefraction) blur(6px) saturate(1.5); }
+.board-card > .pbar, .board-card > .board-bar { background: var(--cfx-ink-1); }
+.board-card > .pbar { margin: 0; border-radius: 0 0 12px 12px; }
+.board-card > .pbar:first-of-type { padding-top: 0; border-radius: 12px 12px 0 0; }
+.stage .board-bar { padding: 10px 4px 3px; }
+.stage .board-bar::after { content: none; }
+.stage .look-name { flex: 1 1 auto; }
 .glare { background: radial-gradient(ellipse at var(--gx, 50%) var(--gy, 30%), #ffffff42, color-mix(in srgb, var(--tint) 10%, transparent) 22%, transparent 48%), linear-gradient(125deg, #ffffff0a, transparent 32%, color-mix(in srgb, var(--tint2) 5%, transparent) 75%, transparent); }
+.glass-dock { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; min-width: 0; padding: 10px; border-radius: 26px; border: 1px solid #ffffff30; background: linear-gradient(135deg, #ffffff12, #ffffff03), rgb(13 25 20 / .78); -webkit-backdrop-filter: blur(18px) saturate(1.6); backdrop-filter: blur(18px) saturate(1.6); box-shadow: inset 0 1px 0 #ffffff38, inset 1px 0 0 #ffffff14, 0 18px 36px -20px #000; }
+html.js .stage .glass-dock .chips { min-height: 0; }
+.stage .glass-dock .chips { display: grid; grid-template-columns: repeat(4, 36px); flex: 1 1 100%; min-width: 0; justify-content: center; gap: 8px; padding: 4px; overflow: visible; animation: none; }
+.stage .glass-dock .chip { width: 36px; height: 36px; background: #ffffff08; }
+.stage .glass-dock .chip img { width: 30px; height: 30px; }
+.glass-dock .seg { flex: none; gap: 4px; }
+.glass-dock .seg button { min-height: 36px; padding-inline: 10px; border-radius: 999px; font-size: 13px; }
+.glass-dock .icon-btn, .stage .glass-dock .chip-dice { flex: none; width: 40px; height: 40px; min-height: 40px; margin: 0; padding: 0; border-radius: 50%; background: #ffffff08; border-color: #ffffff26; align-self: center; }
+.glass-dock .chip-dice .dice-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.glass-dock #sound, .glass-dock #pause { order: 0; margin: 0; }
+/* Eight swatches form one row when there is room, otherwise two even rows. */
+@container (min-width: 390px) {
+  .stage .glass-dock .chips { grid-template-columns: repeat(8, 36px); }
+}
+@media (pointer: coarse) {
+  .stage .glass-dock .chips { grid-template-columns: repeat(4, 44px); }
+  .stage .glass-dock .chip { width: 44px; height: 44px; }
+  .glass-dock .icon-btn, .stage .glass-dock .chip-dice { width: 44px; height: 44px; min-height: 44px; }
+  .glass-dock .seg button { min-height: 40px; }
+}
 @media (prefers-reduced-motion: reduce) { .glare { transition: none; } }
-@media (forced-colors: active) { .glass-rim { border: 1px solid CanvasText; } .stage .glow { display: none; } }
+@media (forced-colors: active) { .glass-dock, .glass-rim { border: 1px solid CanvasText; } .stage .glow { display: none; } }
 
 /* ===== Liquid glass (step 2) ===== */
 /* Leave room for the capsule's top gap, height and focus outline at anchor destinations. */
@@ -619,13 +680,13 @@ html { scroll-padding-top: 100px; }
 .nav .brand { flex: none; }
 .nav .acct { margin-left: auto; flex: none; }
 
-/* Gallery tabs: a frosted track and a softly raised, highlighted lens. */
-.tabs { border-radius: 999px; border: 1px solid #ffffff26; background: linear-gradient(135deg, #ffffff0d, #ffffff03), rgb(13 25 20 / .78); -webkit-backdrop-filter: blur(18px) saturate(1.6); backdrop-filter: blur(18px) saturate(1.6); box-shadow: inset 0 1px 0 #ffffff20; }
+/* Both segmented controls share a frosted track and a softly raised, highlighted lens. */
+.tabs, .glass-dock .seg { border-radius: 999px; border: 1px solid #ffffff26; background: linear-gradient(135deg, #ffffff0d, #ffffff03), rgb(13 25 20 / .78); -webkit-backdrop-filter: blur(18px) saturate(1.6); backdrop-filter: blur(18px) saturate(1.6); box-shadow: inset 0 1px 0 #ffffff20; }
 .tabs { position: relative; isolation: isolate; max-width: 100%; }
 .tabs [role="tab"], .seg button { border-radius: 999px; }
 .tabs [role="tab"] { position: relative; z-index: 1; min-width: 0; }
-.tab-lens, .tabs:not(.lens-ready) [aria-selected="true"] { background: linear-gradient(180deg, #ffffff24, #ffffff0b); box-shadow: inset 0 1px 0 #ffffff66, inset 0 0 0 1px #ffffff24, 0 3px 8px #00000040; }
-.tabs [aria-selected="true"], .tabs [aria-selected="true"] small { color: var(--cfx-accent); }
+.tab-lens, .tabs:not(.lens-ready) [aria-selected="true"], .glass-dock .seg button[aria-pressed="true"] { background: linear-gradient(180deg, #ffffff24, #ffffff0b); box-shadow: inset 0 1px 0 #ffffff66, inset 0 0 0 1px #ffffff24, 0 3px 8px #00000040; }
+.tabs [aria-selected="true"], .tabs [aria-selected="true"] small, .glass-dock .seg button[aria-pressed="true"] { color: var(--cfx-accent); }
 .tab-lens { position: absolute; top: 4px; bottom: 4px; left: 0; border-radius: 999px; pointer-events: none; visibility: hidden; }
 .lens-ready .tab-lens { visibility: visible; transition: transform .28s cubic-bezier(.2, .8, .2, 1), width .28s cubic-bezier(.2, .8, .2, 1); }
 /* Hide section links before they crowd the auth actions, including extension Settings. */
@@ -634,15 +695,24 @@ html { scroll-padding-top: 100px; }
   .nav { top: 10px; width: calc(100% - 20px); margin-top: 10px; padding: 8px 12px; gap: 10px; }
   .nav > .nav-link { display: none; }
 }
-@media (prefers-reduced-motion: reduce) { .nav, .lens-ready .tab-lens, .tabs [role="tab"] { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .nav, .lens-ready .tab-lens, .tabs [role="tab"], .glass-dock .seg button { transition: none; } }
 @media (forced-colors: active) {
-  .nav, .tabs { border: 1px solid CanvasText; }
+  .nav, .tabs, .glass-dock .seg { border: 1px solid CanvasText; }
   .tab-lens { display: none; }
-  .tabs [aria-selected="true"] { background: Highlight; color: HighlightText; box-shadow: none; forced-color-adjust: none; }
+  .tabs [aria-selected="true"], .glass-dock .seg button[aria-pressed="true"] { background: Highlight; color: HighlightText; box-shadow: none; forced-color-adjust: none; }
   .tabs [aria-selected="true"] small { color: inherit; }
 }
 
 /* ===== Board polish ===== */
+.dock-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
+.glass-dock button { transition: transform .15s, filter .15s; }
+.glass-dock button:hover { filter: brightness(1.2); }
+.glass-dock button:active { transform: scale(.95); filter: brightness(.92); }
+.glass-dock button:focus-visible { outline: 2px solid var(--cfx-text); outline-offset: 3px; }
+.stage .glass-dock .chip[aria-pressed="true"] { border-color: var(--cfx-accent); }
+@container (max-width: 350px) {
+  .dock-actions .seg { flex: 1 1 100%; justify-content: center; order: -1; }
+}
 .board-card .clock:not(.on) { color: var(--cfx-text-2); }
 @media (hover: hover) and (pointer: fine) {
   .board { cursor: pointer; }
@@ -650,114 +720,4 @@ html { scroll-padding-top: 100px; }
   .board > .square-highlight { inset: auto; left: var(--hover-x, 0%); top: var(--hover-y, 0%); width: 12.5%; height: 12.5%; opacity: 0; background: #ffffff1f; box-shadow: inset 0 0 0 1px #ffffff55; border-radius: 3px; }
   .board.square-hover > .square-highlight { opacity: 1; }
 }
-
-/* ===== One tablet ===== */
-.stage { gap: 12px; min-width: 0; }
-.board-card {
-  --tablet-pad: 8px;
-  --tablet-gap: 6px;
-  --tablet-radius: 12px;
-  --tablet-swatch: 32px;
-  --tablet-surface: linear-gradient(135deg, #ffffff10, #ffffff04), rgb(13 25 20 / .78);
-  display: grid;
-  gap: var(--tablet-gap);
-  padding: var(--tablet-pad);
-  border-radius: 24px;
-  transform-style: preserve-3d;
-}
-.board-card::before, .board-card::after { inset: var(--tablet-pad); border-radius: var(--tablet-radius); }
-.board-card > .board { min-width: 0; border-radius: var(--tablet-radius); transform: translateZ(14px); }
-.board-card > .pbar, .board-card > .board-bar {
-  min-width: 0;
-  padding: var(--tablet-pad);
-  border-radius: var(--tablet-radius);
-  background: var(--tablet-surface);
-  box-shadow: inset 0 1px 0 #ffffff24;
-  transform: translateZ(14px);
-  backface-visibility: hidden;
-}
-.board-card > .pbar { height: 36px; min-height: 36px; padding-block: 4px; gap: var(--tablet-gap); }
-.board-card .pname { flex: 0 1 auto; min-width: 0; max-width: none; }
-.board-card .caps { flex: 0 2 auto; }
-.board-card .clock { margin-left: auto; }
-.board-card > .board-bar {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--tablet-gap);
-  padding: 6px;
-}
-.board-card .board-bar::after { content: none; }
-.board-card .look-name { margin: 0; min-width: 0; }
-.board-card #lookName, .board-card .look-name small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tablet-actions { display: flex; align-items: center; justify-self: end; gap: 4px; }
-.board-card .board-bar .icon-btn, .board-card .board-bar .chip-dice {
-  flex: none; order: 0; align-self: center; width: 36px; height: 36px; min-height: 36px;
-  margin: 0; padding: 0; border-radius: 50%; background: #ffffff08; border: 1px solid #ffffff26;
-}
-.board-card .chip-dice .dice-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-html.js .stage .board-bar .chips, .stage .board-bar .chips {
-  display: grid; grid-template-columns: repeat(4, var(--tablet-swatch)); grid-column: 1;
-  justify-content: start; gap: var(--tablet-gap); min-width: 0;
-  min-height: calc(2 * var(--tablet-swatch) + var(--tablet-gap));
-  padding: 0; overflow: visible; mask: none; -webkit-mask: none; animation: none;
-}
-.stage .board-bar .chips .chip { width: var(--tablet-swatch); height: var(--tablet-swatch); min-height: var(--tablet-swatch); padding: 0; background: #ffffff08; }
-.stage .board-bar .chips .chip img { width: 26px; height: 26px; }
-.board-card .board-bar .seg {
-  grid-column: 2; justify-self: end; order: 0; margin: 0; gap: 0; width: 116px; padding: 1px;
-  border-radius: var(--tablet-radius); border: 1px solid #ffffff26;
-  background: #ffffff08; box-shadow: inset 0 1px 0 #ffffff20;
-}
-.board-card .board-bar .seg button { flex: 1; min-height: 32px; padding: 4px 2px; font-size: 13px; border-radius: 8px; }
-.board-card .seg button[aria-pressed="true"] { color: var(--cfx-accent); background: linear-gradient(180deg, #ffffff24, #ffffff0b); box-shadow: inset 0 1px 0 #ffffff66, inset 0 0 0 1px #ffffff24, 0 3px 8px #00000040; }
-.board-bar button { transition: transform .15s, filter .15s; }
-.board-bar button:hover { filter: brightness(1.2); }
-.board-bar button:active { transform: scale(.95); filter: brightness(.92); }
-.board-bar button:focus-visible { outline: 2px solid var(--cfx-text); outline-offset: 3px; }
-/* Stage queries include the rim: 298px of swatches + 116px switch + gap + 30px inset. */
-@container (min-width: 450px) {
-  html.js .stage .board-bar .chips, .stage .board-bar .chips { grid-template-columns: repeat(8, var(--tablet-swatch)); min-height: var(--tablet-swatch); }
-}
-@container (max-width: 319px) {
-  html.js .stage .board-bar .chips, .stage .board-bar .chips { grid-column: 1 / -1; justify-content: center; }
-  .board-card .board-bar .seg { grid-column: 1 / -1; justify-self: center; }
-}
-@container (max-width: 280px) {
-  .board-card .look-name { grid-column: 1 / -1; }
-  .tablet-actions { grid-column: 1 / -1; justify-self: center; }
-}
-/* Compact card adds ~182px to its width (bars, footer and gaps; the rim cancels).
-   Budget 190px plus the 65px nav and 40px hero padding. */
-@media (min-width: 921px) {
-  .hero { grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); padding-block: 20px; }
-  .stage { width: min(100%, calc(100vh - 295px)); width: min(100%, calc(100svh - 295px)); justify-self: center; }
-}
-/* Short laptops use four swatches per row beside the switch: ~214px card overhead. */
-@media (min-width: 921px) and (max-height: 700px) {
-  .hero { padding-block: 6px; }
-  .stage { width: min(100%, calc(100vh - 293px)); width: min(100%, calc(100svh - 293px)); }
-}
-@media (pointer: coarse) {
-  .board-card { --tablet-swatch: 44px; }
-  .board-card .board-bar .icon-btn, .board-card .board-bar .chip-dice { width: 44px; height: 44px; min-height: 44px; }
-  .stage .board-bar .chips .chip img { width: 34px; height: 34px; }
-  .board-card .board-bar .seg button { min-height: 44px; }
-  html.js .stage .board-bar .chips, .stage .board-bar .chips {
-    grid-column: 1 / -1; grid-template-columns: repeat(4, var(--tablet-swatch));
-    justify-content: center; min-height: calc(2 * var(--tablet-swatch) + var(--tablet-gap));
-  }
-  .board-card .board-bar .seg { grid-column: 1 / -1; justify-self: center; }
-  @container (min-width: 610px) {
-    html.js .stage .board-bar .chips, .stage .board-bar .chips { grid-column: 1; grid-template-columns: repeat(8, var(--tablet-swatch)); min-height: var(--tablet-swatch); }
-    .board-card .board-bar .seg { grid-column: 2; justify-self: end; }
-  }
-  @media (min-width: 921px) {
-    .stage { width: min(100%, calc(100vh - 390px)); width: min(100%, calc(100svh - 390px)); }
-  }
-}
-@media (prefers-reduced-motion: reduce) { .board-bar button { transition: none; } }
-@media (forced-colors: active) {
-  .board-card > .pbar, .board-card > .board-bar, .board-card .board-bar .seg { border: 1px solid CanvasText; }
-  .board-card .seg button[aria-pressed="true"] { background: Highlight; color: HighlightText; box-shadow: none; forced-color-adjust: none; }
-}
+@media (prefers-reduced-motion: reduce) { .glass-dock button { transition: none; } }
