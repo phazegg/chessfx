@@ -17,8 +17,8 @@
 <script>document.documentElement.classList.add('js')</script>
 <link rel="preload" as="image" href="assets/boards/galaxy.jpg" fetchpriority="high">
 <link rel="preload" as="font" type="font/woff2" href="fonts/archivo-var.woff2" crossorigin>
-<link rel="stylesheet" href="assets/tokens.css?v=22">
-<link rel="stylesheet" href="site.css?v=22">
+<link rel="stylesheet" href="assets/tokens.css?v=23">
+<link rel="stylesheet" href="site.css?v=23">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"SoftwareApplication","name":"ChessFX","applicationCategory":"BrowserApplication","operatingSystem":"Chrome, Edge, Brave","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Animated boards, piece sets, effects and sounds for Chess.com. Cosmetic only."}
 </script>
@@ -28,7 +28,7 @@
 <header class="nav">
   <a class="brand" href="#top" aria-label="ChessFX home"><img src="assets/icon.png" alt="" width="28" height="28"><b>ChessFX</b><span class="tag">Free</span></a>
   <nav aria-label="Sections">
-    <a href="#looks">Looks</a><a href="#piece-sets">Pieces</a><a href="#how">How it works</a><a href="#features">Features</a><a href="#fair">Fair play</a><a href="#faq">FAQ</a>
+    <a href="#looks">Looks</a><a href="#how">How it works</a><a href="#features">Features</a><a href="#fair">Fair play</a><a href="#faq">FAQ</a>
   </nav>
   <div class="acct" id="acct"></div>
 </header>
@@ -90,6 +90,31 @@
     </ol>
   </section>
 
+  <!-- Looks: the ready-made presets first; Boards and Pieces tabs to mix your own. -->
+  <section class="sec" id="looks" aria-labelledby="looksH">
+    <div class="looks-head">
+      <div>
+        <h2 id="looksH">Pick a look.</h2>
+        <p class="sub">Each look is a board, a piece set and effects made to go together. Want your own mix? Swap the board or the pieces.</p>
+      </div>
+      <div class="tabs" role="tablist" aria-label="Browse looks, boards or pieces">
+        <button type="button" role="tab" id="tabLooks" aria-controls="pLooks" aria-selected="true">Looks <small>8</small></button>
+        <button type="button" role="tab" id="tabBoards" aria-controls="pBoards" aria-selected="false" tabindex="-1">Boards <small>21</small></button>
+        <button type="button" role="tab" id="tabPieces" aria-controls="pPieces" aria-selected="false" tabindex="-1">Pieces <small>8</small></button>
+      </div>
+    </div>
+    <p class="mix" id="mix" role="status" hidden><span>Your mix: <b id="mixName"></b></span><button type="button" class="linkbtn" id="mixCopy">Copy link</button><button type="button" class="linkbtn" id="mixReset">Back to <span id="mixBase"></span></button></p>
+    <div class="panel" id="pLooks" role="tabpanel" aria-labelledby="tabLooks"><div class="presets" id="presets" role="group" aria-label="Looks"></div></div>
+    <div class="panel" id="pBoards" role="tabpanel" aria-labelledby="tabBoards" hidden>
+      <p class="panel-note">All 21 are drawn live, not looped videos. Point at one to watch it move; pick one to put it under your current pieces.</p>
+      <div class="gallery" id="gallery"></div>
+    </div>
+    <div class="panel" id="pPieces" role="tabpanel" aria-labelledby="tabPieces" hidden>
+      <p class="panel-note">Eight of the 40+ sets in ChessFX. Pick one to put it on your current board.</p>
+      <div class="sets" id="sets" role="group" aria-label="Piece sets"></div>
+    </div>
+  </section>
+
   <!-- Before and after: the same position on a standard green board and on the look picked above. -->
   <section class="sec cmp-sec" id="compare" aria-labelledby="cmpH">
     <div class="cmp-copy">
@@ -107,18 +132,7 @@
     </figure>
   </section>
 
-  <!-- Looks gallery: every animated board, each one clickable into the live board above. -->
-  <section class="sec" id="looks" aria-labelledby="looksH">
-    <h2 id="looksH">Boards that move.</h2>
-    <p class="sub">All 21 are drawn live, not looped videos: stars drift, water ripples, rain falls. Pick one to try it on the board above.</p>
-    <div class="gallery" id="gallery"></div>
-  </section>
 
-  <section class="sec" id="piece-sets" aria-labelledby="piecesH">
-    <h2 id="piecesH">Pieces with character.</h2>
-    <p class="sub">Eight of the 40+ sets. Pick one to see it on the board above, then mix it with any board.</p>
-    <div class="sets" id="sets" role="group" aria-label="Try a piece set"></div>
-  </section>
 
   <section class="sec feat-sec" id="features" aria-labelledby="featH">
     <h2 id="featH">More than a new skin.</h2>
@@ -176,14 +190,13 @@
     </div>
   </section>
 
-  <section class="sec" id="faq" aria-labelledby="faqH">
-    <h2 id="faqH">Questions</h2>
+  <section class="sec faq-sec" id="faq" aria-labelledby="faqH">
+    <div class="faq-head"><h2 id="faqH">Questions</h2><p class="sub">The short answers. ChessFX is free, cosmetic only, and you can remove it in one click.</p></div>
     <div class="faq">
       <details><summary>Is ChessFX allowed on Chess.com?</summary><p>ChessFX is purely cosmetic and never assists your play. Chess.com's terms restrict third-party software in general, so use it at your own risk. It is not affiliated with Chess.com.</p></details>
       <details><summary>Does it slow my board down?</summary><p>Animated boards run on your graphics card and lower their quality automatically if your computer struggles, in bullet games, or when you ask your system to reduce motion.</p></details>
       <details><summary>Which browsers does it work in?</summary><p>Chrome, Edge, Brave and other Chromium browsers on desktop. Chess.com's mobile app isn't supported.</p></details>
       <details id="faqWhen"><summary>When can I install it?</summary><p>ChessFX is launching soon on the Chrome Web Store. It will be free, and this page will link to it the day it's live.</p></details>
-      <details><summary>Does it cost anything?</summary><p>No. Every board, piece set, effect and sound pack is free, and you don't need an account.</p></details>
       <details><summary>Why does it ask for access to chess.com?</summary><p>To restyle chess.com pages and swap Chess.com's own board, piece and sound files for the ones you pick. It doesn't run on other websites.</p></details>
       <details><summary>How do I remove it?</summary><p>Right-click the ChessFX icon and choose Remove. Chess.com goes back to exactly how it was.</p></details>
     </div>
@@ -206,13 +219,13 @@
   <details id="credits" class="credits"><summary>Credits and licences</summary><p>Piece sets shown on this page come from the Lichess project and their authors:</p><ul id="creditList"></ul><p>Typeface: Archivo by Omnibus-Type, under the SIL Open Font License 1.1 (<a href="fonts/OFL.txt">licence</a>).</p></details>
 </footer>
 
-<script src="assets/data.js?v=22"></script>
-<script src="assets/shaders.js?v=22"></script>
-<script src="assets/catalog.js?v=22"></script>
-<script src="assets/presets.js?v=22"></script>
-<script src="assets/settings.js?v=22"></script>
-<script src="assets/cloud-config.js?v=22"></script>
-<script src="auth.js?v=22"></script>
-<script src="site.js?v=22" defer></script>
+<script src="assets/data.js?v=23"></script>
+<script src="assets/shaders.js?v=23"></script>
+<script src="assets/catalog.js?v=23"></script>
+<script src="assets/presets.js?v=23"></script>
+<script src="assets/settings.js?v=23"></script>
+<script src="assets/cloud-config.js?v=23"></script>
+<script src="auth.js?v=23"></script>
+<script src="site.js?v=23" defer></script>
 </body>
 </html>

@@ -317,6 +317,7 @@
     for (const c of $('sets').children) c.setAttribute('aria-pressed', String(c.dataset.set === pieceSet.w));
     if (original) setOriginal(false); else { repaintPieces(); draw(); }
     capLoad();
+    paintMix();
     if (!rm.matches) {
       for (const i of layer.children) i.classList.remove('set');
       for (const el of [board, $('heroPiece')]) { el.classList.remove('swap'); void el.offsetWidth; el.classList.add('swap'); }
@@ -373,6 +374,7 @@
     const t = document.createElement('button');
     t.type = 'button';
     t.className = 'tile';
+    t.dataset.board = bd.id;
     t.innerHTML = `<img src="assets/boards/${bd.id}.jpg" alt="" loading="lazy" width="400" height="400"><span></span>`;
     t.querySelector('span').textContent = bd.name;
     t.setAttribute('aria-label', `Try the ${bd.name} board on the preview`);
@@ -390,6 +392,73 @@
     t.addEventListener('blur', () => tileLive(null));
     gal.append(t);
   }
+
+  // ---------- Looks section: the presets first; Boards and Pieces tabs mix your own ----------
+  // Each preset card shows its board with its own pieces in an opening position (the Italian Game).
+  const POS = 'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R';
+  const miniPieces = (set) => {
+    let h = '';
+    POS.split('/').forEach((row, r) => {
+      let f = 0;
+      for (const ch of row) {
+        if (/\d/.test(ch)) { f += +ch; continue; }
+        const c = ch === ch.toUpperCase() ? 'w' : 'b';
+        h += `<img class="${c}" src="assets/pieces/${set[c]}/${c}${ch.toUpperCase()}.png" alt="" loading="lazy" style="left:${f * 12.5}%;top:${r * 12.5}%">`;
+        f++;
+      }
+    });
+    return h;
+  };
+  const presetsBox = $('presets');
+  const usePreset = (l) => {
+    pieceOverride = null;
+    for (const c of lookChips()) c.setAttribute('aria-pressed', String(c.dataset.look === l.id));
+    applyLook(l);
+    share();
+  };
+  for (const l of D.looks) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'preset';
+    b.dataset.id = l.id;
+    b.innerHTML = `<span class="preset-art" style="--glow-w:${l.glowW};--glow-b:${l.glowB}" aria-hidden="true"><img class="preset-board" src="assets/boards/${l.board}.jpg" alt="" loading="lazy" width="400" height="400"><span class="preset-pieces">${miniPieces({ w: l.white, b: l.black })}</span></span><span class="preset-text"><b></b><small></small></span>`;
+    b.querySelector('b').textContent = l.name;
+    b.querySelector('small').textContent = l.blurb;
+    b.addEventListener('click', () => { usePreset(l); showBoard(); });
+    presetsBox.append(b);
+  }
+  // Tabs: click, or arrow keys between them (the selected tab is the one in the tab order).
+  const tabs = [...document.querySelectorAll('#looks [role="tab"]')];
+  const showTab = (t, focus) => {
+    for (const x of tabs) { const on = x === t; x.setAttribute('aria-selected', String(on)); x.tabIndex = on ? 0 : -1; $(x.getAttribute('aria-controls')).hidden = !on; }
+    if (focus) t.focus();
+  };
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => showTab(t));
+    t.addEventListener('keydown', (e) => {
+      const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+      if (d) { e.preventDefault(); showTab(tabs[(i + d + tabs.length) % tabs.length], true); }
+    });
+  });
+  // What's on the board when it isn't a preset as-is: "Your mix", with a way back and a link to share it.
+  function paintMix() {
+    const base = D.looks.find((x) => x.id === look.id) || D.looks[0];
+    const mixed = look.board !== base.board || !!pieceOverride;
+    $('mix').hidden = !mixed;
+    if (mixed) {
+      const bd = D.boards.find((x) => x.id === look.board);
+      $('mixName').textContent = `${bd ? bd.name : base.name} board with ${setName(pieceSet.w)} pieces`;
+      $('mixBase').textContent = base.name;
+    }
+    for (const c of presetsBox.children) c.setAttribute('aria-pressed', String(!mixed && c.dataset.id === base.id));
+    for (const t of $('gallery').children) t.setAttribute('aria-pressed', String(t.dataset.board === look.board));
+  }
+  $('mixReset').addEventListener('click', () => usePreset(D.looks.find((x) => x.id === look.id) || D.looks[0]));
+  $('mixCopy').addEventListener('click', async () => {
+    const btn = $('mixCopy');
+    try { await navigator.clipboard.writeText(location.href); btn.textContent = 'Link copied'; } catch (e) { btn.textContent = 'Copy the address bar'; }
+    setTimeout(() => { btn.textContent = 'Copy link'; }, 1800);
+  });
 
   // ---------- piece sets: try any of them on the hero board ----------
   const setsBox = $('sets');

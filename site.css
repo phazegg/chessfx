@@ -569,3 +569,57 @@ html.js .stage .chips { min-height: 46px; }
 .hero-piece.face-right { scale: -1 1; }
 @media (max-width: 920px) { .board-card, .stage:hover .board-card { --rx: 0deg; --ry: 0deg; } }
 @media (prefers-reduced-motion: reduce) { .hero-piece { transition: none; } }
+
+/* ===== Looks: the presets first; Boards and Pieces tabs to mix your own ===== */
+.looks-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px 40px; }
+.looks-head .sub { max-width: 34em; }
+.tabs { display: inline-flex; flex: none; padding: 4px; border-radius: 14px; border: 1px solid var(--cfx-line); background: var(--cfx-ink-1); }
+.tabs [role="tab"] { min-height: 40px; padding: 6px 16px; border: 0; border-radius: 10px; background: none; color: var(--cfx-text-2); font: inherit; font-weight: 700; font-size: 15px; cursor: pointer; transition: background-color .2s, color .2s; }
+.tabs [role="tab"]:hover { color: var(--cfx-text); }
+.tabs [role="tab"] small { margin-left: 6px; color: var(--cfx-text-3); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.tabs [aria-selected="true"] { background: var(--cfx-ink-3); color: var(--cfx-text); }
+.panel { margin-top: 28px; }
+.panel-note { margin: 0 0 16px; color: var(--cfx-text-2); font-size: 15px; }
+.panel .gallery, .panel .sets { margin-top: 0; }
+/* Your mix: shown only when the board isn't a preset as-is. */
+.mix { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 20px; margin: 22px 0 0; padding: 11px 16px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--cfx-accent) 30%, transparent); background: color-mix(in srgb, var(--cfx-accent) 8%, var(--cfx-ink-1)); color: var(--cfx-text-2); font-size: 15px; }
+.mix span:first-child { margin-right: auto; }
+.mix b { color: var(--cfx-text); }
+.mix .linkbtn { color: var(--cfx-text); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+/* Preset cards: the look's board with its own pieces, then its name and what makes it. */
+.presets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.preset { display: flex; flex-direction: column; gap: 12px; padding: 10px 10px 16px; border-radius: 18px; border: 1px solid var(--cfx-line); background: var(--cfx-ink-1); color: var(--cfx-text); font: inherit; text-align: left; cursor: pointer; transition: border-color .2s, transform .25s cubic-bezier(.2, .8, .2, 1); }
+.preset:hover { border-color: var(--cfx-line-strong); transform: translateY(-3px); }
+.preset:active { transform: scale(.98); }
+.preset[aria-pressed="true"] { border-color: var(--cfx-accent); box-shadow: 0 0 0 1px var(--cfx-accent) inset; }
+.preset-art { position: relative; display: block; aspect-ratio: 1; overflow: hidden; border-radius: 12px; }
+.preset-board { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .6s cubic-bezier(.2, .8, .2, 1); }
+.preset:hover .preset-board { transform: scale(1.04); }
+.preset-pieces img { position: absolute; width: 12.5%; height: 12.5%; }
+.preset-pieces img.w { filter: drop-shadow(0 0 3px var(--glow-w, transparent)); }
+.preset-pieces img.b { filter: drop-shadow(0 0 3px var(--glow-b, transparent)); }
+.preset-text { display: flex; flex-direction: column; gap: 3px; padding: 0 6px; }
+.preset-text b { font-stretch: 110%; font-weight: 800; font-size: 18px; letter-spacing: -.01em; }
+.preset-text small { color: var(--cfx-text-2); font-size: 14px; line-height: 1.4; }
+.preset[aria-pressed="true"] .preset-text b::after { content: ' · on the board'; color: var(--cfx-accent); font-stretch: 100%; font-weight: 600; font-size: 13px; letter-spacing: 0; }
+.tile[aria-pressed="true"] { border-color: var(--cfx-accent); box-shadow: 0 0 0 1px var(--cfx-accent) inset; }
+@media (max-width: 1000px) { .presets { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px) {
+  .looks-head { align-items: stretch; }
+  .tabs { width: 100%; }
+  .tabs [role="tab"] { flex: 1; padding-inline: 8px; }
+  .presets { gap: 10px; }
+  .preset { padding: 8px 8px 12px; }
+  .preset-text small { display: none; }
+  .preset[aria-pressed="true"] .preset-text b::after { content: none; }
+}
+@media (prefers-reduced-motion: reduce) { .preset, .preset-board { transition: none; } .preset:hover, .preset:hover .preset-board { transform: none; } }
+@media (forced-colors: active) { .preset, .tabs { border: 1px solid CanvasText; } .preset[aria-pressed="true"], .tabs [aria-selected="true"], .tile[aria-pressed="true"] { outline: 3px solid Highlight; } }
+
+/* How it works: three even columns. FAQ: heading on the left, questions on the right. */
+.steps ol { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 32px; }
+.faq-sec { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.4fr); gap: 24px 56px; align-items: start; }
+.faq-sec .faq { margin-top: 0; max-width: none; }
+.faq-head { position: sticky; top: 96px; }
+@media (max-width: 920px) { .faq-sec { grid-template-columns: minmax(0, 1fr); } .faq-head { position: static; } }
+@media (max-width: 760px) { .steps ol { grid-template-columns: minmax(0, 1fr); } }
