@@ -635,17 +635,16 @@ html.js .stage .chips { min-height: 46px; }
 .stage .glow { inset: -12% -12% 2%; background: radial-gradient(ellipse at 22% 30%, color-mix(in srgb, var(--tint) 30%, transparent), transparent 65%), radial-gradient(ellipse at 85% 65%, color-mix(in srgb, var(--tint2) 24%, transparent), transparent 65%); filter: blur(32px); }
 /* Filters live on a childless rim, never on the preserve-3d card or its sharp content planes. */
 .board-card { background: transparent; border-color: color-mix(in srgb, var(--tint) 28%, #ffffff38); box-shadow: 0 40px 90px -40px #000, 0 0 18px -6px color-mix(in srgb, var(--tint2) 45%, transparent), inset 0 1px 0 #ffffff70; }
-.board-card::before { content: ''; position: absolute; inset: 11px; border-radius: 12px; background: var(--cfx-ink-1); transform: translateZ(0); backface-visibility: hidden; pointer-events: none; }
-.board-card::after { content: ''; position: absolute; inset: 11px; border: 1px solid transparent; border-top-color: #ffffff80; border-left-color: color-mix(in srgb, var(--tint) 55%, #ffffff55); border-radius: 12px; transform: translateZ(2px); backface-visibility: hidden; pointer-events: none; }
+.board-card::after { content: ''; position: absolute; inset: 12px; border: 1px solid transparent; border-top-color: #ffffff80; border-left-color: color-mix(in srgb, var(--tint) 55%, #ffffff55); border-radius: 12px; transform: translateZ(15px); backface-visibility: hidden; pointer-events: none; }
 .glass-rim { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; transform: translateZ(1px); background: linear-gradient(135deg, #ffffff26, color-mix(in srgb, var(--tint) 16%, transparent) 40%, color-mix(in srgb, var(--tint2) 20%, transparent)); box-shadow: inset 1px 1px 0 #ffffff8c, inset -1px -1px 0 color-mix(in srgb, var(--tint2) 45%, transparent);
   clip-path: polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, 12px 12px, 12px calc(100% - 12px), calc(100% - 12px) calc(100% - 12px), calc(100% - 12px) 12px, 12px 12px);
   -webkit-backdrop-filter: blur(6px) saturate(1.5); backdrop-filter: blur(6px) saturate(1.5); }
 /* Exactly one surface uses refraction, clipped to the 12px perimeter. Other engines keep the frost above. */
 .glass-refract .glass-rim { backdrop-filter: url(#glassRefraction) blur(6px) saturate(1.5); }
 .board-card > .pbar, .board-card > .board-bar { background: var(--cfx-ink-1); }
-.board-card > .pbar { margin: 0; border-radius: 0 0 12px 12px; }
+.board-card > .pbar { margin: 0; border-radius: 0; }
 .board-card > .pbar:first-of-type { padding-top: 0; border-radius: 12px 12px 0 0; }
-.stage .board-bar { padding: 10px 4px 3px; }
+.board-card > .board-bar { margin: 0; padding: 10px 4px 3px; border-radius: 0 0 12px 12px; }
 .stage .board-bar::after { content: none; }
 .stage .look-name { flex: 1 1 auto; }
 .glare { background: radial-gradient(ellipse at var(--gx, 50%) var(--gy, 30%), #ffffff42, color-mix(in srgb, var(--tint) 10%, transparent) 22%, transparent 48%), linear-gradient(125deg, #ffffff0a, transparent 32%, color-mix(in srgb, var(--tint2) 5%, transparent) 75%, transparent); }
