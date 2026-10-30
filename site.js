@@ -310,6 +310,7 @@
     $('poster').src = `assets/boards/${l.board}.jpg`;
     $('lookName').textContent = title();
     $('heroPiece').src = `assets/pieces/${pieceSet.w}/wN.png`;
+    $('backImg').src = `assets/boards/${look.board}.jpg`; $('backName').textContent = title();
     $('applyMsg').textContent = '';
     board.setAttribute('aria-label', `Live preview of the ${title()} look playing the Opera Game`);
     cmpPaint();
@@ -490,6 +491,95 @@
       } catch (e) { $('applyMsg').textContent = e.message; }
     });
   });
+
+  // ---------- the hero card: leans toward the pointer, spins a full turn when dragged, bursts where you click ----------
+  // One spring per axis (slightly bouncy); the loop runs only while the card is moving. Reduced motion: none of it.
+  const card = document.querySelector('.board-card'), knight = $('heroPiece');
+  const fineHover = matchMedia('(hover: hover) and (pointer: fine)');
+  const rest = () => (innerWidth > 920 ? { x: 4, y: -9 } : { x: 0, y: 0 });
+  const T = { x: rest().x, y: rest().y, vx: 0, vy: 0, tx: rest().x, ty: rest().y };
+  let cardRaf = 0, cardLast = 0, drag = null;
+  const clampN = (v, a) => Math.max(-a, Math.min(a, v));
+  const turnBase = () => Math.round((T.ty - rest().y) / 360) * 360;
+  const paintCard = () => {
+    card.style.setProperty('--rx', T.x.toFixed(2) + 'deg');
+    card.style.setProperty('--ry', T.y.toFixed(2) + 'deg');
+    const yaw = ((T.y + 180) % 360 + 360) % 360 - 180;
+    knight.style.setProperty('--kx', clampN(-yaw * 0.8, 22).toFixed(1) + 'px');
+    knight.style.setProperty('--ky', clampN(T.x * 0.8, 16).toFixed(1) + 'px');
+  };
+  const stepCard = (now) => {
+    cardRaf = 0;
+    const dt = Math.min((now - (cardLast || now)) / 1000, 0.034); cardLast = now;
+    if (!drag) for (const [p, v, t] of [['x', 'vx', 'tx'], ['y', 'vy', 'ty']]) { const a = 170 * (T[t] - T[p]) - 16 * T[v]; T[v] += a * dt; T[p] += T[v] * dt; }
+    paintCard();
+    const still = !drag && Math.abs(T.tx - T.x) < 0.03 && Math.abs(T.ty - T.y) < 0.03 && Math.abs(T.vx) < 0.05 && Math.abs(T.vy) < 0.05;
+    if (!still) { cardRaf = requestAnimationFrame(stepCard); return; }
+    // Settled after a spin: drop the whole turns (same picture), so later leans are measured from the front again.
+    const k = turnBase(); T.x = T.tx; T.y = T.ty - k; T.ty -= k; T.vx = T.vy = 0; cardLast = 0; paintCard();
+  };
+  const wake = () => { if (!cardRaf) cardRaf = requestAnimationFrame(stepCard); };
+  const aimRest = () => { const r = rest(); T.tx = r.x; T.ty = turnBase() + r.y; card.style.setProperty('--go', 0); wake(); };
+  if (!rm.matches) {
+    // Lean toward the pointer anywhere on screen while the hero is in view: it faces the pointer, up to about 18 degrees.
+    addEventListener('pointermove', (e) => {
+      if (drag || !visible || !fineHover.matches || e.pointerType === 'touch') return;
+      const r = card.getBoundingClientRect(), nx = clampN((e.clientX - (r.left + r.width / 2)) / (r.width * 0.75), 1), ny = clampN((e.clientY - (r.top + r.height / 2)) / (r.height * 0.75), 1);
+      const base = rest();
+      T.ty = turnBase() + base.y * 0.35 + nx * 18;
+      T.tx = base.x * 0.35 - ny * 14;
+      card.style.setProperty('--gx', (50 + nx * 45).toFixed(1) + '%');
+      card.style.setProperty('--gy', (50 + ny * 45).toFixed(1) + '%');
+      card.style.setProperty('--go', 1);
+      const kr = knight.getBoundingClientRect();
+      knight.classList.toggle('face-right', e.clientX > kr.left + kr.width / 2);
+      wake();
+    });
+    document.documentElement.addEventListener('pointerleave', () => { if (!drag) { aimRest(); knight.classList.remove('face-right'); } });
+    addEventListener('resize', () => { if (!drag) aimRest(); });
+    // Drag sideways to spin (vertical drags still scroll the page on touch screens); let go and it keeps turning,
+    // then lands facing front. A press that doesn't move is a click: a burst from the square under it.
+    card.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0 || e.target.closest('button, a, input')) return;
+      const onBoard = e.target === board;
+      drag = { x0: e.clientX, y0: e.clientY, rx0: T.x, ry0: T.y, lx: e.clientX, lt: performance.now(), v: 0, moved: false,
+        sq: onBoard ? 'abcdefgh'[clampN(Math.floor(e.offsetX / board.clientWidth * 8), 7)] + (8 - clampN(Math.floor(e.offsetY / board.clientHeight * 8), 7)) : null };
+      card.setPointerCapture(e.pointerId);
+    });
+    card.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+      if (!drag.moved && Math.hypot(dx, dy) < 6) return;
+      drag.moved = true;
+      card.classList.add('grabbing');
+      card.style.setProperty('--go', 0);
+      const now = performance.now(), dt = Math.max(now - drag.lt, 1) / 1000;
+      drag.v = drag.v * 0.6 + ((e.clientX - drag.lx) * 0.5 / dt) * 0.4;
+      drag.lx = e.clientX; drag.lt = now;
+      T.y = drag.ry0 + dx * 0.5;
+      T.x = clampN(drag.rx0 - dy * 0.3, 35);
+      wake();
+    });
+    const release = (e) => {
+      if (!drag) return;
+      const d = drag; drag = null;
+      card.classList.remove('grabbing');
+      if (d.moved) {
+        // Fling: keep the speed, then land on the nearest whole turn in the direction it was going.
+        T.vy = clampN(d.v, 1400); T.vx = 0;
+        const land = T.y + T.vy * 0.35, base = rest();
+        T.ty = base.y + Math.round((land - base.y) / 360) * 360;
+        T.tx = base.x;
+        wake();
+      } else if (d.sq && e.type === 'pointerup' && running()) {
+        burst(d.sq, 24, 1.3); ring(d.sq, look.palette[0]); sfx('capture');
+      }
+    };
+    card.addEventListener('pointerup', release);
+    card.addEventListener('pointercancel', release);
+    card.addEventListener('lostpointercapture', release);
+  }
+  paintCard();
 
   // ---------- features: a capture on the chosen look's own board, looping while it is on screen ----------
   // A 4x4 corner of the board (a1-d4): the white knight hops b1-c3 and takes the bishop in a burst of the look's colours.

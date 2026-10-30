@@ -542,3 +542,30 @@ html.js .stage .chips { min-height: 46px; }
 .art-looks img:nth-child(2) { left: 48px; }
 .art-looks img:nth-child(3) { left: 96px; }
 .promise-cols { margin-top: 36px; }
+
+/* ===== The hero card you can play with (site.js "hero card"): it leans toward the pointer in every direction,
+   spins a full turn when dragged (its back shows the look), and a click on the board bursts from that square. ===== */
+.board-wrap { perspective: 1100px; }
+.board-card, .stage:hover .board-card { --rx: 4deg; --ry: -9deg; position: relative; transform: rotateX(var(--rx)) rotateY(var(--ry)); transform-origin: 50% 50%; transform-style: preserve-3d; transition: none; cursor: grab; touch-action: pan-y; -webkit-user-select: none; user-select: none; }
+.board-card.grabbing { cursor: grabbing; }
+.board-card button { cursor: pointer; }
+/* Depth: the board floats highest, the player bars and controls a little lower, the card itself is the base. */
+.board-card > .pbar, .board-card > .board-bar { transform: translateZ(14px); }
+.board-card > .board { transform: translateZ(26px); }
+.board-card > :not(.card-back) { backface-visibility: hidden; }
+.board > * { pointer-events: none; }
+/* A soft light that sits where the pointer is. */
+.glare { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; transform: translateZ(34px); opacity: var(--go, 0); transition: opacity .35s;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 30%), rgba(255, 255, 255, .2), rgba(255, 255, 255, .05) 32%, transparent 62%); }
+/* The back of the card: the current look, dimmed, with the ChessFX mark. */
+.card-back { position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden; border-radius: inherit; background: var(--cfx-ink-1); transform: rotateY(180deg) translateZ(1px); backface-visibility: hidden; }
+.card-back > img { position: absolute; inset: 12px; width: calc(100% - 24px); height: calc(100% - 24px); border-radius: 12px; object-fit: cover; filter: brightness(.5) saturate(1.2); }
+.cb-mark { position: relative; display: grid; justify-items: center; gap: 4px; text-align: center; }
+.cb-mark img { width: 64px; height: 64px; margin-bottom: 8px; border-radius: 16px; box-shadow: 0 14px 34px rgba(0, 0, 0, .6); }
+.cb-mark b { font-stretch: 125%; font-weight: 800; font-size: 36px; line-height: 1; letter-spacing: -.03em; }
+#backName { color: var(--cfx-text); font-weight: 600; opacity: .85; }
+/* The knight drifts against the card's lean and turns to face the pointer. */
+.hero-piece { translate: var(--kx, 0px) var(--ky, 0px); transition: scale .35s cubic-bezier(.3, 1.4, .5, 1); }
+.hero-piece.face-right { scale: -1 1; }
+@media (max-width: 920px) { .board-card, .stage:hover .board-card { --rx: 0deg; --ry: 0deg; } }
+@media (prefers-reduced-motion: reduce) { .board-card, .stage:hover .board-card { cursor: default; } .hero-piece { transition: none; } }

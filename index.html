@@ -17,8 +17,8 @@
 <script>document.documentElement.classList.add('js')</script>
 <link rel="preload" as="image" href="assets/boards/galaxy.jpg" fetchpriority="high">
 <link rel="preload" as="font" type="font/woff2" href="fonts/archivo-var.woff2" crossorigin>
-<link rel="stylesheet" href="assets/tokens.css?v=19">
-<link rel="stylesheet" href="site.css?v=19">
+<link rel="stylesheet" href="assets/tokens.css?v=20">
+<link rel="stylesheet" href="site.css?v=20">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"SoftwareApplication","name":"ChessFX","applicationCategory":"BrowserApplication","operatingSystem":"Chrome, Edge, Brave","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Animated boards, piece sets, effects and sounds for Chess.com. Cosmetic only."}
 </script>
@@ -69,6 +69,9 @@
           <button type="button" id="sound" class="icon-btn" aria-pressed="false" aria-label="Sound" title="Turn sound on"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="spk" d="M4 9v6h4l5 4V5L8 9z"/><path class="on" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/><path class="off" d="M17 9l5 6M22 9l-5 6"/></svg></button>
           <button type="button" id="pause" class="icon-btn" aria-pressed="false" aria-label="Pause the preview">❚❚</button>
         </figcaption>
+        <span class="glare" aria-hidden="true"></span>
+        <!-- The card's back, seen while it spins: the current look with the ChessFX mark. -->
+        <div class="card-back" aria-hidden="true"><img id="backImg" src="assets/boards/galaxy.jpg" alt="" width="400" height="400" loading="lazy"><span class="cb-mark"><img src="assets/icon.png" alt="" width="52" height="52"><b>ChessFX</b><span id="backName">Cosmic</span></span></div>
       </figure>
       <img class="hero-piece" id="heroPiece" src="assets/pieces/maestro/wN.png" alt="" width="256" height="256" aria-hidden="true">
       </div>
@@ -203,13 +206,13 @@
   <details id="credits" class="credits"><summary>Credits and licences</summary><p>Piece sets shown on this page come from the Lichess project and their authors:</p><ul id="creditList"></ul><p>Typeface: Archivo by Omnibus-Type, under the SIL Open Font License 1.1 (<a href="fonts/OFL.txt">licence</a>).</p></details>
 </footer>
 
-<script src="assets/data.js?v=19"></script>
-<script src="assets/shaders.js?v=19"></script>
-<script src="assets/catalog.js?v=19"></script>
-<script src="assets/presets.js?v=19"></script>
-<script src="assets/settings.js?v=19"></script>
-<script src="assets/cloud-config.js?v=19"></script>
-<script src="auth.js?v=19"></script>
-<script src="site.js?v=19" defer></script>
+<script src="assets/data.js?v=20"></script>
+<script src="assets/shaders.js?v=20"></script>
+<script src="assets/catalog.js?v=20"></script>
+<script src="assets/presets.js?v=20"></script>
+<script src="assets/settings.js?v=20"></script>
+<script src="assets/cloud-config.js?v=20"></script>
+<script src="auth.js?v=20"></script>
+<script src="site.js?v=20" defer></script>
 </body>
 </html>
