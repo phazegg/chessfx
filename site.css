@@ -546,7 +546,7 @@ html.js .stage .chips { min-height: 46px; }
 /* ===== The hero card you can play with (site.js "hero card"): it leans toward the pointer in every direction,
    spins a full turn when dragged (its back shows the look), and a click on the board bursts from that square. ===== */
 .board-wrap { perspective: 1100px; }
-.board-card, .stage:hover .board-card { --rx: 4deg; --ry: -9deg; position: relative; transform: rotateX(var(--rx)) rotateY(var(--ry)); transform-origin: 50% 50%; transform-style: preserve-3d; transition: none; cursor: grab; touch-action: pan-y; -webkit-user-select: none; user-select: none; }
+.board-card, .stage:hover .board-card { --rx: 0deg; --ry: 0deg; position: relative; transform: rotateX(var(--rx)) rotateY(var(--ry)); transform-origin: 50% 50%; transform-style: preserve-3d; transition: none; cursor: grab; touch-action: pan-y; -webkit-user-select: none; user-select: none; }
 .board-card.grabbing { cursor: grabbing; }
 .board-card button { cursor: pointer; }
 /* Depth: the board floats highest, the player bars and controls a little lower, the card itself is the base. */

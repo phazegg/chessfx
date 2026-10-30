@@ -496,7 +496,8 @@
   // One spring per axis (slightly bouncy); the loop runs only while the card is moving. Reduced motion: none of it.
   const card = document.querySelector('.board-card'), knight = $('heroPiece');
   const fineHover = matchMedia('(hover: hover) and (pointer: fine)');
-  const rest = () => (innerWidth > 920 ? { x: 4, y: -9 } : { x: 0, y: 0 });
+  const rest = () => ({ x: 0, y: 0 });
+  let idleTimer = 0;
   const T = { x: rest().x, y: rest().y, vx: 0, vy: 0, tx: rest().x, ty: rest().y };
   let cardRaf = 0, cardLast = 0, drag = null;
   const clampN = (v, a) => Math.max(-a, Math.min(a, v));
@@ -525,9 +526,13 @@
     addEventListener('pointermove', (e) => {
       if (drag || !visible || !fineHover.matches || e.pointerType === 'touch') return;
       const r = card.getBoundingClientRect(), nx = clampN((e.clientX - (r.left + r.width / 2)) / (r.width * 0.75), 1), ny = clampN((e.clientY - (r.top + r.height / 2)) / (r.height * 0.75), 1);
-      const base = rest();
-      T.ty = turnBase() + base.y * 0.35 + nx * 18;
-      T.tx = base.x * 0.35 - ny * 14;
+      // Full lean near the card, gentler far away (reading the text on the left shouldn't tip it hard over).
+      const dist = Math.hypot((e.clientX - (r.left + r.width / 2)) / r.width, (e.clientY - (r.top + r.height / 2)) / r.height);
+      const k = dist < 0.8 ? 1 : Math.max(0.3, 1 - (dist - 0.8) * 0.9);
+      T.ty = turnBase() + nx * 18 * k;
+      T.tx = -ny * 14 * k;
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => { if (!drag) aimRest(); }, 2200);
       card.style.setProperty('--gx', (50 + nx * 45).toFixed(1) + '%');
       card.style.setProperty('--gy', (50 + ny * 45).toFixed(1) + '%');
       card.style.setProperty('--go', 1);
