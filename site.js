@@ -334,7 +334,7 @@
     tRaf = requestAnimationFrame(tileFrame);
   };
 
-  // ---------- looks: chips under the board, and the full gallery ----------
+  // ---------- looks: chips in the tablet footer, and the full gallery ----------
   const applyLook = (l, label) => {
     look = { ...l, label: label || l.name };
     if (pieceOverride === l.white) pieceOverride = null;
@@ -403,7 +403,7 @@
     dice.classList.remove('roll'); void dice.offsetWidth; dice.classList.add('roll');
   });
   // The die shares the steady glass dock with the other preview controls.
-  $('mOriginal').parentElement.before(dice);
+  document.querySelector('.tablet-actions').prepend(dice);
   const gal = $('gallery');
   for (const bd of D.boards) {
     const t = document.createElement('button');
@@ -649,13 +649,13 @@
   const wake = () => { if (!cardRaf) cardRaf = requestAnimationFrame(stepCard); };
   const aimRest = () => { const r = rest(); T.tx = r.x; T.ty = turnBase() + r.y; card.style.setProperty('--go', 0); wake(); };
   {
-    // Face the pointer while the hero is in view; stay nearly flat while the visitor aims at the card or dock.
+    // Face the pointer while the hero is in view; stay nearly flat while the visitor aims at the card, including its footer controls.
     addEventListener('pointermove', (e) => {
       if (drag || !visible || !fineHover.matches || e.pointerType === 'touch') return;
       const r = card.getBoundingClientRect(), nx = clampN((e.clientX - (r.left + r.width / 2)) / (r.width * 0.75), 1), ny = clampN((e.clientY - (r.top + r.height / 2)) / (r.height * 0.75), 1);
       // Like a tablet held toward you: the screen's normal points at the pointer (as if it were ~1.1 card widths in front).
       const D = r.width * 1.1, deg = 180 / Math.PI;
-      const aiming = !!e.target.closest('.board-card, .glass-dock');
+      const aiming = !!e.target.closest('.board-card');
       T.ty = turnBase() + clampN(Math.atan2(e.clientX - (r.left + r.width / 2), D) * deg, aiming ? AIM_TILT : MAX_YAW);
       T.tx = clampN(-Math.atan2(e.clientY - (r.top + r.height / 2), D) * deg, aiming ? AIM_TILT : MAX_PITCH);
       card.style.setProperty('--gx', (50 + nx * 45).toFixed(1) + '%');
