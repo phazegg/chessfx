@@ -624,6 +624,7 @@
   // ---------- the hero card: leans toward the pointer, spins a full turn when dragged, bursts where you click ----------
   // One spring per axis; the loop runs only while the card is moving. It moves only when you move the pointer, so it
   // also runs with reduced motion, just without the bounce (critically damped).
+  const MAX_YAW = 12, MAX_PITCH = 9, AIM_TILT = 3;
   const card = document.querySelector('.board-card');
   const fineHover = matchMedia('(hover: hover) and (pointer: fine)');
   const rest = () => ({ x: 0, y: 0 });
@@ -648,25 +649,39 @@
   const wake = () => { if (!cardRaf) cardRaf = requestAnimationFrame(stepCard); };
   const aimRest = () => { const r = rest(); T.tx = r.x; T.ty = turnBase() + r.y; card.style.setProperty('--go', 0); wake(); };
   {
-    // Lean toward the pointer anywhere on screen while the hero is in view: it faces the pointer, up to about 18 degrees.
+    // Face the pointer while the hero is in view; stay nearly flat while the visitor aims at the card or dock.
     addEventListener('pointermove', (e) => {
       if (drag || !visible || !fineHover.matches || e.pointerType === 'touch') return;
       const r = card.getBoundingClientRect(), nx = clampN((e.clientX - (r.left + r.width / 2)) / (r.width * 0.75), 1), ny = clampN((e.clientY - (r.top + r.height / 2)) / (r.height * 0.75), 1);
       // Like a tablet held toward you: the screen's normal points at the pointer (as if it were ~1.1 card widths in front).
       const D = r.width * 1.1, deg = 180 / Math.PI;
-      T.ty = turnBase() + clampN(Math.atan2(e.clientX - (r.left + r.width / 2), D) * deg, 32);
-      T.tx = clampN(-Math.atan2(e.clientY - (r.top + r.height / 2), D) * deg, 26);
+      const aiming = !!e.target.closest('.board-card, .glass-dock');
+      T.ty = turnBase() + clampN(Math.atan2(e.clientX - (r.left + r.width / 2), D) * deg, aiming ? AIM_TILT : MAX_YAW);
+      T.tx = clampN(-Math.atan2(e.clientY - (r.top + r.height / 2), D) * deg, aiming ? AIM_TILT : MAX_PITCH);
       card.style.setProperty('--gx', (50 + nx * 45).toFixed(1) + '%');
       card.style.setProperty('--gy', (50 + ny * 45).toFixed(1) + '%');
       card.style.setProperty('--go', 1);
       wake();
     });
+    // Board children ignore pointer events, so offsets are in the rotated board's own coordinates.
+    const hideSquare = () => board.classList.remove('square-hover');
+    board.addEventListener('pointermove', (e) => {
+      if (drag || !fineHover.matches || e.pointerType === 'touch' || e.target !== board) { hideSquare(); return; }
+      const col = Math.max(0, Math.min(7, Math.floor(e.offsetX / board.clientWidth * 8)));
+      const row = Math.max(0, Math.min(7, Math.floor(e.offsetY / board.clientHeight * 8)));
+      board.style.setProperty('--hover-x', col * 12.5 + '%');
+      board.style.setProperty('--hover-y', row * 12.5 + '%');
+      board.classList.add('square-hover');
+    });
+    board.addEventListener('pointerleave', hideSquare);
+    fineHover.addEventListener('change', hideSquare);
     document.documentElement.addEventListener('pointerleave', () => { if (!drag) aimRest(); });
     addEventListener('resize', () => { if (!drag) aimRest(); });
     // Drag sideways to spin (vertical drags still scroll the page on touch screens); let go and it keeps turning,
     // then lands facing front. A press that doesn't move is a click: a burst from the square under it.
     card.addEventListener('pointerdown', (e) => {
       if (e.button !== 0 || e.target.closest('button, a, input')) return;
+      hideSquare();
       const onBoard = board.contains(e.target);
       const boardRect = onBoard && e.target !== board ? board.getBoundingClientRect() : null;
       drag = { x0: e.clientX, y0: e.clientY, rx0: T.x, ry0: T.y, lx: e.clientX, lt: performance.now(), v: 0, moved: false,

@@ -17,8 +17,8 @@
 <script>document.documentElement.classList.add('js')</script>
 <link rel="preload" as="image" href="assets/boards/galaxy.jpg" fetchpriority="high">
 <link rel="preload" as="font" type="font/woff2" href="fonts/archivo-var.woff2" crossorigin>
-<link rel="stylesheet" href="assets/tokens.css?v=27">
-<link rel="stylesheet" href="site.css?v=27">
+<link rel="stylesheet" href="assets/tokens.css?v=28">
+<link rel="stylesheet" href="site.css?v=28">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"SoftwareApplication","name":"ChessFX","applicationCategory":"BrowserApplication","operatingSystem":"Chrome, Edge, Brave","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Animated boards, piece sets, effects and sounds for Chess.com. Cosmetic only."}
 </script>
@@ -67,6 +67,7 @@
           <div class="marks" id="marks" aria-hidden="true" hidden><i></i><i></i></div>
           <div class="pieces" id="pieces" aria-hidden="true"></div>
           <canvas id="fx" aria-hidden="true"></canvas>
+          <span class="square-highlight" aria-hidden="true"></span>
         </div>
         <div class="pbar" aria-hidden="true"><span class="pname">Paul Morphy</span><span class="caps" id="capsB"></span><span class="clock" id="clockW">3:00</span></div>
         <figcaption class="board-bar">
@@ -79,12 +80,14 @@
       </div>
       <div class="glass-dock" role="group" aria-label="Preview controls">
         <div class="chips" id="chips" role="group" aria-label="Try a look"></div>
+        <div class="dock-actions">
           <span class="seg" role="group" aria-label="Compare">
             <button type="button" id="mOriginal" aria-pressed="false">Original</button>
             <button type="button" id="mFx" aria-pressed="true">ChessFX</button>
           </span>
           <button type="button" id="sound" class="icon-btn" aria-pressed="false" aria-label="Sound" title="Turn sound on"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="spk" d="M4 9v6h4l5 4V5L8 9z"/><path class="on" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/><path class="off" d="M17 9l5 6M22 9l-5 6"/></svg></button>
           <button type="button" id="pause" class="icon-btn" aria-pressed="false" aria-label="Pause the preview">❚❚</button>
+        </div>
       </div>
       <p class="apply-row" id="applyRow" hidden><button type="button" class="btn btn-go" id="applyBtn">Apply to my ChessFX</button><span id="applyMsg" role="status" aria-live="polite"></span></p>
     </div>
@@ -230,13 +233,13 @@
   <details id="credits" class="credits"><summary>Credits and licences</summary><p>Piece sets shown on this page come from the Lichess project and their authors:</p><ul id="creditList"></ul><p>Typeface: Archivo by Omnibus-Type, under the SIL Open Font License 1.1 (<a href="fonts/OFL.txt">licence</a>).</p></details>
 </footer>
 
-<script src="assets/data.js?v=27"></script>
-<script src="assets/shaders.js?v=27"></script>
-<script src="assets/catalog.js?v=27"></script>
-<script src="assets/presets.js?v=27"></script>
-<script src="assets/settings.js?v=27"></script>
-<script src="assets/cloud-config.js?v=27"></script>
-<script src="auth.js?v=27"></script>
-<script src="site.js?v=27" defer></script>
+<script src="assets/data.js?v=28"></script>
+<script src="assets/shaders.js?v=28"></script>
+<script src="assets/catalog.js?v=28"></script>
+<script src="assets/presets.js?v=28"></script>
+<script src="assets/settings.js?v=28"></script>
+<script src="assets/cloud-config.js?v=28"></script>
+<script src="auth.js?v=28"></script>
+<script src="site.js?v=28" defer></script>
 </body>
 </html>

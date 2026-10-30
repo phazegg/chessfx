@@ -649,22 +649,22 @@ html.js .stage .chips { min-height: 46px; }
 .stage .board-bar::after { content: none; }
 .stage .look-name { flex: 1 1 auto; }
 .glare { background: radial-gradient(ellipse at var(--gx, 50%) var(--gy, 30%), #ffffff42, color-mix(in srgb, var(--tint) 10%, transparent) 22%, transparent 48%), linear-gradient(125deg, #ffffff0a, transparent 32%, color-mix(in srgb, var(--tint2) 5%, transparent) 75%, transparent); }
-.glass-dock { display: flex; align-items: center; gap: 6px; min-width: 0; padding: 8px; border-radius: 999px; border: 1px solid #ffffff30; background: linear-gradient(135deg, #ffffff12, #ffffff03), rgb(13 25 20 / .78); -webkit-backdrop-filter: blur(18px) saturate(1.6); backdrop-filter: blur(18px) saturate(1.6); box-shadow: inset 0 1px 0 #ffffff38, inset 1px 0 0 #ffffff14, 0 18px 36px -20px #000; }
-html.js .stage .glass-dock .chips { min-height: 40px; }
-.stage .glass-dock .chips { flex: 1 1 0; min-width: 44px; justify-content: safe center; gap: 5px; padding: 4px; animation: none; }
-.stage .glass-dock .chip { width: 32px; height: 32px; background: #ffffff08; }
-.stage .glass-dock .chip img { width: 26px; height: 26px; }
-.glass-dock .seg { flex: none; }
-.glass-dock .seg button { padding-inline: 8px; border-radius: 999px; font-size: 12px; }
-.glass-dock .icon-btn, .stage .glass-dock .chip-dice { flex: none; width: 36px; height: 36px; min-height: 36px; margin: 0; padding: 0; border-radius: 50%; background: #ffffff08; border-color: #ffffff26; align-self: center; }
+.glass-dock { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; min-width: 0; padding: 10px; border-radius: 26px; border: 1px solid #ffffff30; background: linear-gradient(135deg, #ffffff12, #ffffff03), rgb(13 25 20 / .78); -webkit-backdrop-filter: blur(18px) saturate(1.6); backdrop-filter: blur(18px) saturate(1.6); box-shadow: inset 0 1px 0 #ffffff38, inset 1px 0 0 #ffffff14, 0 18px 36px -20px #000; }
+html.js .stage .glass-dock .chips { min-height: 0; }
+.stage .glass-dock .chips { display: grid; grid-template-columns: repeat(4, 36px); flex: 1 1 100%; min-width: 0; justify-content: center; gap: 8px; padding: 4px; overflow: visible; animation: none; }
+.stage .glass-dock .chip { width: 36px; height: 36px; background: #ffffff08; }
+.stage .glass-dock .chip img { width: 30px; height: 30px; }
+.glass-dock .seg { flex: none; gap: 4px; }
+.glass-dock .seg button { min-height: 36px; padding-inline: 10px; border-radius: 999px; font-size: 13px; }
+.glass-dock .icon-btn, .stage .glass-dock .chip-dice { flex: none; width: 40px; height: 40px; min-height: 40px; margin: 0; padding: 0; border-radius: 50%; background: #ffffff08; border-color: #ffffff26; align-self: center; }
 .glass-dock .chip-dice .dice-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .glass-dock #sound, .glass-dock #pause { order: 0; margin: 0; }
-/* Compact columns and phones wrap within the same dock; all eight swatches stay available. */
-@container (max-width: 420px) {
-  .glass-dock { flex-wrap: wrap; justify-content: center; border-radius: 26px; }
-  .stage .glass-dock .chips { flex-basis: 100%; flex-wrap: wrap; overflow: visible; }
+/* Eight swatches form one row when there is room, otherwise two even rows. */
+@container (min-width: 390px) {
+  .stage .glass-dock .chips { grid-template-columns: repeat(8, 36px); }
 }
 @media (pointer: coarse) {
+  .stage .glass-dock .chips { grid-template-columns: repeat(4, 44px); }
   .stage .glass-dock .chip { width: 44px; height: 44px; }
   .glass-dock .icon-btn, .stage .glass-dock .chip-dice { width: 44px; height: 44px; min-height: 44px; }
   .glass-dock .seg button { min-height: 40px; }
@@ -702,3 +702,22 @@ html { scroll-padding-top: 100px; }
   .tabs [aria-selected="true"], .glass-dock .seg button[aria-pressed="true"] { background: Highlight; color: HighlightText; box-shadow: none; forced-color-adjust: none; }
   .tabs [aria-selected="true"] small { color: inherit; }
 }
+
+/* ===== Board polish ===== */
+.dock-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
+.glass-dock button { transition: transform .15s, filter .15s; }
+.glass-dock button:hover { filter: brightness(1.2); }
+.glass-dock button:active { transform: scale(.95); filter: brightness(.92); }
+.glass-dock button:focus-visible { outline: 2px solid var(--cfx-text); outline-offset: 3px; }
+.stage .glass-dock .chip[aria-pressed="true"] { border-color: var(--cfx-accent); }
+@container (max-width: 350px) {
+  .dock-actions .seg { flex: 1 1 100%; justify-content: center; order: -1; }
+}
+.board-card .clock:not(.on) { color: var(--cfx-text-2); }
+@media (hover: hover) and (pointer: fine) {
+  .board { cursor: pointer; }
+  .board-card.grabbing .board { cursor: grabbing; }
+  .board > .square-highlight { inset: auto; left: var(--hover-x, 0%); top: var(--hover-y, 0%); width: 12.5%; height: 12.5%; opacity: 0; background: #ffffff1f; box-shadow: inset 0 0 0 1px #ffffff55; border-radius: 3px; }
+  .board.square-hover > .square-highlight { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) { .glass-dock button { transition: none; } }
