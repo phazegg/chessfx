@@ -46,7 +46,7 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 .board.original .pieces img { filter: none; }
 .pieces img.gone { opacity: 0; }
 #fx { pointer-events: none; }
-.board-bar { display: flex; align-items: center; gap: 12px; padding: 12px 4px 2px; }
+.board-bar { display: flex; align-items: center; gap: 12px; padding: 10px 12px; }
 .look-name { font-weight: 800; font-size: 17px; margin-right: auto; }
 .seg { display: inline-flex; padding: 3px; }
 .seg button { min-height: 32px; padding: 4px 12px; border: 0; background: none; color: var(--cfx-text-2); font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; }
@@ -350,8 +350,7 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 @media (max-width: 620px) { .sets { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .set { padding: 10px; } .set b { font-size: 14px; } }
 
 /* ===== A real game around the board: player bars, clocks, captures; sound; surprise; the finale wall ===== */
-.pbar { display: flex; align-items: center; gap: 10px; min-height: 34px; padding: 4px 4px; font-size: 13px; }
-.pbar:first-child { padding-top: 0; }
+.pbar { display: flex; align-items: center; gap: 10px; height: 40px; padding: 4px 12px; font-size: 13px; }
 .pname { flex: none; color: var(--cfx-text); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; }
 .pname small { margin-left: 6px; color: var(--cfx-text-3); font-weight: 600; }
 .caps { display: flex; flex: 1 1 auto; min-width: 0; overflow: hidden; }
@@ -411,7 +410,7 @@ h1, h2, h3 { margin: 0; letter-spacing: -.025em; line-height: 1.05; }
 }
 
 /* Short desktop screens: the board scales with the window height, so the board and its controls stay on screen. */
-@media (min-width: 921px) and (max-height: 900px) { .stage { width: min(100%, calc(100vh - 340px)); justify-self: center; } }
+@media (min-width: 921px) and (max-height: 900px) { .stage { width: min(100%, calc(100vh - 362px)); justify-self: center; } }
 
 /* Player names: the short form on phones. Captured pieces: legible. */
 .pshort { display: none; }
@@ -643,8 +642,8 @@ html.js .stage .chips { min-height: 46px; }
 .glass-refract .glass-rim { backdrop-filter: url(#glassRefraction) blur(6px) saturate(1.5); }
 .board-card > .pbar, .board-card > .board-bar { background: var(--cfx-ink-1); }
 .board-card > .pbar { margin: 0; border-radius: 0; }
-.board-card > .pbar:first-of-type { padding-top: 0; border-radius: 12px 12px 0 0; }
-.board-card > .board-bar { margin: 0; padding: 10px 4px 3px; border-radius: 0 0 12px 12px; }
+.board-card > .pbar:first-of-type { border-radius: 12px 12px 0 0; }
+.board-card > .board-bar { margin: 0; border-radius: 0 0 12px 12px; }
 .stage .board-bar::after { content: none; }
 .stage .look-name { flex: 1 1 auto; }
 .glare { background: radial-gradient(ellipse at var(--gx, 50%) var(--gy, 30%), #ffffff42, color-mix(in srgb, var(--tint) 10%, transparent) 22%, transparent 48%), linear-gradient(125deg, #ffffff0a, transparent 32%, color-mix(in srgb, var(--tint2) 5%, transparent) 75%, transparent); }
