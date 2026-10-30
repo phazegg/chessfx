@@ -174,7 +174,9 @@
   };
   // The preview plays on its own, also with reduced motion (which only drops the intro, bursts and ripples);
   // the pause button stops it. It animates only while on screen, the tab is visible and nobody pressed pause.
-  const running = () => !paused && visible && !document.hidden && !original;
+  // The board animates while it or the before/after slider (which shows its frames) is on screen.
+  let cmpSeen = false;
+  const running = () => !paused && (visible || cmpSeen) && !document.hidden && !original;
   const tick = (now) => {
     raf = 0;
     if (!running()) return;
@@ -183,6 +185,7 @@
     simT += Math.min(now - (lastDraw || now), 100) / 1000;
     lastDraw = now;
     draw();
+    if (cmpSeen) cmpCopy();
     fxTick(now);
   };
   const sync = () => { if (running() && !raf) { lastDraw = 0; raf = requestAnimationFrame(tick); } else if (!running()) draw(); };
@@ -344,6 +347,7 @@
     b.type = 'button';
     b.className = 'chip';
     b.dataset.look = l.id;
+    b.title = l.name;
     b.innerHTML = `<img src="assets/boards/${l.board}.jpg" alt="" loading="lazy" width="30" height="30"><span></span>`;
     b.querySelector('span').textContent = l.name;
     b.setAttribute('aria-pressed', String(l === look));
@@ -481,6 +485,15 @@
 
   // ---------- before and after: the Opera Game after 13 moves, on Chess.com's board and on the chosen look ----------
   const cmp = $('cmp'), cmpRange = $('cmpRange');
+  // Its ChessFX side is live: each new frame of the hero board's shader is copied in while the slider is on screen.
+  const cmpLive = $('cmpLive'), cmpLiveG = cmpLive.getContext('2d');
+  function cmpCopy() {
+    if (!board.classList.contains('live')) return;
+    if (cmpLive.width !== cv.width) cmpLive.width = cmpLive.height = cv.width;
+    cmpLiveG.drawImage(cv, 0, 0);
+    cmpLive.classList.add('on');
+  }
+  new IntersectionObserver(([e]) => { cmpSeen = e.isIntersecting; sync(); }).observe(cmp);
   const cmpPos = (() => {
     const m = new Map();
     START.split('/').forEach((row, ri) => { let f = 0; for (const ch of row) { if (/\d/.test(ch)) { f += +ch; continue; } m.set(String.fromCharCode(97 + f) + (8 - ri), ch); f++; } });
