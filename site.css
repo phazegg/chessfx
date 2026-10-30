@@ -568,4 +568,4 @@ html.js .stage .chips { min-height: 46px; }
 .hero-piece { translate: var(--kx, 0px) var(--ky, 0px); transition: scale .35s cubic-bezier(.3, 1.4, .5, 1); }
 .hero-piece.face-right { scale: -1 1; }
 @media (max-width: 920px) { .board-card, .stage:hover .board-card { --rx: 0deg; --ry: 0deg; } }
-@media (prefers-reduced-motion: reduce) { .board-card, .stage:hover .board-card { cursor: default; } .hero-piece { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .hero-piece { transition: none; } }

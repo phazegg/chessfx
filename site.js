@@ -493,11 +493,11 @@
   });
 
   // ---------- the hero card: leans toward the pointer, spins a full turn when dragged, bursts where you click ----------
-  // One spring per axis (slightly bouncy); the loop runs only while the card is moving. Reduced motion: none of it.
+  // One spring per axis; the loop runs only while the card is moving. It moves only when you move the pointer, so it
+  // also runs with reduced motion, just without the bounce (critically damped).
   const card = document.querySelector('.board-card'), knight = $('heroPiece');
   const fineHover = matchMedia('(hover: hover) and (pointer: fine)');
   const rest = () => ({ x: 0, y: 0 });
-  let idleTimer = 0;
   const T = { x: rest().x, y: rest().y, vx: 0, vy: 0, tx: rest().x, ty: rest().y };
   let cardRaf = 0, cardLast = 0, drag = null;
   const clampN = (v, a) => Math.max(-a, Math.min(a, v));
@@ -512,7 +512,7 @@
   const stepCard = (now) => {
     cardRaf = 0;
     const dt = Math.min((now - (cardLast || now)) / 1000, 0.034); cardLast = now;
-    if (!drag) for (const [p, v, t] of [['x', 'vx', 'tx'], ['y', 'vy', 'ty']]) { const a = 170 * (T[t] - T[p]) - 16 * T[v]; T[v] += a * dt; T[p] += T[v] * dt; }
+    if (!drag) for (const [p, v, t] of [['x', 'vx', 'tx'], ['y', 'vy', 'ty']]) { const a = 170 * (T[t] - T[p]) - (rm.matches ? 26 : 16) * T[v]; T[v] += a * dt; T[p] += T[v] * dt; }
     paintCard();
     const still = !drag && Math.abs(T.tx - T.x) < 0.03 && Math.abs(T.ty - T.y) < 0.03 && Math.abs(T.vx) < 0.05 && Math.abs(T.vy) < 0.05;
     if (!still) { cardRaf = requestAnimationFrame(stepCard); return; }
@@ -521,18 +521,15 @@
   };
   const wake = () => { if (!cardRaf) cardRaf = requestAnimationFrame(stepCard); };
   const aimRest = () => { const r = rest(); T.tx = r.x; T.ty = turnBase() + r.y; card.style.setProperty('--go', 0); wake(); };
-  if (!rm.matches) {
+  {
     // Lean toward the pointer anywhere on screen while the hero is in view: it faces the pointer, up to about 18 degrees.
     addEventListener('pointermove', (e) => {
       if (drag || !visible || !fineHover.matches || e.pointerType === 'touch') return;
       const r = card.getBoundingClientRect(), nx = clampN((e.clientX - (r.left + r.width / 2)) / (r.width * 0.75), 1), ny = clampN((e.clientY - (r.top + r.height / 2)) / (r.height * 0.75), 1);
-      // Full lean near the card, gentler far away (reading the text on the left shouldn't tip it hard over).
-      const dist = Math.hypot((e.clientX - (r.left + r.width / 2)) / r.width, (e.clientY - (r.top + r.height / 2)) / r.height);
-      const k = dist < 0.8 ? 1 : Math.max(0.3, 1 - (dist - 0.8) * 0.9);
-      T.ty = turnBase() + nx * 18 * k;
-      T.tx = -ny * 14 * k;
-      clearTimeout(idleTimer);
-      idleTimer = setTimeout(() => { if (!drag) aimRest(); }, 2200);
+      // Like a tablet held toward you: the screen's normal points at the pointer (as if it were ~1.1 card widths in front).
+      const D = r.width * 1.1, deg = 180 / Math.PI;
+      T.ty = turnBase() + clampN(Math.atan2(e.clientX - (r.left + r.width / 2), D) * deg, 32);
+      T.tx = clampN(-Math.atan2(e.clientY - (r.top + r.height / 2), D) * deg, 26);
       card.style.setProperty('--gx', (50 + nx * 45).toFixed(1) + '%');
       card.style.setProperty('--gy', (50 + ny * 45).toFixed(1) + '%');
       card.style.setProperty('--go', 1);
